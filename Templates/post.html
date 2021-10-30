@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 offset-md-4">
+            <div class="login-form bg-light mt-4 p-4">
+                <form action="" method="POST" class="row g-3">
+                    <h4>Add a Post</h4>
+                    {{form.csrf_token}}
+                    <div class="col-12">
+                        {{ form.title }}
+                    </div>
+                    <div class="col-12">
+                      {{ form.content }}
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-dark float-end">Post</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

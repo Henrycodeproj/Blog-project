@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename = 'signup.css') }}">
+{% endblock %}
+
+{% block title %}
+<title>Signup Page</title>
+{% endblock %}
+
+{% block body %}
+<div class = "container position-absolute top-50 start-50 translate-middle">
+    <div class = "container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <ul class=flashes>
+        {% for category, message in messages %}
+        {% if category == "email_username"%}
+          <div class="alert alert-danger alert-dismissible fade show">
+            <strong>{{ message }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endif %}
+
+        {% if category == "email"%}
+        <div class="alert alert-danger alert-dismissible fade show">
+          <strong>{{ message }}</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif%}
+
+        {% if category == "username"%}
+        <div class="alert alert-danger alert-dismissible fade show">
+          <strong>{{ message }}</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif%}
+
+        {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %} 
+        </div>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 offset-md-3">
+                    <div class="signup-form">
+                        <form action="" method = "POST" class="mt-5 border p-4 bg-light shadow">
+                            <h4 class="mb-5 text-dark">Create Your Account</h4>
+                            {{form.csrf_token}}
+                            <div class="row">
+                                <div class="mb-3 col-md-6">
+                                    {{ wtf.form_field(form.name) }}
+                                </div>
+        
+                                <div class="mb-3 col-md-6">
+                                    {{ wtf.form_field(form.email) }}
+                                </div>
+
+                                <div class="mb-3 col-md-12">
+                                    {{ wtf.form_field(form.username) }}
+                                </div>
+
+                                <div class="mb-3 col-md-12">
+                                    {{ wtf.form_field(form.password) }}
+                                </div>
+                                <div class="mb-3 col-md-12">
+                                    {{ wtf.form_field(form.confirm_password) }}
+                                </div>
+                                <div class="col-md-12">
+                                   <button type = "submit" class="btn btn-dark float-end">Signup Now</button>
+                                </div>
+                            </div>
+                            <p class="text-center mt-3 text-secondary">If you have account, Please <a href="{{ url_for('login') }}">Login Now</a></p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+
+{% endblock %}

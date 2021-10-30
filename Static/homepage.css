@@ -1,0 +1,8 @@
+body{
+    background: linear-gradient(#373B44 0%,#4286f4 100%);
+    background-repeat: no-repeat !important;
+    height: 100vh;
+}
+.log{
+    padding:8px !important;
+}
