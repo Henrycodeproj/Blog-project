@@ -88,6 +88,15 @@ def hex(file):
     split=os.path.splitext(file)
     return random_hex + split[1]
 
+@app.route('/test')
+def test():
+    old_image = current_user.profimage
+    path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
+    os.remove(path)
+    current_user.profimage = None
+    db.session.commit()
+    return render_template('testing.html')
+
 #homepage
 @app.route ('/')
 def index():

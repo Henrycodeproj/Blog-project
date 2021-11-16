@@ -77,7 +77,19 @@
     <div class = "d-flex flex-column wrap">
     {% for post in posts %}
     <div class = "post_container posting">
-    <div><a href="" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/' + post.poster.profimage) }}" alt="">{{post.posting_user}}</a></div>
+      {% if post.poster.profimage == None %}
+      <div>
+        <a href="" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}" alt="">
+          {{post.posting_user}}
+        </a>
+      </div>
+      {% else %}
+    <div>
+      <a href="" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/' + post.poster.profimage) }}" alt="">
+        {{post.posting_user}}
+      </a>
+    </div>
+      {% endif %}
     <a href="{{ url_for ('index', posting_user = post.username)}}"></a>
       <img class = "posted_images" src="{{url_for('static', filename='/images/' + post.image) }}" alt="Image" />
     <div class = "title">{{ post.title }} </div>
