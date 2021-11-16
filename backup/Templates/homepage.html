@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block nav%}
+    {% if loggedin == True %}
+    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+          <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">Blog</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false"    aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{{ url_for('index') }}">What's New</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{{ url_for('post') }}">Post</a>
+              </li>
+            </ul>
+            <form class="d-flex">
+              <a class="btn btn-outline-info prof-button" href = "{{ url_for('dashboard') }}">Profile</a>
+              <a class="btn btn-outline-light" href = "{{ url_for('logout') }}">Logout</a>
+            </form>
+          </div>
+        </div>
+      </nav>
+      {% else %}
+      <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+          <a class="navbar-brand fw-bold" href="{{url_for('index')}}">BoredGame Blogs</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link fs-5" href="{{ url_for('login') }}">Login</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link fs-5" href="{{ url_for('signup') }}">Signup</a>
+              </li>
+            </ul>
+            <form class="nav-item">
+              <a class="btn btn-outline-light" href = "{{ url_for('signup') }}">Register Here</a>
+            </form>
+          </div>
+        </div>
+      </nav>
+    {% endif %}
+
+{% endblock %}
+
+{% block body%}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for category, message in messages %}
+    {% if category == "edit"%}
+    <div class="alert alert-info alert-dismissible fade show container">
+        <strong>{{ message }}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+    {% if category == "false_user"%}
+    <div class="alert alert-danger alert-dismissible fade show container">
+        <strong>{{ message }}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+    </ul>
+  {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class = "container">
+  <div class = "flex">
+    <div class = "d-flex flex-column wrap">
+    {% for post in posts %}
+    <div class = "post_container posting">
+    <div><a href="" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/' + post.poster.profimage) }}" alt="">{{post.posting_user}}</a></div>
+    <a href="{{ url_for ('index', posting_user = post.username)}}"></a>
+      <img class = "posted_images" src="{{url_for('static', filename='/images/' + post.image) }}" alt="Image" />
+    <div class = "title">{{ post.title }} </div>
+    <div class = "content">{{ post.content }}</div>
+    <div>
+      {% if current_user.username == post.posting_user %}
+      <div class = "posting_date_show justify-content-between">
+        <div>
+        <a class = "btn btn-primary btn-sm" href="{{ url_for('edit', postID = post.id) }}">Edit</a> 
+        <a class = "btn btn-danger btn-sm" href="{{ url_for('delete', postID = post.id) }}">Delete</a>
+        </div>
+        <div class = "posting_data">{{post.date_posted}}</div>
+      </div>
+      {% else %}
+      <div class = "posting_date justify-content-end">{{post.date_posted}}</div>
+      {% endif %}
+    </div>
+    </div>
+    {% endfor %}
+    </div>
+
+    <div class="sidesection">
+      <div class="content-section">
+        <h3 class = "sidebar_text">Sidebar</h3>
+        <p class='text-muted'>
+          <ul class="list-group">
+            <li class="list-group-item list-group-item-light">The Lastest post is by pro and smak</li>
+            <li class="list-group-item list-group-item-light">Announcements</li>
+            <li class="list-group-item list-group-item-light">Calendars</li>
+            <li class="list-group-item list-group-item-light">etc</li>
+          </ul>
+        </p>
+      </div>
+    </div>
+  </div>
+</div> 
+
+{% endblock %}

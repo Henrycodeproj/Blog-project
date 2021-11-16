@@ -1,0 +1,141 @@
+body{
+    background-repeat: no-repeat !important;
+    height: 300vh;
+    background: linear-gradient(#373B44 0%, #4286f4 100%);
+}
+.log{
+    padding:8px !important;
+}
+.post_container{
+    color:black;
+    padding: 20px;
+    align-items: center !important;
+}
+.posting_date_show{
+    display: flex;
+    text-transform: capitalize;
+    justify-items: right !important;
+    align-self: flex-end !important;
+}
+.posting_date{
+    display:flex;
+}
+.prof_link{
+    text-decoration: none;
+    text-transform: capitalize;
+    font-style: italic;
+    color: rgb(87, 86, 86);
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+.title{
+    text-transform: capitalize;
+    font-size:2rem;
+    font-weight: bolder;
+    color: rgb(0, 0, 0);
+}
+.posted_images{
+    margin:12px 0px 24px 0px;
+}
+.content{
+    width: 100%;
+    font-size:1rem !important;
+}
+.container1{
+    display: flex;
+    justify-content: center;
+}
+.prof-button{
+    margin-right: 5px !important;
+}
+.content{
+    margin: 10px 0px 10px 0px;
+}
+.wrap{
+    display:flex;
+    width:50%;
+    margin:10px;
+}
+.flex {
+    display:flex;
+    justify-content: space-around;
+}
+.sidebar_text{
+    color:black;
+}
+.posting{
+    margin:10px;
+    box-shadow: 2px 1px 10px 2px rgb(48, 47, 47);
+    border-radius: 5px;
+    background:white;
+}
+.sidesection{
+    position: sticky;
+}
+.check{
+    width: 100%;
+}
+.spank{ /*test*/
+    width: 20%;
+}
+.thumbnail {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    overflow: hidden;
+  }
+  .thumbnail img {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    height: 100%;
+    width: auto;
+    -webkit-transform: translate(-50%,-50%);
+        -ms-transform: translate(-50%,-50%);
+            transform: translate(-50%,-50%);
+  }
+  .thumbnail img.portrait {
+    width: 100%;
+    height: auto;
+  }
+
+.testm{
+    height: 100%;
+    display:flex;
+    flex-direction: row;
+}
+.tree{
+    border-style: solid;
+    color: rgba(0, 0, 0, 0.144);
+    width:40px;
+    height:40px;
+    border-radius: 50%;
+    margin-right:10px;
+}
+@media (max-width:976px){
+    .wrap{
+        width:100%;
+    }
+    .container{
+        padding:0;
+    }
+}
+@media (max-width:500px){
+    .flex{
+        flex-wrap: wrap;
+    }
+}
+@media (max-width:400px){
+    .wrap{
+        width:100%;
+        margin: 0;
+    }
+    .content{
+        font-size:.6rem;
+    }
+    .container{
+        padding:0;
+    }
+}
+

@@ -1,0 +1,12 @@
+body{
+    background: linear-gradient(#373B44 0%,#4286f4 100%);
+    background-repeat: no-repeat !important;
+    height: 100vh;
+}
+.sign-up-btn{
+    padding:12 6px;
+    margin-top:10px !important;
+}
+.control-label{
+    font-weight: bold;
+}

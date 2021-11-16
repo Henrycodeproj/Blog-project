@@ -2,7 +2,7 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block style %}
-<link rel="stylesheet" href="{{ url_for('static', filename = 'signup.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename = './css/signup.css') }}">
 {% endblock %}
 
 {% block title %}
@@ -49,7 +49,8 @@
                     <div class="signup-form">
                         <form action="" method = "POST" class="mt-5 border p-4 bg-light shadow">
                             <h4 class="mb-5 text-dark">Create Your Account</h4>
-                            {{form.csrf_token}}
+                            <!-- {{form.csrf_token}} -->
+                            {{ form.hidden_tag() }}
                             <div class="row">
                                 <div class="mb-3 col-md-6">
                                     {{ wtf.form_field(form.name) }}

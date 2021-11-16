@@ -1,0 +1,33 @@
+body{
+    background: linear-gradient(#373B44 0%, #4286f4 100%);
+    background-repeat: no-repeat !important;
+    height: 100vh;
+}
+.welcome_text {
+    text-transform: capitalize;
+}
+.control-label{
+    font-weight: bold;
+}
+.checkbox{
+    padding:5px;
+}
+label {
+    text-transform: capitalize;
+}
+.account{
+    color:rgb(20, 20, 20);
+}
+.links{
+    padding:0 !important;
+}
+.form-group.required{
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.checkbox{
+    padding:10px 0px 10px 0px;
+}
+.form-check{
+    padding:0;
+}

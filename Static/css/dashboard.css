@@ -115,6 +115,7 @@ p {
 }
 img {
     border-radius: 50%;
+    border-style: solid;
 }
 .prof-image{
     display:flex;

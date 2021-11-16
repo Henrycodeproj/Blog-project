@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename = './css/upload.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="container">
+  <div class="row">
+      <div class="col-md-4 offset-md-4">
+          <div class="login-form bg-light mt-4 p-4">
+              <form action="" method="POST" class="row g-3" enctype='multipart/form-data'>
+                  <h4>Add a profile picture and description</h4>
+                  {{profile.description(cols="30", rows="15", placeholder = "Write a small description about yourself")}}
+                  {{profile.file}}
+                  <div class="col-12">
+                      <input type="submit" name = "post_submit" class="btn btn-dark float-end"></input>
+                  </div>
+              </form>
+          </div>
+      </div>
+  </div>
+</div>
+{% endblock %}
+
+Lorem ipsum dolor sit, amet consectetur adipisicing elit. At consequatur illo vitae magni nesciunt exercitationem explicabo fugiat quae doloribus dicta modi error perspiciatis, ratione repudiandae, aliquam inventore ad! Id totam magnam obcaecati debitis dolores ut porro, fuga cupiditate magni sunt ipsa necessitatibus. Necessitatibus unde fugiat, ipsum explicabo sint, ab magnam nemo labore voluptates eius perspiciatis id ut est numquam facere et culpa quasi qui earum debitis officiis animi cupiditate. Dolor eligendi ullam ea blanditiis deleniti modi, consequuntur veritatis libero? Sapiente officiis excepturi, sunt minima, nostrum quos eos consequuntur totam ipsa adipisci minus neque voluptate modi natus, ad quia et inventore.
+Lorem ipsum dolor sit, amet consectetur adipisicing elit. At consequatur illo vitae magni nesciunt exercitationem explicabo fugiat quae doloribus dicta modi error perspiciatis, ratione repudiandae, aliquam inventore ad! Id totam magnam obcaecati debitis dolores ut porro, fuga cupiditate magni sunt ipsa necessitatibus. Necessitatibus unde fugiat, ipsum explicabo sint, ab magnam nemo labore voluptates eius perspiciatis id ut est numquam facere et culpa quasi qui earum debitis officiis animi cupiditate. Dolor eligendi ullam ea blanditiis deleniti modi, consequuntur veritatis libero? Sapiente officiis excepturi, sunt minima, nostrum quos eos consequuntur totam ipsa adipisci minus neque voluptate modi natus, ad quia et inventore.

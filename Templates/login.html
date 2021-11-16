@@ -3,7 +3,7 @@
 
 <!-- style sheet -->
 {% block style %}
-<link rel="stylesheet" href="{{ url_for('static', filename = 'login.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename = '/css/login.css') }}">
 {% endblock %}
 
 {% block title %}
@@ -39,6 +39,13 @@
     </div>
     {% endif%}
 
+    {% if category == "creation"%}
+    <div class="alert alert-success alert-dismissible fade show">
+      <strong>{{ message }}</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif%}
+
     {% endfor %}
     </ul>
     {% endif %}
@@ -51,7 +58,7 @@
               <div class="login-form bg-light mt-4 p-4">
                   <form action="" method="POST" class="row g-3">
                       <h4>Login</h4>
-                      {{form.csrf_token}}
+                      {{ form.hidden_tag() }}
                       <div class="col-12">
                           {{ wtf.form_field(form.username) }}
                       </div>
