@@ -2,7 +2,7 @@
 
 {% block nav%}
     {% if loggedin == True %}
-    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-secondary ass">
         <div class="container-fluid">
           <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">Blog</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false"    aria-label="Toggle navigation">
@@ -25,7 +25,7 @@
         </div>
       </nav>
       {% else %}
-      <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-secondary ass">
         <div class="container-fluid">
           <a class="navbar-brand fw-bold" href="{{url_for('index')}}">BoredGame Blogs</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,25 +74,27 @@
 
 <div class = "container">
   <div class = "flex">
+    <!-- <div class = 'pas'>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Deserunt dicta minima aperiam. Voluptatum delectus nulla deserunt commodi, sed id quo voluptate asperiores necessitatibus eligendi iste ea repellendus aut? Eius culpa optio reiciendis ipsa neque vitae, consectetur voluptas! Cumque debitis, aperiam fuga nam odit ipsa? Beatae sequi sint at delectus unde quibusdam repellendus veniam hic. Iusto delectus dignissimos quo. Laudantium labore voluptatum cupiditate eligendi perferendis modi assumenda temporibus reprehenderit aut eaque? Dolor placeat, amet voluptatum, dignissimos cum libero cupiditate quod illo soluta nemo quaerat dicta! Hic ipsum ut libero labore mollitia accusamus magnam tenetur blanditiis temporibus nesciunt, nobis perspiciatis, numquam dolore.</div> -->
     <div class = "d-flex flex-column wrap">
     {% for post in posts %}
     <div class = "post_container posting">
       {% if post.poster.profimage == None %}
       <div>
         <a href="" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}" alt="">
-          {{post.posting_user}}
+          -{{post.posting_user}}
         </a>
       </div>
       {% else %}
     <div>
       <a href="" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/' + post.poster.profimage) }}" alt="">
-        {{post.posting_user}}
+        -{{post.posting_user}}
       </a>
     </div>
       {% endif %}
     <a href="{{ url_for ('index', posting_user = post.username)}}"></a>
       <img class = "posted_images" src="{{url_for('static', filename='/images/' + post.image) }}" alt="Image" />
     <div class = "title">{{ post.title }} </div>
+    <div class = "bar"></div>
     <div class = "content">{{ post.content }}</div>
     <div>
       {% if current_user.username == post.posting_user %}
@@ -101,7 +103,7 @@
         <a class = "btn btn-primary btn-sm" href="{{ url_for('edit', postID = post.id) }}">Edit</a> 
         <a class = "btn btn-danger btn-sm" href="{{ url_for('delete', postID = post.id) }}">Delete</a>
         </div>
-        <div class = "posting_data">{{post.date_posted}}</div>
+        <div class = "posting_date">{{post.date_posted}}</div>
       </div>
       {% else %}
       <div class = "posting_date justify-content-end">{{post.date_posted}}</div>
@@ -111,20 +113,22 @@
     {% endfor %}
     </div>
 
-    <div class="sidesection">
-      <div class="content-section">
+    <div class = "lok">
+      <div class="sidesection ">
+        <div class="content-section">
         <h3 class = "sidebar_text">Sidebar</h3>
         <p class='text-muted'>
           <ul class="list-group">
-            <li class="list-group-item list-group-item-light">The Lastest post is by pro and smak</li>
-            <li class="list-group-item list-group-item-light">Announcements</li>
-            <li class="list-group-item list-group-item-light">Calendars</li>
+            <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Today's Date:</span> {{ current_date }}</li>
+            <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Announcements:</span> Lorem ipsum dolor sit, amet consectetur adipisicing elit. Unde exercitationem odit in. In ab nemo alias eligendi voluptatum omnis mollitia, porro rerum aliquid voluptate, consectetur minima, ullam suscipit adipisci vero odit. Voluptate sequi necessitatibus aliquam culpa, iste veniam velit modi sunt laborum iusto, vitae quibusdam recusandae expedita libero quae ad.</li>
+            <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Latest Post:</span> By Henry</li>
             <li class="list-group-item list-group-item-light">etc</li>
           </ul>
         </p>
+        </div>
+        <!-- used to add more to the bar later <div>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Earum, explicabo beatae consectetur iure voluptatum natus iste voluptatem expedita distinctio in.</div> -->
       </div>
     </div>
-  </div>
 </div> 
 
 {% endblock %}

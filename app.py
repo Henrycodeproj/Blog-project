@@ -40,7 +40,7 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return Users.query.get(int(user_id))
 
-class Users(UserMixin, db.Model): #user column description for sqlite database
+class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), unique = False)
     username = db.Column(db.String(25), unique = True)
@@ -52,7 +52,7 @@ class Users(UserMixin, db.Model): #user column description for sqlite database
     last_login = db.Column(db.String(50))
     posts = db.relationship('Posts', backref='poster', lazy = True)
 
-class Posts(db.Model):
+class Posts(db.Model): #post skeleton and columns
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(50))
     content = db.Column(db.Text)
@@ -88,6 +88,13 @@ def hex(file):
     split=os.path.splitext(file)
     return random_hex + split[1]
 
+def word_check(data):
+    word_set ={'penis','nigga','queer','fag','pussy','cunt','douche','nigger','retard','gay','chink'}
+    if data in word_set:
+        return True
+    else:
+        return False
+
 @app.route('/test')
 def test():
     old_image = current_user.profimage
@@ -101,8 +108,7 @@ def test():
 @app.route ('/')
 def index():
     posts = Posts.query.order_by(Posts.id.desc()).all()
-    print(posts)
-    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active)
+    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date())
 
 # @app.route('/comments', methods = ["POST", "GET"])
 # def comments():
@@ -123,7 +129,8 @@ def upload_profile():
             user.description = profile.description.data
             db.session.add(user)
             db.session.commit()
-            flash('You have sucessfully changed your profile description')
+            flash('You have sucessfully changed your profile description', 'prof_description')
+            return redirect(url_for('dashboard'))
         #check if the post request has the file part
         if 'file' not in request.files:
             flash('No file part')
@@ -135,17 +142,33 @@ def upload_profile():
             flash('No selected file')
             return redirect(request.url)
         if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            hexed_name = hex(filename) # passes original name of file and turns turns name into hex, prevents long names and overloads
-            output_size = (300,300)
-            picture = Image.open(file)   # converts uploaded images into smaller thumbnails or any pixel related size
-            picture.thumbnail(output_size, Image.ANTIALIAS)
-            picture.save(os.path.join(app.config['UPLOAD_FOLDER'], hexed_name), quality = 100)
-            user.profimage = hexed_name
-            db.session.add(user)
-            db.session.commit()
-            flash('You have sucessfully uploaded a photo')
-            return redirect(url_for('upload_profile', name=filename))
+            if current_user.profimage == None:
+                filename = secure_filename(file.filename)
+                hexed_name = hex(filename) # passes original name of file and turns turns name into hex, prevents long names and overloads
+                output_size = (300,300)
+                picture = Image.open(file)   # converts uploaded images into smaller thumbnails or any pixel related size
+                picture.thumbnail(output_size, Image.ANTIALIAS)
+                picture.save(os.path.join(app.config['UPLOAD_FOLDER'], hexed_name), quality = 100)
+                user.profimage = hexed_name
+                db.session.add(user)
+                db.session.commit()
+                flash('You have sucessfully uploaded a photo','prof_photo')
+                return redirect(url_for('dashboard', name=filename))
+            else:
+                old_image = current_user.profimage # removes old photo from folder before updating
+                path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
+                os.remove(path)
+                filename = secure_filename(file.filename)
+                hexed_name = hex(filename) # passes original name of file and turns turns name into hex, prevents long names and overloads
+                output_size = (300,300)
+                picture = Image.open(file)   # converts uploaded images into smaller thumbnails or any pixel related size
+                picture.thumbnail(output_size, Image.ANTIALIAS)
+                picture.save(os.path.join(app.config['UPLOAD_FOLDER'], hexed_name), quality = 100)
+                user.profimage = hexed_name
+                db.session.add(user)
+                db.session.commit()
+                flash('You have sucessfully uploaded a photo','prof_photo')
+                return redirect(url_for('dashboard', name=filename))
     return render_template('upload.html', profile = profile)
 
 #post editing
@@ -157,13 +180,13 @@ def edit(postID):
         flash('Error: You are not the original poster of this user', 'false_user')
         return redirect(url_for('index'))
     elif request.method == "POST":
-        current_blog.title = form.title.data
+        current_blog.title = form.title.data  #changes the actual post data
         current_blog.content = form.content.data
         db.session.add(current_blog)
         db.session.commit()
         flash('Your article has been successfully edited', 'edit')
         return redirect(url_for('index'))
-    form.title.data = current_blog.title
+    form.title.data = current_blog.title #fills in the form with title from id
     form.content.data = current_blog.content
     return render_template('post_edit.html', form = form)
 
@@ -172,6 +195,9 @@ def edit(postID):
 def delete(postID):
     try:
         delete_id = Posts.query.get(postID)
+        old_image = delete_id.image # removes old photo from folder before updating
+        path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
+        os.remove(path)
         db.session.delete(delete_id)
         db.session.commit()
         return redirect(url_for('index'))
@@ -233,12 +259,17 @@ def login():
         return redirect(url_for('login'))
     return render_template("login.html", form = form)
 
+@app.route('/password_reset')
+
 #handles signup, checks database and returns messages
 @app.route('/signup', methods = ["POST", "GET"])
 def signup():
     form = Register()
     if form.validate_on_submit():
-        if checkemail() and checkusername() == True:
+        if word_check(form.username.data) == True:
+            flash('Your username contains an inappropriate word', 'inappropriate')
+            return redirect(url_for('signup'))
+        elif checkemail() and checkusername() == True:
             flash('Both Email and Username are taken!', 'email_username')
             return redirect(url_for("signup"))
         elif checkemail() == True:

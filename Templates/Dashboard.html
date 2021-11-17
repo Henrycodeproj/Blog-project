@@ -34,12 +34,28 @@
   {% if messages %}
     <ul class=flashes>
     {% for category, message in messages %}
+
       {% if category == "success"%}
       <div class="alert alert-success alert-dismissible fade show">
         <strong>{{ message }}</strong>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
       {% endif%}
+
+      {% if category == "prof_description"%}
+      <div class="alert alert-danger alert-dismissible fade show container">
+          <strong>{{ message }}</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      {% endif %}
+
+      {% if category == "prof_photo"%}
+      <div class="alert alert-danger alert-dismissible fade show container">
+          <strong>{{ message }}</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      {% endif %}
+
     {% endfor %}
     </ul>
   {% endif %}
@@ -47,7 +63,7 @@
 </div>
 
 <div class = "container welcome-intro">
-  {% if profimage == None %}
+  {% if profimage == None or '' %}
   <div class="container thumbnail">
     <img src="{{url_for ('static', filename ='/images/default.jpg') }}" alt="Image" />
   </div>
@@ -99,7 +115,7 @@
               <div class="d-flex mt-2 "> <span class="fas fa-users-cog mt-1"></span>
                   <div class="w-100 border-bottom">
                       <a href="{{url_for('upload_profile')}}"><p class="">Update Profile Picture and Description</p></a>
-                      <p class="textmuted mb-2"> Add or update your profile picture and description</p>
+                      <p class="textmuted mb-2"> Add or update your profile picture and description.</p>
                   </div>
               </div>
               <div class="d-flex mt-2"> <span class="fas fa-money-bill-alt mt-1"></span>
@@ -110,8 +126,8 @@
               </div>
               <div class="d-flex mt-2"> <span class="fas fa-bookmark ms-0 mt-1"></span>
                   <div class="w-100 ps-2">
-                      <p class="">filler</p>
-                      <p class="textmuted mb-2">filler</p>
+                      <a href=""><p class="">Delete your profile</p></a>
+                      <p class="textmuted mb-2">Erase your account and post(s) permanently.</p>
                   </div>
               </div>
           </div>

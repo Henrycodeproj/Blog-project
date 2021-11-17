@@ -37,6 +37,13 @@
         </div>
         {% endif%}
 
+        {% if category == "inappropriate"%}
+        <div class="alert alert-danger alert-dismissible fade show container">
+            <strong>{{ message }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
+
         {% endfor %}
         </ul>
         {% endif %}
