@@ -2,7 +2,7 @@
 
 {% block nav%}
     {% if loggedin == True %}
-    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-secondary ass">
+    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-secondary nav-color">
         <div class="container-fluid">
           <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">Blog</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false"    aria-label="Toggle navigation">
@@ -25,7 +25,7 @@
         </div>
       </nav>
       {% else %}
-      <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-secondary ass">
+      <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-secondary nav-color">
         <div class="container-fluid">
           <a class="navbar-brand fw-bold" href="{{url_for('index')}}">BoredGame Blogs</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
@@ -91,7 +91,6 @@
       </a>
     </div>
       {% endif %}
-    <a href="{{ url_for ('index', posting_user = post.username)}}"></a>
       <img class = "posted_images" src="{{url_for('static', filename='/images/' + post.image) }}" alt="Image" />
     <div class = "title">{{ post.title }} </div>
     <div class = "bar"></div>
@@ -122,7 +121,8 @@
             <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Today's Date:</span> {{ current_date }}</li>
             <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Announcements:</span> Lorem ipsum dolor sit, amet consectetur adipisicing elit. Unde exercitationem odit in. In ab nemo alias eligendi voluptatum omnis mollitia, porro rerum aliquid voluptate, consectetur minima, ullam suscipit adipisci vero odit. Voluptate sequi necessitatibus aliquam culpa, iste veniam velit modi sunt laborum iusto, vitae quibusdam recusandae expedita libero quae ad.</li>
             <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Latest Post:</span> By Henry</li>
-            <li class="list-group-item list-group-item-light">etc</li>
+            <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Newest User:</span></li>
+            <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Hotest article:</span></li>
           </ul>
         </p>
         </div>

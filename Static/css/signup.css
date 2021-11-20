@@ -10,3 +10,6 @@ body{
 .control-label{
     font-weight: bold;
 }
+.nav-color{
+    background-color: #243655 !important;
+}

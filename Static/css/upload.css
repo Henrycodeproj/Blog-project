@@ -2,3 +2,6 @@ body{
     background: linear-gradient(#141E30 0%, #243B55 100%); 
     height:300vh;
 }
+.nav-color{
+    background-color: #243655 !important;
+}

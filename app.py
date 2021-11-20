@@ -6,14 +6,17 @@ from flask.sessions import NullSession
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import current_user, UserMixin, LoginManager
+from itsdangerous.serializer import Serializer
 from sqlalchemy.orm import relation, relationship
 from wtforms.fields.core import BooleanField
 from wtforms.fields.simple import SubmitField
 from wtforms.validators import ValidationError
-from models import Addprofile, LoginForm, Register, Postform, Addprofile
+from models import Addprofile, LoginForm, Register, Postform, Addprofile, Password_success, Password_request
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from PIL import Image
+from flask_mail import Mail, Message
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 import datetime
 import os
 import secrets
@@ -25,12 +28,21 @@ Bootstrap(app)
 UPLOAD_FOLDER = 'static/images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
-app.config['SECRET_KEY'] = "l6<E9kwpe0KyFWG$UP2&"
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:123123@localhost/test'
+app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URI']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
+
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USERNAME'] = 'lihenryhl.work@gmail.com'
+app.config['MAIL_PASSWORD'] = 'Creation101'
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+
+mail = Mail(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -88,21 +100,48 @@ def hex(file):
     split=os.path.splitext(file)
     return random_hex + split[1]
 
-def word_check(data):
+def word_check(word_data):
     word_set ={'penis','nigga','queer','fag','pussy','cunt','douche','nigger','retard','gay','chink'}
-    if data in word_set:
+    if word_data in word_set:
         return True
     else:
         return False
 
+def get_reset_token(user):
+    serial = Serializer(app.config['SECRET_KEY'], expires_in=900) # 15 mins in seconds
+    return serial.dumps({'user_id':user.id}).decode('utf-8')
+
+def verify_token(token):
+    serial = Serializer(app.config['SECRET_KEY'])
+    print(serial)
+    try:
+        user_id = serial.loads(token)['user_id']
+    except:
+        return None
+    return Users.query.get(user_id)
+
+def send_mail(user):
+    token = get_reset_token(user)
+    print(token)
+    message = Message('Password Reset Request', recipients = [user.email], sender='noreply@gmail.com')
+    message.body= f'''
+To Reset your password, click the following link:
+
+{url_for('reset_token', token = token, _external = True)}
+
+If you did not send this email, please ignore this message.
+'''
+    mail.send(message)
+
 @app.route('/test')
 def test():
-    old_image = current_user.profimage
-    path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
-    os.remove(path)
-    current_user.profimage = None
-    db.session.commit()
-    return render_template('testing.html')
+    form = Password_success()
+    # old_image = current_user.profimage
+    # path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
+    # os.remove(path)
+    # current_user.profimage = None
+    # db.session.commit()
+    return render_template('confirm_reset.html', form = form )
 
 #homepage
 @app.route ('/')
@@ -140,7 +179,8 @@ def upload_profile():
         # empty file without a filename.
         if file.filename == '':
             flash('No selected file')
-            return redirect(request.url)
+            # return redirect(request.url)
+            return redirect(url_for('dashboard'))
         if file and allowed_file(file.filename):
             if current_user.profimage == None:
                 filename = secure_filename(file.filename)
@@ -211,10 +251,10 @@ def delete(postID):
 def post():
     form = Postform()
     if request.method == "POST":
-                #check if the post request has the file part
+        #check if the post request has the file
         if 'file' not in request.files:
             flash('No file part')
-            return redirect(request.url)
+            return redirect(url_for('post'))
         file = request.files['file']
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
@@ -259,7 +299,38 @@ def login():
         return redirect(url_for('login'))
     return render_template("login.html", form = form)
 
-@app.route('/password_reset')
+@app.route('/password_reset', methods = ['GET', 'POST'])
+def password_reset():
+    form = Password_request()
+    if request.method == "POST":
+        if form.validate_on_submit:
+            user = Users.query.filter_by(email = form.email.data).first()
+            send_mail(user)
+            flash('Check your email. Password change request has been sent')
+            return redirect(url_for('login'))
+        else:
+            flash('Your email was not linked to an account')
+    return render_template('password_reset.html', form = form)
+
+
+@app.route('/password_reset/<token>', methods = ['GET', 'POST'])
+def reset_token(token):
+    print(token)
+    user = verify_token(token)
+    print(user)
+    if user == None:
+        flash('The token is invalid or expired')
+        return redirect(url_for('password_reset'))
+
+    form = Password_success()
+    if request.method == 'POST':
+        if form.validate_on_submit:
+            hashed_password=generate_password_hash(form.password.data, method = 'sha256')
+            user.password = hashed_password
+            db.session.commit()
+        print('Your password has been updated!')
+        return redirect(url_for('login'))
+    return render_template('confirm_reset.html', form = form)
 
 #handles signup, checks database and returns messages
 @app.route('/signup', methods = ["POST", "GET"])
@@ -280,7 +351,7 @@ def signup():
             return redirect(url_for("signup"))
         else:
             hashed_password=generate_password_hash(form.password.data, method = 'sha256')
-            new_user = Users(name = form.name.data, username = form.username.data, password = hashed_password, email = form.email.data, date_joined = datetime.datetime.now())
+            new_user = Users(name = form.name.data, username = form.username.data, password = hashed_password, email = form.email.data, date_joined = datetime.datetime.now().date())
             db.session.add(new_user)
             db.session.commit()
             flash('You have succesfully created your account. You can now login.', 'creation')

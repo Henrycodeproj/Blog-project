@@ -3,6 +3,9 @@ body{
     background-repeat: no-repeat !important;
     height: 100vh;
 }
+.nav-color{
+    background-color: #243655 !important;
+}
 .welcome_text {
     text-transform: capitalize;
 }

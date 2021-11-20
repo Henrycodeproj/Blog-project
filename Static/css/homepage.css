@@ -4,8 +4,14 @@ body{
     /* background: linear-gradient(#373B44 0%, #4286f4 100%); */
     background: linear-gradient(#141E30 0%, #243B55 100%); 
 }
-.ass{
+.nav-color{
     background-color: #243655 !important;
+}
+.password_reset_title{
+    text-align: center;
+    font-weight: bolder;
+    font-size:2rem;
+    padding-bottom: 30px;
 }
 .lok{
     display:flex;
@@ -21,7 +27,7 @@ body{
     padding:8px !important;
 }
 .post_container{
-    color:black;
+    color:rgb(14, 8, 8);
     padding: 20px;
     align-items: center !important;
 }
@@ -125,7 +131,7 @@ body{
     width:40px;
     height:40px;
     border-radius: 50%;
-    margin-right:10px;
+    margin-right:5px;
 }
 .sidebar_header{
     font-weight: bold;

@@ -71,12 +71,19 @@
                           </div>
                       </div>
                       <div class="col-12">
+                        <div class="form-check">
+                          <a href="{{ url_for('password_reset')}}">Forgot Password</a>
+                        </div>
+                    </div>
+                      <div class="col-12">
                           <button type="submit" class="btn btn-dark float-end">Login</button>
                       </div>
                   </form>
                   <hr class="mt-4">
                   <div class="col-12">
-                      <p class="text-center mb-0">Don't have an account yet? <a href="{{url_for('signup')}}">Signup</a></p>
+                      <p class="text-center mb-0">Don't have an account yet?
+                        <a href="{{url_for('signup')}}">Signup</a>
+                      </p>
                   </div>
               </div>
           </div>
