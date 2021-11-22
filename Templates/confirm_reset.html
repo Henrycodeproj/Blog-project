@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 
+
 {% block body %}
 
 <div class="container">
@@ -9,8 +10,13 @@
                 <form action="" method="POST" class="row g-3" enctype="multipart/form-data">
                     <h4>Confirm your New Password</h4>
                     {{ form.hidden_tag()}}
-                    {{ form.password(placeholder = "password")}}
-                    {{ form.confirm_password(placeholder = "confirm password")}}
+                    {{ form.password(placeholder = "Password")}}
+                    {{ form.confirm_password(placeholder = "Confirm Password")}}
+                    <div class = "error_text">
+                    {% for errors in form.password.errors %}
+                        {{errors}}
+                    {% endfor %}
+                    </div>
                     <div class="col-12">
                         <button type="submit" name = "post_submit" class="btn btn-dark float-end">Post</button>
                     </div>

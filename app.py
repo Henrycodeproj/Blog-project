@@ -11,7 +11,7 @@ from sqlalchemy.orm import relation, relationship
 from wtforms.fields.core import BooleanField
 from wtforms.fields.simple import SubmitField
 from wtforms.validators import ValidationError
-from models import Addprofile, LoginForm, Register, Postform, Addprofile, Password_success, Password_request
+from models import Addprofile, LoginForm, Register, Postform, Addprofile, Passwordrequest, Passwordsuccess
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from PIL import Image
@@ -133,21 +133,20 @@ If you did not send this email, please ignore this message.
 '''
     mail.send(message)
 
-@app.route('/test')
-def test():
-    form = Password_success()
+# @app.route('/test')
+# def test():
     # old_image = current_user.profimage
     # path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
     # os.remove(path)
     # current_user.profimage = None
     # db.session.commit()
-    return render_template('confirm_reset.html', form = form )
 
 #homepage
 @app.route ('/')
 def index():
     posts = Posts.query.order_by(Posts.id.desc()).all()
-    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date())
+    newest_user = Users.query.order_by(Users.id.desc()).all()
+    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user)
 
 # @app.route('/comments', methods = ["POST", "GET"])
 # def comments():
@@ -233,6 +232,10 @@ def edit(postID):
 #post deletion
 @app.route('/delete/<postID>')
 def delete(postID):
+    poster = Posts.query.get(postID)
+    if current_user.username != poster.posting_user:
+        flash('You can only delete your own post.')
+        return redirect(url_for('index'))
     try:
         delete_id = Posts.query.get(postID)
         old_image = delete_id.image # removes old photo from folder before updating
@@ -242,7 +245,7 @@ def delete(postID):
         db.session.commit()
         return redirect(url_for('index'))
     except:
-        flash('Opps, something went wrong. Your post was not deleted')
+        flash('Opps, something went wrong. Your post was not deleted.')
         return redirect(url_for('delete'))
 
 #posting for blog articles/status
@@ -253,7 +256,7 @@ def post():
     if request.method == "POST":
         #check if the post request has the file
         if 'file' not in request.files:
-            flash('No file part')
+            print('No file part')
             return redirect(url_for('post'))
         file = request.files['file']
         # If the user does not select a file, the browser submits an
@@ -280,7 +283,14 @@ def post():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template("Dashboard.html", name = current_user.name, last_logged = current_user.last_login, profimage = current_user.profimage, description =current_user.description)
+    return render_template("Dashboard.html", name = current_user.name, last_logged = current_user.last_login, profimage = current_user.profimage, description = current_user.description)
+
+@app.route('/dashboard/<poster>')
+def public_user_dashboard(poster):
+    user = Users.query.filter_by(username = poster).first()
+    if user.username == current_user.username:
+        return redirect(url_for('dashboard'))
+    return render_template('public_profile.html', user = user)
 
 #login method
 @app.route('/login', methods = ["POST", "GET"])
@@ -299,36 +309,38 @@ def login():
         return redirect(url_for('login'))
     return render_template("login.html", form = form)
 
-@app.route('/password_reset', methods = ['GET', 'POST'])
+@app.route('/password_reset', methods = ["GET", "POST"])
 def password_reset():
-    form = Password_request()
-    if request.method == "POST":
-        if form.validate_on_submit:
-            user = Users.query.filter_by(email = form.email.data).first()
-            send_mail(user)
-            flash('Check your email. Password change request has been sent')
-            return redirect(url_for('login'))
-        else:
-            flash('Your email was not linked to an account')
+    form = Passwordrequest()
+    if current_user.is_active:
+        return redirect(url_for('dashboard'))
+    if form.validate_on_submit():
+        if request.method == "POST":
+            try:
+                user = Users.query.filter_by(email = form.email.data).first()
+                send_mail(user)
+                flash('Check your email. If your account is linked to this email a password change request will be sent.', 'success')
+                return redirect(url_for('login'))
+            except:
+                flash('Check your email. If your account is linked to this email a password change request will be sent.', 'success')
+                return redirect(url_for('login'))
     return render_template('password_reset.html', form = form)
 
 
-@app.route('/password_reset/<token>', methods = ['GET', 'POST'])
+@app.route('/password_reset/<token>', methods = ["GET", "POST"])
 def reset_token(token):
-    print(token)
     user = verify_token(token)
-    print(user)
     if user == None:
         flash('The token is invalid or expired')
         return redirect(url_for('password_reset'))
 
-    form = Password_success()
-    if request.method == 'POST':
-        if form.validate_on_submit:
+    form = Passwordsuccess()
+    if form.validate_on_submit():
+        if request.method == 'POST':
             hashed_password=generate_password_hash(form.password.data, method = 'sha256')
             user.password = hashed_password
             db.session.commit()
-        print('Your password has been updated!')
+        flash('Your password has been updated!','success')
         return redirect(url_for('login'))
     return render_template('confirm_reset.html', form = form)
 

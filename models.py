@@ -29,9 +29,9 @@ class Addprofile(FlaskForm):
     file = FileField('image', validators=[FileAllowed(['jpg', 'png'])])
     description = StringField('Description', validators=[Length(min=0, max = 255)], widget=TextArea())
 
-class Password_request(FlaskForm):
-    email = StringField('Email Address', validators=[InputRequired(), Email(message='Invalid email'), Length(max = 50)])
+class Passwordrequest(FlaskForm):
+    email = StringField('Email', validators=[InputRequired(), Email(message='Invalid email'), Length(max = 50)])
 
-class Password_success(FlaskForm):
+class Passwordsuccess(FlaskForm):
     password = PasswordField('Password', validators=[InputRequired(), validators.EqualTo('confirm_password', message='Passwords must match'), Length(min = 6, max = 80)])
     confirm_password = PasswordField('Confirm Password')

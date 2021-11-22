@@ -4,6 +4,9 @@ body{
     /* background: linear-gradient(#373B44 0%, #4286f4 100%); */
     background: linear-gradient(#141E30 0%, #243B55 100%); 
 }
+.error_text{
+    color:red;
+}
 .nav-color{
     background-color: #243655 !important;
 }
@@ -20,7 +23,8 @@ body{
 }
 .bar{
     height:1px;
-    width:100px;
+    width:75px;
+    margin: 5px 0px 5px 0px;
     background-color: black;
 }
 .log{
@@ -78,6 +82,9 @@ body{
     display:flex;
     width:50%;
     margin:10px;
+}
+.right-bar{
+    text-transform: capitalize;
 }
 .flex {
     display:flex;

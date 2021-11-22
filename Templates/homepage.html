@@ -80,13 +80,13 @@
     <div class = "post_container posting">
       {% if post.poster.profimage == None %}
       <div>
-        <a href="" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}" alt="">
+        <a href="{{url_for('dashboard')}}" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}" alt="">
           -{{post.posting_user}}
         </a>
       </div>
       {% else %}
     <div>
-      <a href="" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/' + post.poster.profimage) }}" alt="">
+      <a href="{{url_for('public_user_dashboard', poster = post.poster.username )}}" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/' + post.poster.profimage) }}" alt="">
         -{{post.posting_user}}
       </a>
     </div>
@@ -119,10 +119,10 @@
         <p class='text-muted'>
           <ul class="list-group">
             <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Today's Date:</span> {{ current_date }}</li>
-            <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Announcements:</span> Lorem ipsum dolor sit, amet consectetur adipisicing elit. Unde exercitationem odit in. In ab nemo alias eligendi voluptatum omnis mollitia, porro rerum aliquid voluptate, consectetur minima, ullam suscipit adipisci vero odit. Voluptate sequi necessitatibus aliquam culpa, iste veniam velit modi sunt laborum iusto, vitae quibusdam recusandae expedita libero quae ad.</li>
-            <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Latest Post:</span> By Henry</li>
-            <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Newest User:</span></li>
-            <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Hotest article:</span></li>
+            <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Announcements:</span> This site is still a work in progress and will always continue updating to be better </li>
+            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span> {{ posts[0].posting_user}}</li>
+            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Newest Users:</span> {{ newest_user[0].username}}, {{ newest_user[1].username}}, {{ newest_user[2].username}}</li>
+            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Hotest article:</span></li>
           </ul>
         </p>
         </div>
