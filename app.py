@@ -62,6 +62,8 @@ class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
     description = db.Column(db.Text)
     date_joined = db.Column(db.String(50))
     last_login = db.Column(db.String(50))
+    profile_views = db.Column(db.Integer)
+    total_post = db.Column(db.Integer)
     posts = db.relationship('Posts', backref='poster', lazy = True)
 
 class Posts(db.Model): #post skeleton and columns
@@ -71,11 +73,16 @@ class Posts(db.Model): #post skeleton and columns
     image = db.Column(db.String(255))
     posting_user = db.Column(db.String(255))
     date_posted = db.Column(db.String(255))
+    article_views = db.Column(db.Integer)
     poster_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    comments = db.relationship('Comments', backref = 'user_comments', lazy = True)
 
-class Comment(db.Model):
+class Comments(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    words = db.Column(db.String(50))
+    comment = db.Column(db.Text)
+    date = db.Column(db.String(255))
+
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
 
 def checkemail():
     user = Users.query.filter_by(email=request.form.get('email')).first()
@@ -146,6 +153,7 @@ If you did not send this email, please ignore this message.
 def index():
     posts = Posts.query.order_by(Posts.id.desc()).all()
     newest_user = Users.query.order_by(Users.id.desc()).all()
+    print(newest_user)
     return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user)
 
 # @app.route('/comments', methods = ["POST", "GET"])
@@ -241,12 +249,20 @@ def delete(postID):
         old_image = delete_id.image # removes old photo from folder before updating
         path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
         os.remove(path)
+        current_user.total_post -= 1
         db.session.delete(delete_id)
         db.session.commit()
         return redirect(url_for('index'))
     except:
         flash('Opps, something went wrong. Your post was not deleted.')
         return redirect(url_for('delete'))
+
+@app.route('/view/<postID>')
+def expanded_post(postID):
+    public_post=Posts.query.get(postID)
+    public_post.article_views += 1
+    db.session.commit()
+    return render_template('expanded_post.html')
 
 #posting for blog articles/status
 @app.route('/dashboard/post', methods = ["POST", "GET"])
@@ -271,7 +287,8 @@ def post():
             picture = Image.open(file)   # converts uploaded images into smaller thumbnails or any pixel related size
             picture.thumbnail(output_size, Image.ANTIALIAS)
             picture.save(os.path.join(app.config['UPLOAD_FOLDER'], hexed_name), quality = 100)
-            posting = Posts(title = form.title.data, content = form.content.data, image = hexed_name, posting_user = current_user.username, date_posted = datetime.datetime.now().date(), poster_id = current_user.id)
+            posting = Posts(title = form.title.data, content = form.content.data, image = hexed_name, posting_user = current_user.username, date_posted = datetime.datetime.now().date(), article_views = 0, poster_id = current_user.id)
+            current_user.total_post += 1
             db.session.add(posting)
             db.session.commit()
             flash('Your post has been added', 'posted')
@@ -283,15 +300,21 @@ def post():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template("Dashboard.html", name = current_user.name, last_logged = current_user.last_login, profimage = current_user.profimage, description = current_user.description)
+    return render_template("Dashboard.html", name = current_user.name, last_logged = current_user.last_login, profimage = current_user.profimage, description = current_user.description, views = current_user.profile_views, total_post = current_user.total_post)
 
+#public profiles for each poster
 @app.route('/dashboard/<poster>')
 def public_user_dashboard(poster):
     user = Users.query.filter_by(username = poster).first()
-    if user.username == current_user.username:
-        return redirect(url_for('dashboard'))
+    if user.is_anonymous == True:
+        return render_template('public_profile.html', user = user)
+    if current_user.is_active:
+        if user.username == current_user.username:
+            return redirect(url_for('dashboard'))
+        elif current_user != user.username:
+            user.profile_views += 1
+            db.session.commit()
     return render_template('public_profile.html', user = user)
-
 #login method
 @app.route('/login', methods = ["POST", "GET"])
 def login():
@@ -349,7 +372,7 @@ def reset_token(token):
 def signup():
     form = Register()
     if form.validate_on_submit():
-        if word_check(form.username.data) == True:
+        if word_check(form.username.data) == True: # word filter
             flash('Your username contains an inappropriate word', 'inappropriate')
             return redirect(url_for('signup'))
         elif checkemail() and checkusername() == True:
@@ -362,8 +385,8 @@ def signup():
             flash('Username is already taken', 'username')
             return redirect(url_for("signup"))
         else:
-            hashed_password=generate_password_hash(form.password.data, method = 'sha256')
-            new_user = Users(name = form.name.data, username = form.username.data, password = hashed_password, email = form.email.data, date_joined = datetime.datetime.now().date())
+            hashed_password=generate_password_hash(form.password.data, method = 'sha256')  # if everything is valid, this hashes the password and stores it in database
+            new_user = Users(name = form.name.data, username = form.username.data, password = hashed_password, email = form.email.data, date_joined = datetime.datetime.now().date(), profile_views = 0, total_post = 0)
             db.session.add(new_user)
             db.session.commit()
             flash('You have succesfully created your account. You can now login.', 'creation')

@@ -31,9 +31,15 @@
 {% block body %}
 
 <div class = "container welcome-intro">
+  {% if user.profimage == None%}
+    <div class="container thumbnail">
+      <img src="{{url_for ('static', filename ='/images/default.jpg') }}" alt="Image" />
+    </div>
+  {% else %}
     <div class="container thumbnail">
       <img src="{{url_for ('static', filename ='/images/' + user.profimage) }}" alt="Image" />
     </div>
+  {% endif %}
       <h1 class = "welcome_text">{{ user.username }}'s Profile</h1>
   </div>
 
@@ -48,13 +54,13 @@
         <div class="row mx-0 mt-2">
             <div class="col-md-4 p-0 border-end">
                 <div class="viewbox">
-                    <p class="blue">11</p>
+                    <p class="blue">{{user.profile_views}}</p>
                     <p>Profile views</p>
                 </div>
             </div>
             <div class="col-md-4 p-0 border-end">
                 <div class="viewbox">
-                    <p class="blue">0</p>
+                    <p class="blue">{{user.total_post}}</p>
                     <p>Article views</p>
                 </div>
             </div>

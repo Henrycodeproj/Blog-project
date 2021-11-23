@@ -79,19 +79,19 @@
     {% for post in posts %}
     <div class = "post_container posting">
       {% if post.poster.profimage == None %}
-      <div>
-        <a href="{{url_for('dashboard')}}" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}" alt="">
+      <div class = "">
+        <a href="{{url_for('public_user_dashboard', poster = post.poster.username )}}" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}" alt="">
           -{{post.posting_user}}
         </a>
       </div>
       {% else %}
-    <div>
+    <div class = "">
       <a href="{{url_for('public_user_dashboard', poster = post.poster.username )}}" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/' + post.poster.profimage) }}" alt="">
         -{{post.posting_user}}
       </a>
     </div>
       {% endif %}
-      <img class = "posted_images" src="{{url_for('static', filename='/images/' + post.image) }}" alt="Image" />
+      <img class = "posted_images img-fluid" src="{{url_for('static', filename='/images/' + post.image) }}" alt="Image" />
     <div class = "title">{{ post.title }} </div>
     <div class = "bar"></div>
     <div class = "content">{{ post.content }}</div>
@@ -105,7 +105,10 @@
         <div class = "posting_date">{{post.date_posted}}</div>
       </div>
       {% else %}
-      <div class = "posting_date justify-content-end">{{post.date_posted}}</div>
+      <div class = "posting_date justify-content-between">
+        <div><a class = "btn btn-dark btn-sm" href="{{ url_for('expanded_post', postID = post.id) }}">View</a></div>
+        {{post.date_posted}}
+      </div>
       {% endif %}
     </div>
     </div>
@@ -113,15 +116,26 @@
     </div>
 
     <div class = "lok">
-      <div class="sidesection ">
+      <div class="sidesection">
         <div class="content-section">
         <h3 class = "sidebar_text">Sidebar</h3>
         <p class='text-muted'>
           <ul class="list-group">
             <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Today's Date:</span> {{ current_date }}</li>
             <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Announcements:</span> This site is still a work in progress and will always continue updating to be better </li>
+
+            {% if posts == [] %}
+            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span></li>
+            {% else %}
             <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span> {{ posts[0].posting_user}}</li>
-            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Newest Users:</span> {{ newest_user[0].username}}, {{ newest_user[1].username}}, {{ newest_user[2].username}}</li>
+            {% endif %}
+
+            {% if newest_user == [] %}
+            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Newest Users:</span></li> 
+            {% else %}
+            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Newest Users:</span> {{newest_user[0].username}}</li>
+            {% endif %}
+
             <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Hotest article:</span></li>
           </ul>
         </p>
