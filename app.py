@@ -81,7 +81,6 @@ class Comments(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     comment = db.Column(db.Text)
     date = db.Column(db.String(255))
-
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
 
 def checkemail():
@@ -259,10 +258,10 @@ def delete(postID):
 
 @app.route('/view/<postID>')
 def expanded_post(postID):
-    public_post=Posts.query.get(postID)
-    public_post.article_views += 1
+    expanded_post=Posts.query.get(postID)
+    expanded_post.article_views += 1
     db.session.commit()
-    return render_template('expanded_post.html')
+    return render_template('expanded_post.html', expanded_post = expanded_post)
 
 #posting for blog articles/status
 @app.route('/dashboard/post', methods = ["POST", "GET"])

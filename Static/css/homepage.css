@@ -7,9 +7,6 @@ body{
 .error_text{
     color:red;
 }
-.post_header{
-    dis
-}
 .nav-color{
     background-color: #243655 !important;
 }
@@ -65,7 +62,7 @@ body{
     color: rgb(0, 0, 0);
 }
 .posted_images{
-    margin:12px 0px 24px 0px;
+    margin:20px 0px 24px 0px;
 }
 .content{
     width: 100%;

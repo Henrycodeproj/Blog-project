@@ -35,3 +35,6 @@ class Passwordrequest(FlaskForm):
 class Passwordsuccess(FlaskForm):
     password = PasswordField('Password', validators=[InputRequired(), validators.EqualTo('confirm_password', message='Passwords must match'), Length(min = 6, max = 80)])
     confirm_password = PasswordField('Confirm Password')
+
+class comments(FlaskForm):
+    comment = StringField('comment', validators=[InputRequired()], widget=TextArea())
