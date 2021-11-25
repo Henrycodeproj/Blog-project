@@ -1,15 +1,17 @@
 body{
     height: 200vh;
+    width: auto;
     background: linear-gradient(#141E30 0%, #243B55 100%); 
 }
 .article{
     padding:20px;
+    max-width:auto;
     box-shadow: 1px 1px 1px 1px black;
     background: white;
     border-radius: 5px;
 }
 .article{
-    height:100vh;
+    height:auto;
 }
 .thumbnail{
     border-style: solid;
@@ -57,4 +59,28 @@ body{
 }
 .views{
     color: rgba(114, 112, 112, 0.89);
+}
+.comments_title{
+    margin-top: 50px;
+    font-weight: bolder;
+}
+.comment_box{
+    width: 100%;
+}
+.comment_thumbnail{
+    border-style: solid;
+    color: rgba(0, 0, 0, 0.144);
+    width:40px;
+    height:40px;
+    border-radius: 50%;
+    margin-right:5px;
+}
+.comment_date{
+    display:flex;
+    justify-content: flex-end;
+}
+@media (min-width:989px){
+    .article {
+        max-width: 750px;
+    }
 }
