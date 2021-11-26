@@ -1,8 +1,11 @@
 body{
-    height: 200vh;
+    height: auto;
     width: auto;
     background: linear-gradient(#141E30 0%, #243B55 100%); 
 }
+/* .wrapper{
+    box-shadow: 1px 1px 1px 1px black;
+} */
 .article{
     padding:20px;
     max-width:auto;
@@ -61,7 +64,7 @@ body{
     color: rgba(114, 112, 112, 0.89);
 }
 .comments_title{
-    margin-top: 50px;
+    margin: 50px 0px 10px 0px;
     font-weight: bolder;
 }
 .comment_box{
@@ -78,6 +81,25 @@ body{
 .comment_date{
     display:flex;
     justify-content: flex-end;
+}
+.commenter_username {
+    text-transform: capitalize;
+    font-weight: bolder;
+    align-items: flex-end;
+}
+.post_wrapper{
+    display: flex;
+}
+.submit{
+    justify-content: flex-end;
+}
+.user_date_bar{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+.space{
+    width: 100%;
 }
 @media (min-width:989px){
     .article {

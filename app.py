@@ -79,6 +79,7 @@ class Posts(db.Model): #post skeleton and columns
 
 class Comments(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    posting_user = db.Column(db.String(255))
     comment = db.Column(db.Text)
     poster_image = db.Column(db.String(255))
     date = db.Column(db.String(255))
@@ -258,7 +259,6 @@ def delete(postID):
         return redirect(url_for('delete'))
 
 @app.route('/view/<postID>', methods = ["POST", "GET"])
-@login_required
 def expanded_post(postID):
     show_comments = Comments.query.filter_by(post_id = postID).all() #gets all post that equals the post id
     form = Commentsform()
@@ -266,10 +266,11 @@ def expanded_post(postID):
     expanded_post.article_views += 1
     db.session.commit()
     if request.method == "POST":
-        comment = Comments(comment=form.comment.data, post_id = postID, date = datetime.datetime.now().date(), poster_image = current_user.profimage)
+        comment = Comments(comment=form.comment.data, post_id = postID, date = datetime.datetime.now().date(), poster_image = current_user.profimage, posting_user = current_user.username)
         db.session.add(comment)
         db.session.commit()
-    return render_template('expanded_post.html', expanded_post = expanded_post, form = form, show_comments = show_comments)
+        return redirect(url_for('expanded_post', postID = postID))
+    return render_template('expanded_post.html', expanded_post = expanded_post, form = form, show_comments = show_comments, current_user_image = current_user.profimage)
 
 #posting for blog articles/status
 @app.route('/dashboard/post', methods = ["POST", "GET"])
