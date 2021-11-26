@@ -1,5 +1,108 @@
-.gradient-custom { /* fallback for old browsers */ background: #4facfe; /* Chrome 10-25,
-    Safari 5.1-6 */ background: -webkit-linear-gradient(to bottom right, rgba(79, 172, 254,
-    1), rgba(0, 242, 254, 1)); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+,
-    Safari 7+ */ background: linear-gradient(to bottom right, rgba(79, 172, 254, 1), rgba(0,
-    242, 254, 1)) }
+body{
+    height: auto;
+    width: auto;
+    background: linear-gradient(#141E30 0%, #243B55 100%); 
+}
+/* .wrapper{
+    box-shadow: 1px 1px 1px 1px black;
+} */
+.article{
+    padding:20px;
+    max-width:auto;
+    box-shadow: 1px 1px 1px 1px black;
+    background: white;
+    border-radius: 5px;
+}
+.article{
+    height:auto;
+}
+.thumbnail{
+    border-style: solid;
+    color: rgba(0, 0, 0, 0.144);
+    width:40px;
+    height:40px;
+    border-radius: 50%;
+    margin-right:5px;
+}
+.profile_link{
+    text-decoration: none;
+    text-transform: capitalize;
+    font-style: italic;
+    color: rgb(87, 86, 86);
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+.bar{
+    height:1px;
+    width:75px;
+    margin: 5px 0px 5px 0px;
+    background-color: black;
+}
+.center{
+    display:flex;
+    justify-content: center;
+}
+.expanded_title{
+    text-transform: capitalize;
+    font-size:2rem;
+    font-weight: bolder;
+    color: rgb(0, 0, 0);
+}
+.posted_images{
+    margin:20px 0px 24px 0px;
+}
+.top-iconbar{
+    display: flex;
+    justify-content: space-between;
+}
+.posting_date{
+    color:rgba(0, 0, 0, 0.788);
+    font-weight: 700;
+}
+.views{
+    color: rgba(114, 112, 112, 0.89);
+}
+.comments_title{
+    margin: 50px 0px 10px 0px;
+    font-weight: bolder;
+}
+.comment_box{
+    width: 100%;
+}
+.comment_thumbnail{
+    border-style: solid;
+    color: rgba(0, 0, 0, 0.144);
+    width:40px;
+    height:40px;
+    border-radius: 50%;
+    margin-right:5px;
+}
+.comment_date{
+    display:flex;
+    justify-content: flex-end;
+}
+.commenter_username {
+    text-transform: capitalize;
+    font-weight: bolder;
+    align-items: flex-end;
+}
+.post_wrapper{
+    display: flex;
+}
+.submit{
+    justify-content: flex-end;
+}
+.user_date_bar{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+.space{
+    width: 100%;
+}
+@media (min-width:989px){
+    .article {
+        max-width: 750px;
+    }
+}
