@@ -32,37 +32,30 @@
   <div class = "bar"></div>
   <div>{{ expanded_post.content }}</div>
   <div class = "comments_title">Comments</div>
-  <form action="" method="POST">
-    <div class = "post_wrapper">
-    <img class = "thumbnail" src="{{url_for('static', filename='/images/' + current_user_image) }}" alt="">
-    {{form.comment(cols = "2", rows = "2", placeholder = "Post a comment", class ="comment_box")}}
-    </div>
-    <div class = "d-flex submit"><input type="submit" value="submit" class = "btn btn-dark float-end"></div>
-  </form>
-<div class = "ada">
-  {% if show_comments == None or [] or ''%}
+  {% if check == True %}
+    <form action="" method="POST">
+      <div class = "post_wrapper">
+        {% if current_user_check == False %}
+      <img class = "thumbnail" src="{{url_for('static', filename='/images/' + current_user.profimage) }}" alt="">
+      {{form.comment(cols = "2", rows = "3", placeholder = "Post a comment", class ="comment_box")}}
+      </div>
+      <div class = "d-flex submit"><input type="submit" value="submit" class = "btn btn-dark comment_submit_button"></div>
+    </form>
+        {% else %}
+        {% endif %}
   {% else %}
-    {% for users in show_comments %}
-    <div class = "wrapper d-flex">
-      {% if users.poster_image == None or '' %}
-      <div><img class = "comment_thumbnail"src="{{ url_for('static', filename='/images/default.jpg')}}" alt=""></div>
-      {% else %}
-      <div>
-        <img class = "comment_thumbnail"src="{{ url_for('static', filename='/images/' + users.poster_image)}}" alt="">
-      </div>
-      {% endif %}
-        <div class = "">
-          <div class = "d-flex justify-content-between">
-            <div class = "commenter_username">{{users.posting_user}}</div>
-            <div class = "comment_date">{{users.date}}</div>
-          </div>
-          <div>{{users.comment}}</div>
-        </div>
-      </div>
-    </div>
-    {% endfor %}
   {% endif %}
+
+  {% for users in show_comments %}
+  <div class = "wrapper d-flex">
+    <img class = "comment_thumbnail" src="{{url_for('static', filename='/images/' + users.poster_image)}}" alt="">
+    <div class = "info_wrap">
+        <div class = "commenter_username">{{users.posting_user}}
+          <span class = "comment_date">{{users.date}}</span>
+        </div>
+      <div>{{users.comment}}</div>
     </div>
-</div>
+  </div>
+  {% endfor %}
 
 {% endblock %}

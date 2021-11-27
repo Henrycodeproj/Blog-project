@@ -1,7 +1,10 @@
 body{
     height: auto;
     width: auto;
-    background: linear-gradient(#141E30 0%, #243B55 100%); 
+    background: linear-gradient(#141E30 0%, #243B55 100%);
+}
+.nav-color{
+    background-color: #243655 !important;
 }
 /* .wrapper{
     box-shadow: 1px 1px 1px 1px black;
@@ -9,12 +12,10 @@ body{
 .article{
     padding:20px;
     max-width:auto;
+    height:auto;
     box-shadow: 1px 1px 1px 1px black;
     background: white;
     border-radius: 5px;
-}
-.article{
-    height:auto;
 }
 .thumbnail{
     border-style: solid;
@@ -22,7 +23,7 @@ body{
     width:40px;
     height:40px;
     border-radius: 50%;
-    margin-right:5px;
+    margin-right:10px;
 }
 .profile_link{
     text-decoration: none;
@@ -53,6 +54,7 @@ body{
     margin:20px 0px 24px 0px;
 }
 .top-iconbar{
+    width: 100%;
     display: flex;
     justify-content: space-between;
 }
@@ -60,11 +62,15 @@ body{
     color:rgba(0, 0, 0, 0.788);
     font-weight: 700;
 }
+.comment_submit_button{
+    margin:5px 0px 5px 0px;
+}
 .views{
     color: rgba(114, 112, 112, 0.89);
 }
 .comments_title{
     margin: 50px 0px 10px 0px;
+    font-size:1.2rem;
     font-weight: bolder;
 }
 .comment_box{
@@ -79,8 +85,9 @@ body{
     margin-right:5px;
 }
 .comment_date{
-    display:flex;
-    justify-content: flex-end;
+    color:rgb(109, 109, 109);
+    margin-left:5px;
+    font-size: .7rem;
 }
 .commenter_username {
     text-transform: capitalize;
@@ -103,6 +110,6 @@ body{
 }
 @media (min-width:989px){
     .article {
-        max-width: 750px;
+        max-width: 650px;
     }
 }

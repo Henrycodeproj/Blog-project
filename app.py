@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import unique
+from flask_login.mixins import AnonymousUserMixin
 from flask import Flask, render_template, request, url_for, redirect, flash
 from flask_login.utils import login_required, login_user, logout_user
 from flask.sessions import NullSession
@@ -84,6 +85,7 @@ class Comments(db.Model):
     poster_image = db.Column(db.String(255))
     date = db.Column(db.String(255))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+
 
 def checkemail():
     user = Users.query.filter_by(email=request.form.get('email')).first()
@@ -257,6 +259,7 @@ def delete(postID):
         return redirect(url_for('delete'))
 
 @app.route('/view/<postID>', methods = ["POST", "GET"])
+
 def expanded_post(postID):
     show_comments = Comments.query.filter_by(post_id = postID).all() #gets all post that equals the post id
     form = Commentsform()
@@ -268,7 +271,7 @@ def expanded_post(postID):
         db.session.add(comment)
         db.session.commit()
         return redirect(url_for('expanded_post', postID = postID))
-    return render_template('expanded_post.html', expanded_post = expanded_post, form = form, show_comments = show_comments, current_user_image = current_user.profimage)
+    return render_template('expanded_post.html', expanded_post = expanded_post, form = form, show_comments = show_comments, check = current_user.is_active, current_user_check = current_user.is_anonymous, current_user = current_user) # current_user doesn't work if changed to check if user is active. So i passed two variables instead to check for if the user exist and then the method to call image
 
 #posting for blog articles/status
 @app.route('/dashboard/post', methods = ["POST", "GET"])
@@ -392,7 +395,7 @@ def signup():
             return redirect(url_for("signup"))
         else:
             hashed_password=generate_password_hash(form.password.data, method = 'sha256')  # if everything is valid, this hashes the password and stores it in database
-            new_user = Users(name = form.name.data, username = form.username.data, password = hashed_password, email = form.email.data, date_joined = datetime.datetime.now().date(), profile_views = 0, total_post = 0)
+            new_user = Users(name = form.name.data, username = form.username.data, password = hashed_password, email = form.email.data, profimage = "default.jpg", date_joined = datetime.datetime.now().date(), profile_views = 0, total_post = 0)
             db.session.add(new_user)
             db.session.commit()
             flash('You have succesfully created your account. You can now login.', 'creation')
