@@ -6,9 +6,9 @@ body{
 .nav-color{
     background-color: #243655 !important;
 }
-/* .wrapper{
-    box-shadow: 1px 1px 1px 1px black;
-} */
+.wrapper{
+    margin-bottom: 5px;
+}
 .article{
     padding:20px;
     max-width:auto;
@@ -79,8 +79,18 @@ body{
 .comment_thumbnail{
     border-style: solid;
     color: rgba(0, 0, 0, 0.144);
-    width:40px;
-    height:40px;
+    min-width:40px;
+    max-width: 40px;
+    max-height:40px;
+    min-height:40px;
+    border-radius: 50%;
+    margin-right:5px;
+}
+.spec-thumbnail{
+    border-style: solid;
+    color: rgba(0, 0, 0, 0.144);
+    width:45px;
+    height:45px;
     border-radius: 50%;
     margin-right:5px;
 }
@@ -88,6 +98,7 @@ body{
     color:rgb(109, 109, 109);
     margin-left:5px;
     font-size: .7rem;
+    margin-bottom:2px;
 }
 .commenter_username {
     text-transform: capitalize;
@@ -96,6 +107,7 @@ body{
 }
 .post_wrapper{
     display: flex;
+    align-items: center;
 }
 .submit{
     justify-content: flex-end;

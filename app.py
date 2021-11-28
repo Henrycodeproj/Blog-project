@@ -53,6 +53,8 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return Users.query.get(int(user_id))
 
+
+
 class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), unique = False)
@@ -66,6 +68,8 @@ class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
     profile_views = db.Column(db.Integer)
     total_post = db.Column(db.Integer)
     posts = db.relationship('Posts', backref='poster', lazy = True)
+    comments = db.relationship('Comments', backref='commentor', lazy = True)
+    
 
 class Posts(db.Model): #post skeleton and columns
     id = db.Column(db.Integer, primary_key=True)
@@ -82,9 +86,9 @@ class Comments(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     posting_user = db.Column(db.String(255))
     comment = db.Column(db.Text)
-    poster_image = db.Column(db.String(255))
     date = db.Column(db.String(255))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    poster_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
 
 def checkemail():
@@ -267,11 +271,13 @@ def expanded_post(postID):
     expanded_post.article_views += 1
     db.session.commit()
     if request.method == "POST":
-        comment = Comments(comment=form.comment.data, post_id = postID, date = datetime.datetime.now().date(), poster_image = current_user.profimage, posting_user = current_user.username)
+        comment = Comments(comment=form.comment.data, post_id = postID, date = datetime.datetime.now().date(), posting_user = current_user.username, poster_id = current_user.id)
+        print(current_user.profimage)
         db.session.add(comment)
         db.session.commit()
         return redirect(url_for('expanded_post', postID = postID))
-    return render_template('expanded_post.html', expanded_post = expanded_post, form = form, show_comments = show_comments, check = current_user.is_active, current_user_check = current_user.is_anonymous, current_user = current_user) # current_user doesn't work if changed to check if user is active. So i passed two variables instead to check for if the user exist and then the method to call image
+        #poster_image = current_user.profimage
+    return render_template('expanded_post.html', expanded_post = expanded_post, form = form, show_comments = show_comments, loggedin = current_user.is_active, current_user_check = current_user.is_anonymous, current_user = current_user) # current_user doesn't work if changed to check if user is active. So i passed two variables instead to check for if the user exist and then the method to call image
 
 #posting for blog articles/status
 @app.route('/dashboard/post', methods = ["POST", "GET"])
@@ -395,7 +401,7 @@ def signup():
             return redirect(url_for("signup"))
         else:
             hashed_password=generate_password_hash(form.password.data, method = 'sha256')  # if everything is valid, this hashes the password and stores it in database
-            new_user = Users(name = form.name.data, username = form.username.data, password = hashed_password, email = form.email.data, profimage = "default.jpg", date_joined = datetime.datetime.now().date(), profile_views = 0, total_post = 0)
+            new_user = Users(name = form.name.data, username = form.username.data, password = hashed_password, email = form.email.data, date_joined = datetime.datetime.now().date(), profile_views = 0, total_post = 0)
             db.session.add(new_user)
             db.session.commit()
             flash('You have succesfully created your account. You can now login.', 'creation')

@@ -99,6 +99,7 @@
       {% if current_user.username == post.posting_user %}
       <div class = "posting_date_show justify-content-between">
         <div>
+        <a class = "btn btn-dark btn-sm" href="{{ url_for('expanded_post', postID = post.id) }}">View</a>
         <a class = "btn btn-primary btn-sm" href="{{ url_for('edit', postID = post.id) }}">Edit</a> 
         <a class = "btn btn-danger btn-sm" href="{{ url_for('delete', postID = post.id) }}">Delete</a>
         </div>
