@@ -103,12 +103,20 @@
         <a class = "btn btn-primary btn-sm" href="{{ url_for('edit', postID = post.id) }}">Edit</a> 
         <a class = "btn btn-danger btn-sm" href="{{ url_for('delete', postID = post.id) }}">Delete</a>
         </div>
-        <div class = "posting_date">{{post.date_posted}}</div>
+          <div class = "posting_date">
+            <div class = "date_view_column">
+              <div>{{post.date_posted}}</div>
+              <div class = "post_views">Views: {{post.article_views}}</div>
+            </div>
+          </div>
       </div>
       {% else %}
       <div class = "posting_date justify-content-between">
         <div><a class = "btn btn-dark btn-sm" href="{{ url_for('expanded_post', postID = post.id) }}">View</a></div>
-        {{post.date_posted}}
+          <div class = "date_view_column">
+            <div>{{post.date_posted}}</div>
+            <div class = "post_views">Views: {{post.article_views}}</div>
+          </div>
       </div>
       {% endif %}
     </div>
@@ -137,11 +145,22 @@
             <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Newest Users:</span> {{newest_user[0].username}}</li>
             {% endif %}
 
-            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Hotest article:</span></li>
+            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Hotest article:</span> <span class = "hot_title">{{hottest_post_id.title}}</span> by {{hottest_post_id.posting_user}} </li>
           </ul>
         </p>
         </div>
-        <!-- used to add more to the bar later <div>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Earum, explicabo beatae consectetur iure voluptatum natus iste voluptatem expedita distinctio in.</div> -->
+          <div class = "category_container">
+            <div class = "category">one</div>
+            <div class = "category">two</div>
+            <div class = "category">three</div>
+            <div class = "category">one</div>
+            <div class = "category">two</div>
+            <div class = "category">three</div>
+            <div class = "category">one</div>
+            <div class = "category">two</div>
+            <div class = "category">three</div>
+            {{smeg}}
+          </div>
       </div>
     </div>
 </div> 

@@ -7,6 +7,20 @@ body{
 .error_text{
     color:red;
 }
+.category_container{
+    color:White;
+}
+.category{
+    border-style: solid;
+    border-color: wheat;
+    display:inline-flex;
+}
+.hot_title{
+    font-style: italic;
+    font-size: 1.1rem;
+    font-weight:600;
+
+}
 .nav-color{
     background-color: #243655 !important;
 }
@@ -15,6 +29,11 @@ body{
     font-weight: bolder;
     font-size:2rem;
     padding-bottom: 30px;
+}
+.post_views{
+    color:gray;
+    margin-left: 10px;
+    font-weight: 400;
 }
 .lok{
     display:flex;
@@ -29,6 +48,10 @@ body{
 }
 .log{
     padding:8px !important;
+}
+.date_view_column{
+    display:flex;
+    flex-direction: column;
 }
 .post_container{
     color:rgb(14, 8, 8);
@@ -45,6 +68,7 @@ body{
     color:rgba(0, 0, 0, 0.788);
     font-weight: 700;
     display:flex;
+    align-items: center;
 }
 .prof_link{
     text-decoration: none;

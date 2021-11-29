@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, url_for, redirect, flash
 from flask_login.utils import login_required, login_user, logout_user
 from flask.sessions import NullSession
 from flask_bootstrap import Bootstrap
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy 
 from flask_login import current_user, UserMixin, LoginManager
 from itsdangerous.serializer import Serializer
 from sqlalchemy.orm import relation, relationship
@@ -18,6 +18,8 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 from flask_mail import Mail, Message
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+#from sqlalchemy import func
+from sqlalchemy.sql.expression import func
 import datetime
 import os
 import secrets
@@ -156,10 +158,12 @@ If you did not send this email, please ignore this message.
 #homepage
 @app.route ('/')
 def index():
+    #hottest_post = Posts.query.order_by(Posts.article_views.asc()).first()
+    hottest_post=db.session.query(func.max(Posts.article_views)).scalar()
+    hottest_post_id=Posts.query.filter_by(article_views = hottest_post).first()
     posts = Posts.query.order_by(Posts.id.desc()).all()
     newest_user = Users.query.order_by(Users.id.desc()).all()
-    print(newest_user)
-    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user)
+    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id)
 
 # @app.route('/comments', methods = ["POST", "GET"])
 # def comments():
@@ -265,7 +269,7 @@ def delete(postID):
 @app.route('/view/<postID>', methods = ["POST", "GET"])
 
 def expanded_post(postID):
-    show_comments = Comments.query.filter_by(post_id = postID).all() #gets all post that equals the post id
+    show_comments = Comments.query.filter_by(post_id = postID).all() #gets all post that equals the to current post
     form = Commentsform()
     expanded_post=Posts.query.get(postID)
     expanded_post.article_views += 1

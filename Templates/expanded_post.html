@@ -42,22 +42,24 @@
         {% endif %}
   {% else %}
   {% endif %}
-
+<div class = "d-flex flex-column-reverse">
   {% for users in show_comments %}
   <div class = "wrapper d-flex">
     {% if users.commentor.profimage == None or '' %}
-    <img class = "comment_thumbnail" src="{{url_for('static', filename='/images/default.jpg')}}" alt="">
+    <a href="{{url_for('public_user_dashboard', poster = users.posting_user )}}"><img class = "comment_thumbnail" src="{{url_for('static', filename='/images/default.jpg')}}" alt=""></a>
     {% else %}
-    <img class = "comment_thumbnail" src="{{url_for('static', filename='/images/' + users.commentor.profimage)}}" alt="">
+    <a href="{{url_for('public_user_dashboard', poster = users.posting_user )}}"><img class = "comment_thumbnail" src="{{url_for('static', filename='/images/' + users.commentor.profimage)}}" alt=""></a>
     {% endif %}
     <div class = "info_wrap">
-        <div class = "commenter_username">{{users.posting_user}}
-          <span class = "comment_date">{{users.date}}</span>
+        <div class = "commenter_username">
+          <a class = "commentor_name_link" href="{{url_for('public_user_dashboard', poster = users.posting_user )}}">{{users.posting_user}}</a>
+            <span class = "comment_date">{{users.date}}</span>
         </div>
       <div>{{users.comment}}</div>
     </div>
   </div>
   {% endfor %}
+</div>
 
 {% endblock %}
 
