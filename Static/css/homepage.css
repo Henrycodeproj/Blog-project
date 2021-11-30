@@ -7,6 +7,11 @@ body{
 .error_text{
     color:red;
 }
+.dots{
+    color:white;
+    position: relative;
+    top:25%;
+}
 .category_container{
     color:White;
 }
@@ -14,12 +19,6 @@ body{
     border-style: solid;
     border-color: wheat;
     display:inline-flex;
-}
-.hot_title{
-    font-style: italic;
-    font-size: 1.1rem;
-    font-weight:600;
-
 }
 .nav-color{
     background-color: #243655 !important;
@@ -62,7 +61,14 @@ body{
     display: flex;
     text-transform: capitalize;
     justify-items: right !important;
-    align-self: flex-end !important;
+    align-items: center !important;
+}
+.hottest_link{
+    font-style: italic;
+    font-size: 1.1rem;
+    font-weight:600;
+    color:rgba(0, 0, 0, 0.788);
+    text-decoration: none;
 }
 .posting_date{
     color:rgba(0, 0, 0, 0.788);
@@ -208,6 +214,9 @@ body{
     }
     .container{
         padding:0;
+    }
+    .contain{
+        margin:10px;
     }
     .sidesection{
         order: 1;

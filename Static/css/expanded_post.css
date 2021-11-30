@@ -129,6 +129,6 @@ body{
 }
 @media (min-width:989px){
     .article {
-        max-width: 650px;
+        max-width: 750px;
     }
 }

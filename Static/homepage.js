@@ -8,3 +8,7 @@ function myfunction() {
     }
     document.getElementById("demo").innerHTML = txt;
   }
+
+function deletecheck(){
+  
+}

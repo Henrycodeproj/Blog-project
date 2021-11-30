@@ -76,7 +76,7 @@
   <div class = "flex">
     <!-- <div class = 'pas'>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Deserunt dicta minima aperiam. Voluptatum delectus nulla deserunt commodi, sed id quo voluptate asperiores necessitatibus eligendi iste ea repellendus aut? Eius culpa optio reiciendis ipsa neque vitae, consectetur voluptas! Cumque debitis, aperiam fuga nam odit ipsa? Beatae sequi sint at delectus unde quibusdam repellendus veniam hic. Iusto delectus dignissimos quo. Laudantium labore voluptatum cupiditate eligendi perferendis modi assumenda temporibus reprehenderit aut eaque? Dolor placeat, amet voluptatum, dignissimos cum libero cupiditate quod illo soluta nemo quaerat dicta! Hic ipsum ut libero labore mollitia accusamus magnam tenetur blanditiis temporibus nesciunt, nobis perspiciatis, numquam dolore.</div> -->
     <div class = "d-flex flex-column wrap">
-    {% for post in posts %}
+    {% for post in posts.items %}
     <div class = "post_container posting">
       {% if post.poster.profimage == None %}
       <div class = "">
@@ -94,14 +94,14 @@
       <img class = "posted_images img-fluid" src="{{url_for('static', filename='/images/' + post.image) }}" alt="Image" />
     <div class = "title">{{ post.title }} </div>
     <div class = "bar"></div>
-    <div class = "content">{{ post.content }}</div>
+    <div class = "content">{{ post.content| truncate(500) }}</div>
     <div>
       {% if current_user.username == post.posting_user %}
       <div class = "posting_date_show justify-content-between">
         <div>
         <a class = "btn btn-dark btn-sm" href="{{ url_for('expanded_post', postID = post.id) }}">View</a>
         <a class = "btn btn-primary btn-sm" href="{{ url_for('edit', postID = post.id) }}">Edit</a> 
-        <a class = "btn btn-danger btn-sm" href="{{ url_for('delete', postID = post.id) }}">Delete</a>
+        <a class = "btn btn-danger btn-sm" onclick= "return confirm('Are you sure you want to delete this post?');" href="{{ url_for('delete', postID = post.id) }}">Delete</a>
         </div>
           <div class = "posting_date">
             <div class = "date_view_column">
@@ -122,11 +122,24 @@
     </div>
     </div>
     {% endfor %}
+    <div class = "container contain">
+      {% for page_number in posts.iter_pages(left_edge=1, left_current=1, right_current=2, right_edge=1) %}
+        {% if page_number %}
+          {% if posts.page == page_number%}
+            <a class = "btn btn-light page_number" href="{{ url_for('index', page=page_number)}}">{{page_number}}</a>
+          {% else %}
+            <a class = "btn btn-outline-light page_number" href="{{ url_for('index', page=page_number)}}">{{page_number}}</a>
+          {% endif %}
+        {% else %}
+        <span class = "dots">...</span>
+        {% endif %}
+      {% endfor %}
     </div>
+  </div>
 
     <div class = "lok">
       <div class="sidesection">
-        <div class="content-section">
+        <div class="content-section ">
         <h3 class = "sidebar_text">Sidebar</h3>
         <p class='text-muted'>
           <ul class="list-group">
@@ -136,7 +149,7 @@
             {% if posts == [] %}
             <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span></li>
             {% else %}
-            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span> {{ posts[0].posting_user}}</li>
+            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span> {{ posts.items[0].posting_user}}</li>
             {% endif %}
 
             {% if newest_user == [] %}
@@ -145,11 +158,17 @@
             <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Newest Users:</span> {{newest_user[0].username}}</li>
             {% endif %}
 
-            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Hotest article:</span> <span class = "hot_title">{{hottest_post_id.title}}</span> by {{hottest_post_id.posting_user}} </li>
+            <li class="list-group-item list-group-item-light right-bar">
+              <span class = "sidebar_header">Hotest article:</span>
+              <span>
+                <a class = "hottest_link" href="{{url_for('expanded_post', postID = hottest_post_id.id)}}">{{hottest_post_id.title}}</a>
+              </span> by {{hottest_post_id.posting_user}}
+             </li>
           </ul>
         </p>
         </div>
           <div class = "category_container">
+            <h1>category</h1>
             <div class = "category">one</div>
             <div class = "category">two</div>
             <div class = "category">three</div>
@@ -159,7 +178,6 @@
             <div class = "category">one</div>
             <div class = "category">two</div>
             <div class = "category">three</div>
-            {{smeg}}
           </div>
       </div>
     </div>

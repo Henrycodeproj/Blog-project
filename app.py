@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, url_for, redirect, flash
 from flask_login.utils import login_required, login_user, logout_user
 from flask.sessions import NullSession
 from flask_bootstrap import Bootstrap
-from flask_sqlalchemy import SQLAlchemy 
+from flask_sqlalchemy import SQLAlchemy, Pagination
 from flask_login import current_user, UserMixin, LoginManager
 from itsdangerous.serializer import Serializer
 from sqlalchemy.orm import relation, relationship
@@ -147,32 +147,16 @@ If you did not send this email, please ignore this message.
 '''
     mail.send(message)
 
-# @app.route('/test')
-# def test():
-    # old_image = current_user.profimage
-    # path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
-    # os.remove(path)
-    # current_user.profimage = None
-    # db.session.commit()
-
 #homepage
 @app.route ('/')
 def index():
     #hottest_post = Posts.query.order_by(Posts.article_views.asc()).first()
     hottest_post=db.session.query(func.max(Posts.article_views)).scalar()
     hottest_post_id=Posts.query.filter_by(article_views = hottest_post).first()
-    posts = Posts.query.order_by(Posts.id.desc()).all()
+    page = request.args.get('page', 1, type = int)
+    posts = Posts.query.order_by(Posts.id.desc()).paginate(page = page, per_page = 3)
     newest_user = Users.query.order_by(Users.id.desc()).all()
     return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id)
-
-# @app.route('/comments', methods = ["POST", "GET"])
-# def comments():
-#     form = Comments()
-#     if request.method == "POST":
-#         commenting = Comment(words = form.words.data)
-#         db.session.add(commenting)
-#         db.session.commit()
-#     return render_template('test.html', form = form)
 
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required
@@ -217,7 +201,7 @@ def upload_profile():
                 filename = secure_filename(file.filename)
                 hexed_name = hex(filename) # passes original name of file and turns turns name into hex, prevents long names and overloads
                 output_size = (300,300)
-                picture = Image.open(file)   # converts uploaded images into smaller thumbnails or any pixel related size
+                picture = Image.open(file) # converts uploaded images into smaller thumbnails or any pixel related size
                 picture.thumbnail(output_size, Image.ANTIALIAS)
                 picture.save(os.path.join(app.config['UPLOAD_FOLDER'], hexed_name), quality = 100)
                 user.profimage = hexed_name
@@ -267,13 +251,18 @@ def delete(postID):
         return redirect(url_for('delete'))
 
 @app.route('/view/<postID>', methods = ["POST", "GET"])
-
 def expanded_post(postID):
     show_comments = Comments.query.filter_by(post_id = postID).all() #gets all post that equals the to current post
-    form = Commentsform()
+    original_poster = Posts.query.get(postID)
     expanded_post=Posts.query.get(postID)
-    expanded_post.article_views += 1
-    db.session.commit()
+    form = Commentsform()
+    print(current_user)
+    if current_user.get_id() == None:
+        expanded_post.article_views += 1
+        db.session.commit()
+    elif current_user.username != original_poster.posting_user:
+        expanded_post.article_views += 1
+        db.session.commit()
     if request.method == "POST":
         comment = Comments(comment=form.comment.data, post_id = postID, date = datetime.datetime.now().date(), posting_user = current_user.username, poster_id = current_user.id)
         print(current_user.profimage)
