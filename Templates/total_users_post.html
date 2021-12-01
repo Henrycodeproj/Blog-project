@@ -1,56 +1,6 @@
 {% extends 'base.html' %}
 
-{% block nav%}
-    {% if loggedin == True %}
-    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-secondary nav-color">
-        <div class="container-fluid">
-          <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">Blog</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false"    aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{{ url_for('index') }}">What's New</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{{ url_for('post') }}">Post</a>
-              </li>
-            </ul>
-            <form class="d-flex">
-              <a class="btn btn-outline-info prof-button" href = "{{ url_for('dashboard') }}">Profile</a>
-              <a class="btn btn-outline-light" href = "{{ url_for('logout') }}">Logout</a>
-            </form>
-          </div>
-        </div>
-      </nav>
-      {% else %}
-      <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-secondary nav-color">
-        <div class="container-fluid">
-          <a class="navbar-brand fw-bold" href="{{url_for('index')}}">BoredGame Blogs</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link fs-5" href="{{ url_for('login') }}">Login</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link fs-5" href="{{ url_for('signup') }}">Signup</a>
-              </li>
-            </ul>
-            <form class="nav-item">
-              <a class="btn btn-outline-light" href = "{{ url_for('signup') }}">Register Here</a>
-            </form>
-          </div>
-        </div>
-      </nav>
-    {% endif %}
-
-{% endblock %}
-
-{% block body%}
+{% block body %}
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <ul class=flashes>
@@ -126,9 +76,9 @@
       {% for page_number in posts.iter_pages(left_edge=1, left_current=1, right_current=2, right_edge=1) %}
         {% if page_number %}
           {% if posts.page == page_number%}
-            <a class = "btn btn-light page_number" href="{{ url_for('index', page=page_number)}}">{{page_number}}</a>
+            <a class = "btn btn-light page_number" href="{{ url_for('all_post', username = user.username, page=page_number)}}">{{page_number}}</a>
           {% else %}
-            <a class = "btn btn-outline-light page_number" href="{{ url_for('index', page=page_number)}}">{{page_number}}</a>
+            <a class = "btn btn-outline-light page_number" href="{{ url_for('all_post', username = user.username, page=page_number)}}">{{page_number}}</a>
           {% endif %}
         {% else %}
         <span class = "dots">...</span>
@@ -179,12 +129,7 @@
             <div class = "category">two</div>
             <div class = "category">three</div>
           </div>
-          <div>
-            <p class = "smoll">Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium consequuntur rem accusamus tempora asperiores ipsum molestias saepe perferendis laudantium repellat mollitia nisi magni, labore quidem natus consectetur alias delectus aperiam est! Ut, atque, officia eum molestias dolores rem quas mollitia beatae laudantium, cumque distinctio quam. Harum eaque, dolore adipisci reiciendis nostrum unde ex cupiditate eligendi ullam, laboriosam molestiae nesciunt fuga iure mollitia nobis deserunt aliquam provident ratione, tempore velit. Placeat dignissimos atque eos reprehenderit tempore veritatis voluptate, voluptatum optio, fugiat harum distinctio iste, nihil quaerat libero suscipit impedit aut? Fugiat fuga ipsam soluta ex voluptate. Cum corrupti non, error quod, doloremque alias nihil optio ipsa culpa velit dicta! Repellendus corporis, dolore, hic reprehenderit corrupti nisi mollitia est dolorem veniam, voluptas nulla laudantium sint! Atque unde dolorum odit recusandae natus facere quod ad sunt minus consequuntur aperiam, modi nisi nemo doloremque tenetur similique accusamus maiores enim commodi saepe? Rem repellendus distinctio, adipisci placeat tenetur sequi incidunt saepe consectetur sint eos? Ea impedit aperiam expedita. Amet eos temporibus hic numquam aliquid alias quaerat. Dicta sit, dolores culpa qui magni velit illum praesentium ut nobis, sunt aperiam blanditiis incidunt excepturi neque omnis aliquam recusandae ipsa consequatur debitis fugit corporis reprehenderit perspiciatis? Blanditiis, laudantium.</p>
-          </div>
       </div>
     </div>
-
 </div> 
-
 {% endblock %}

@@ -80,6 +80,12 @@ p {
     border-radius: 10px;
     padding: 10px 20px
 }
+.fa-user-circle{
+    padding-right:10px;
+}
+.fa-icons{
+    padding-right:10px;
+}
 
 /* .icon1 {
     font-size: 10px;

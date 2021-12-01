@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, url_for, redirect, flash
 from flask_login.utils import login_required, login_user, logout_user
 from flask.sessions import NullSession
 from flask_bootstrap import Bootstrap
-from flask_sqlalchemy import SQLAlchemy, Pagination
+from flask_sqlalchemy import SQLAlchemy
 from flask_login import current_user, UserMixin, LoginManager
 from itsdangerous.serializer import Serializer
 from sqlalchemy.orm import relation, relationship
@@ -158,6 +158,16 @@ def index():
     newest_user = Users.query.order_by(Users.id.desc()).all()
     return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id)
 
+@app.route ('/user/<username>')
+def all_post(username):
+    hottest_post=db.session.query(func.max(Posts.article_views)).scalar()
+    hottest_post_id=Posts.query.filter_by(article_views = hottest_post).first()
+    page = request.args.get('page', 1, type = int)
+    user = Users.query.filter_by(username = username).first_or_404()
+    posts = Posts.query.filter_by(posting_user=user.username).order_by(Posts.id.desc()).paginate(page = page, per_page = 3)
+    newest_user = Users.query.order_by(Users.id.desc()).all()
+    return render_template("total_users_post.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, user = user)
+
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload_profile():
@@ -273,7 +283,7 @@ def expanded_post(postID):
     return render_template('expanded_post.html', expanded_post = expanded_post, form = form, show_comments = show_comments, loggedin = current_user.is_active, current_user_check = current_user.is_anonymous, current_user = current_user) # current_user doesn't work if changed to check if user is active. So i passed two variables instead to check for if the user exist and then the method to call image
 
 #posting for blog articles/status
-@app.route('/dashboard/post', methods = ["POST", "GET"])
+@app.route('/post', methods = ["POST", "GET"])
 @login_required
 def post():
     form = Postform()
@@ -308,7 +318,7 @@ def post():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template("Dashboard.html", name = current_user.name, last_logged = current_user.last_login, profimage = current_user.profimage, description = current_user.description, views = current_user.profile_views, total_post = current_user.total_post)
+    return render_template("Dashboard.html", name = current_user.name, last_logged = current_user.last_login, profimage = current_user.profimage, description = current_user.description, views = current_user.profile_views, total_post = current_user.total_post, username = current_user.username)
 
 #public profiles for each poster
 @app.route('/dashboard/<poster>')

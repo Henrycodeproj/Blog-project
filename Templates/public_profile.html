@@ -55,19 +55,19 @@
             <div class="col-md-4 p-0 border-end">
                 <div class="viewbox">
                     <p class="blue">{{user.profile_views}}</p>
-                    <p>Profile views</p>
+                    <p><i class="fas fa-user-circle"></i>Profile views</p>
                 </div>
             </div>
             <div class="col-md-4 p-0 border-end">
                 <div class="viewbox">
-                    <p class="blue">{{user.total_post}}</p>
-                    <p>Article views</p>
+                    <p class="blue">100</p>
+                    <p>Followers</p>
                 </div>
             </div>
             <div class="col-md-4 p-0">
                 <div class="viewbox">
-                    <p class="blue">50</p>
-                    <p>Total Posts</p>
+                    <p class="blue">{{user.total_post}}</p>
+                    <p><i class="fas fa-icons"></i><a href="{{url_for('all_post', username = user.username)}}">Total Posts</a></p>
                 </div>
             </div>
         </div>

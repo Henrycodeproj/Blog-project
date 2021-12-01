@@ -1,6 +1,7 @@
 body{
     background-repeat: no-repeat !important;
-    height: 300vh;
+    min-height: 100vh;
+    max-height: auto;
     /* background: linear-gradient(#373B44 0%, #4286f4 100%); */
     background: linear-gradient(#141E30 0%, #243B55 100%); 
 }
@@ -14,6 +15,9 @@ body{
 }
 .category_container{
     color:White;
+}
+.smoll{
+    color:white;
 }
 .category{
     border-style: solid;
