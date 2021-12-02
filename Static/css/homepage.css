@@ -8,13 +8,22 @@ body{
 .error_text{
     color:red;
 }
+.coloring{
+    color:White;
+}
 .dots{
     color:white;
     position: relative;
     top:25%;
 }
+.recommendations{
+    background-color: tomato;
+    color:white;
+    margin:50px 0px 50px 0px;
+}
 .category_container{
     color:White;
+    margin:50px 0px 50px 0px;
 }
 .smoll{
     color:white;
@@ -79,6 +88,12 @@ body{
     font-weight: 700;
     display:flex;
     align-items: center;
+}
+.recommend_links{
+    color:rgb(160, 159, 159);
+    text-transform: capitalize;
+    text-decoration: none;
+    font-weight:600
 }
 .prof_link{
     text-decoration: none;

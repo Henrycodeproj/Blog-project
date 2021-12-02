@@ -140,7 +140,7 @@
     <div class = "lok">
       <div class="sidesection">
         <div class="content-section ">
-        <h3 class = "sidebar_text">Sidebar</h3>
+        <!-- <h3 class = "sidebar_text">Sidebar</h3> -->
         <p class='text-muted'>
           <ul class="list-group">
             <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Today's Date:</span> {{ current_date }}</li>
@@ -168,7 +168,7 @@
         </p>
         </div>
           <div class = "category_container">
-            <h1>category</h1>
+            <h3>Categories</h3>
             <div class = "category">one</div>
             <div class = "category">two</div>
             <div class = "category">three</div>
@@ -179,8 +179,21 @@
             <div class = "category">two</div>
             <div class = "category">three</div>
           </div>
-          <div>
-            <p class = "smoll">Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium consequuntur rem accusamus tempora asperiores ipsum molestias saepe perferendis laudantium repellat mollitia nisi magni, labore quidem natus consectetur alias delectus aperiam est! Ut, atque, officia eum molestias dolores rem quas mollitia beatae laudantium, cumque distinctio quam. Harum eaque, dolore adipisci reiciendis nostrum unde ex cupiditate eligendi ullam, laboriosam molestiae nesciunt fuga iure mollitia nobis deserunt aliquam provident ratione, tempore velit. Placeat dignissimos atque eos reprehenderit tempore veritatis voluptate, voluptatum optio, fugiat harum distinctio iste, nihil quaerat libero suscipit impedit aut? Fugiat fuga ipsam soluta ex voluptate. Cum corrupti non, error quod, doloremque alias nihil optio ipsa culpa velit dicta! Repellendus corporis, dolore, hic reprehenderit corrupti nisi mollitia est dolorem veniam, voluptas nulla laudantium sint! Atque unde dolorum odit recusandae natus facere quod ad sunt minus consequuntur aperiam, modi nisi nemo doloremque tenetur similique accusamus maiores enim commodi saepe? Rem repellendus distinctio, adipisci placeat tenetur sequi incidunt saepe consectetur sint eos? Ea impedit aperiam expedita. Amet eos temporibus hic numquam aliquid alias quaerat. Dicta sit, dolores culpa qui magni velit illum praesentium ut nobis, sunt aperiam blanditiis incidunt excepturi neque omnis aliquam recusandae ipsa consequatur debitis fugit corporis reprehenderit perspiciatis? Blanditiis, laudantium.</p>
+          <div class = "recommendations">
+            <h3>Daily Recommendations</h3>
+            {% for highlight in random_users %}
+            <div class = "recommended_profiles">
+              {% if highlight.profimage == None %}
+              <a href="{{url_for('public_user_dashboard', poster = highlight.username )}}" class= "recommend_links"><img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}" alt=""><span>{{highlight.username}}</span></a> 
+              <span>Top Article: Lorem ipsum dolor sit amet consectetur adipisicing elit. Veniam, pariatur.</span>
+              {% else %}
+              <a href="{{url_for('public_user_dashboard', poster = highlight.username )}}" class= "recommend_links"><img class = "tree" src="{{url_for('static', filename='/images/' + highlight.profimage) }}" alt=""><span>{{highlight.username}}</span></a>
+              <span>Top Article: Lorem ipsum dolor sit amet consectetur adipisicing elit. Veniam, pariatur.</span>
+            </div>
+              {% endif %}
+            {% endfor %}
+            </div>
+            <div>board game</div>
           </div>
       </div>
     </div>

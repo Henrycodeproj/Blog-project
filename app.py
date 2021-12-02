@@ -20,6 +20,7 @@ from flask_mail import Mail, Message
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 #from sqlalchemy import func
 from sqlalchemy.sql.expression import func
+import random
 import datetime
 import os
 import secrets
@@ -55,7 +56,10 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return Users.query.get(int(user_id))
 
-
+tags = db.Table('tags',
+    db.Column('adventure_id', db.Integer, db.ForeignKey('adventure.id'), primary_key=True),
+    db.Column('post_id', db.Integer, db.ForeignKey('posts.id'), primary_key=True)
+)
 
 class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
     id = db.Column(db.Integer, primary_key=True)
@@ -83,6 +87,7 @@ class Posts(db.Model): #post skeleton and columns
     article_views = db.Column(db.Integer)
     poster_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     comments = db.relationship('Comments', backref = 'user_comments', lazy = True)
+    tags = db.relationship('Adventure', secondary=tags, lazy='subquery',backref=db.backref('category', lazy=True))
 
 class Comments(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -91,6 +96,10 @@ class Comments(db.Model):
     date = db.Column(db.String(255))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
     poster_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+class Adventure(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255))
 
 
 def checkemail():
@@ -156,7 +165,9 @@ def index():
     page = request.args.get('page', 1, type = int)
     posts = Posts.query.order_by(Posts.id.desc()).paginate(page = page, per_page = 3)
     newest_user = Users.query.order_by(Users.id.desc()).all()
-    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id)
+    random_list=Users.query.order_by(Users.id).all()
+    random_users = set(random.choices(random_list, weights=None, cum_weights=None, k=3)) #set checks for duplicates
+    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, random_users = random_users)
 
 @app.route ('/user/<username>')
 def all_post(username):
@@ -166,6 +177,9 @@ def all_post(username):
     user = Users.query.filter_by(username = username).first_or_404()
     posts = Posts.query.filter_by(posting_user=user.username).order_by(Posts.id.desc()).paginate(page = page, per_page = 3)
     newest_user = Users.query.order_by(Users.id.desc()).all()
+    if bool(posts) is True:
+        flash('You do not have any current post to show!', 'no_post')
+        return redirect(url_for('dashboard'))
     return render_template("total_users_post.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, user = user)
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -173,22 +187,22 @@ def all_post(username):
 def upload_profile():
     profile = Addprofile()
     user = Users.query.get(current_user.id)
-    if request.method == 'POST':  #allows user to add just description and passes onto to check other files
+    if request.method == 'POST':  #allows user to add just description and passes onto to file check for further submission
         if profile.description.data != '':
             user.description = profile.description.data
             db.session.add(user)
             db.session.commit()
-            flash('You have sucessfully changed your profile description', 'prof_description')
+            flash('You have sucessfully changed your profile description!', 'prof_description')
             return redirect(url_for('dashboard'))
         #check if the post request has the file part
         if 'file' not in request.files:
-            flash('No file part')
+            flash('There was not file uploaded!', 'no_file')
             return redirect(request.url)
         file = request.files['file']
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
         if file.filename == '':
-            flash('No selected file')
+            flash('No selected file','no_name')
             # return redirect(request.url)
             return redirect(url_for('dashboard'))
         if file and allowed_file(file.filename):
@@ -202,10 +216,10 @@ def upload_profile():
                 user.profimage = hexed_name
                 db.session.add(user)
                 db.session.commit()
-                flash('You have sucessfully uploaded a photo','prof_photo')
+                flash('You have sucessfully uploaded your profile picture.','prof_photo')
                 return redirect(url_for('dashboard', name=filename))
             else:
-                old_image = current_user.profimage # removes old photo from folder before updating
+                old_image = current_user.profimage # removes old photo from folder before updating current photo
                 path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
                 os.remove(path)
                 filename = secure_filename(file.filename)
@@ -217,7 +231,7 @@ def upload_profile():
                 user.profimage = hexed_name
                 db.session.add(user)
                 db.session.commit()
-                flash('You have sucessfully uploaded a photo','prof_photo')
+                flash('You have sucessfully changed your profile photo','prof_photo')
                 return redirect(url_for('dashboard', name=filename))
     return render_template('upload.html', profile = profile)
 
@@ -245,7 +259,7 @@ def edit(postID):
 def delete(postID):
     poster = Posts.query.get(postID)
     if current_user.username != poster.posting_user:
-        flash('You can only delete your own post.')
+        flash('You can only delete your own post.', 'false_user')
         return redirect(url_for('index'))
     try:
         delete_id = Posts.query.get(postID)
@@ -257,8 +271,8 @@ def delete(postID):
         db.session.commit()
         return redirect(url_for('index'))
     except:
-        flash('Opps, something went wrong. Your post was not deleted.')
-        return redirect(url_for('delete'))
+        flash('Opps, something went wrong. Your post was not deleted.', 'false_user')
+        return redirect(url_for('index'))
 
 @app.route('/view/<postID>', methods = ["POST", "GET"])
 def expanded_post(postID):
@@ -307,14 +321,16 @@ def post():
             picture.save(os.path.join(app.config['UPLOAD_FOLDER'], hexed_name), quality = 100)
             posting = Posts(title = form.title.data, content = form.content.data, image = hexed_name, posting_user = current_user.username, date_posted = datetime.datetime.now().date(), article_views = 0, poster_id = current_user.id)
             current_user.total_post += 1
+            category = Adventure(title = form.title.data)
             db.session.add(posting)
+            db.session.add(category)
             db.session.commit()
             flash('Your post has been added', 'posted')
             return redirect(url_for('post'))
     else:
         return render_template("post.html", form = form, loggedin = current_user.is_active)
 
-#dashboard for users,need working viewer count, article, customization
+#dashboard for users ,needs customization
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -333,6 +349,7 @@ def public_user_dashboard(poster):
             user.profile_views += 1
             db.session.commit()
     return render_template('public_profile.html', user = user)
+
 #login method
 @app.route('/login', methods = ["POST", "GET"])
 def login():

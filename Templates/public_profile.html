@@ -40,7 +40,7 @@
       <img src="{{url_for ('static', filename ='/images/' + user.profimage) }}" alt="Image" />
     </div>
   {% endif %}
-      <h1 class = "welcome_text">{{ user.username }}'s Profile</h1>
+      <h1 class = "welcome_text">{{ user.username }}<span class = "s_dash">'s</span> Profile</h1>
   </div>
 
 <div class = "container">
@@ -61,7 +61,7 @@
             <div class="col-md-4 p-0 border-end">
                 <div class="viewbox">
                     <p class="blue">100</p>
-                    <p>Followers</p>
+                    <p><i class="fas fa-users"></i>Followers</p>
                 </div>
             </div>
             <div class="col-md-4 p-0">

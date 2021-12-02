@@ -40,6 +40,14 @@
                     {{ form.title(placeholder = "Title") }}
                     {{ form.content(cols="30", rows="15", placeholder = "Write your review here") }}
                     {{ form.file }}
+                    <select name="category" id="">
+                        <option value="Adventure">Aventure</option>
+                        <option value="Rpg">Rpg</option>
+                        <option value="Co-op">Co-op</option>
+                        <option value="Fantasy">Fantasy</option>
+                        <option value="Area-control">Area-control</option>
+                        <option value="Deck-Builder">Deck-Builder</option>
+                    </select>
                     <div class="col-12">
                         <button type="submit" name = "file" class="btn btn-dark float-end">Post</button>
                     </div>

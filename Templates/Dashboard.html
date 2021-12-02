@@ -43,13 +43,34 @@
       {% endif%}
 
       {% if category == "prof_description"%}
-      <div class="alert alert-danger alert-dismissible fade show container">
+      <div class="alert alert-success alert-dismissible fade show container">
           <strong>{{ message }}</strong>
           <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
       {% endif %}
 
       {% if category == "prof_photo"%}
+      <div class="alert alert-danger alert-dismissible fade show container">
+          <strong>{{ message }}</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      {% endif %}
+
+      {% if category == "no_file"%}
+      <div class="alert alert-danger alert-dismissible fade show container">
+          <strong>{{ message }}</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      {% endif %}
+
+      {% if category == "no_name"%}
+      <div class="alert alert-danger alert-dismissible fade show container">
+          <strong>{{ message }}</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      {% endif %}
+
+      {% if category == "no_post"%}
       <div class="alert alert-danger alert-dismissible fade show container">
           <strong>{{ message }}</strong>
           <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -100,7 +121,7 @@
           <div class="col-md-4 p-0 border-end">
               <div class="viewbox">
                   <p class="blue">100</p>
-                  <p>Followers</p>
+                  <p><i class="fas fa-users"></i>Followers</p>
               </div>
           </div>
           <div class="col-md-4 p-0">
@@ -120,7 +141,7 @@
               </div>
               <div class="d-flex mt-2"> <span class="fas fa-money-bill-alt mt-1"></span>
                   <div class="w-100 border-bottom">
-                      <a href="{{url_for('all_post', username = username)}}"><p class="">See your own Post</p></a>
+                      <a href="{{url_for('all_post', username = username)}}"><p class="">See all of your own Post</p></a>
                       <p class="textmuted mb-2"> View all of your own posts.</p>
                   </div>
               </div>
