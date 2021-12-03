@@ -8,7 +8,8 @@ from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import current_user, UserMixin, LoginManager
 from itsdangerous.serializer import Serializer
-from sqlalchemy.orm import relation, relationship
+from sqlalchemy.orm import dynamic_loader, relation, relationship
+from sqlalchemy.sql.schema import PrimaryKeyConstraint
 from wtforms.fields.core import BooleanField
 from wtforms.fields.simple import SubmitField
 from wtforms.validators import ValidationError
@@ -58,7 +59,7 @@ def load_user(user_id):
 
 tags = db.Table('tags',
     db.Column('adventure_id', db.Integer, db.ForeignKey('adventure.id'), primary_key=True),
-    db.Column('post_id', db.Integer, db.ForeignKey('posts.id'), primary_key=True)
+    db.Column('rpg_id', db.Integer, db.ForeignKey('rpg.id'), primary_key=True)
 )
 
 class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
@@ -87,7 +88,6 @@ class Posts(db.Model): #post skeleton and columns
     article_views = db.Column(db.Integer)
     poster_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     comments = db.relationship('Comments', backref = 'user_comments', lazy = True)
-    tags = db.relationship('Adventure', secondary=tags, lazy='subquery',backref=db.backref('category', lazy=True))
 
 class Comments(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -100,6 +100,27 @@ class Comments(db.Model):
 class Adventure(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255))
+    tags = db.relationship('Rpg', secondary=tags, lazy='subquery',backref=db.backref('category', lazy=True))
+
+
+class Rpg(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255))
+
+@app.route('/test') #How I will add tags, finally 
+def test():
+    adventure=Adventure(title = "test2")
+    '''rpg=Rpg(title = "test2")
+    db.session.add(rpg)
+    db.session.add(adventure)
+    db.session.commit()
+    cate_id= Adventure.query.filter_by(title = "test2").first()
+    category_id=Rpg.query.filter_by(title = "test").first()
+    category_id.category.append(cate_id)
+    db.session.commit()'''
+
+    fun=Rpg.query.filter_by(title = 'test').first()
+    return render_template('test.html', fun = fun)
 
 
 def checkemail():
@@ -165,9 +186,13 @@ def index():
     page = request.args.get('page', 1, type = int)
     posts = Posts.query.order_by(Posts.id.desc()).paginate(page = page, per_page = 3)
     newest_user = Users.query.order_by(Users.id.desc()).all()
-    random_list=Users.query.order_by(Users.id).all()
-    random_users = set(random.choices(random_list, weights=None, cum_weights=None, k=3)) #set checks for duplicates
-    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, random_users = random_users)
+    random_users=Users.query.order_by(Users.id).all()
+    random.shuffle(random_users) # shuffles list of users and will return first 3 -> (random_list[0:3])
+    list = []
+    for users in random_users[0:3]: #printing users max, still need to get ids and link to the post.
+        list.append(db.session.query(func.max(Posts.article_views)).filter_by(posting_user = users.username).scalar())
+    print(list)
+    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, random_users = random_users[0:3], users = list)
 
 @app.route ('/user/<username>')
 def all_post(username):
@@ -323,7 +348,6 @@ def post():
             current_user.total_post += 1
             category = Adventure(title = form.title.data)
             db.session.add(posting)
-            db.session.add(category)
             db.session.commit()
             flash('Your post has been added', 'posted')
             return redirect(url_for('post'))
