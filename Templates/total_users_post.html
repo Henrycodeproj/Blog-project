@@ -99,7 +99,7 @@
             {% if posts == [] %}
             <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span></li>
             {% else %}
-            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span> {{ posts.items[0].posting_user}}</li>
+            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span> <a href="{{url_for('expanded_post', postID = newest_posts.id)}}">{{newest_posts.title}}</a></li>
             {% endif %}
 
             {% if newest_user == [] %}

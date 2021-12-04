@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, url_for, redirect, flash
 from flask_login.utils import login_required, login_user, logout_user
 from flask.sessions import NullSession
 from flask_bootstrap import Bootstrap
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import Pagination, SQLAlchemy
 from flask_login import current_user, UserMixin, LoginManager
 from itsdangerous.serializer import Serializer
 from sqlalchemy.orm import dynamic_loader, relation, relationship
@@ -188,11 +188,21 @@ def index():
     newest_user = Users.query.order_by(Users.id.desc()).all()
     random_users=Users.query.order_by(Users.id).all()
     random.shuffle(random_users) # shuffles list of users and will return first 3 -> (random_list[0:3])
+    print(random_users)
     list = []
-    for users in random_users[0:3]: #printing users max, still need to get ids and link to the post.
-        list.append(db.session.query(func.max(Posts.article_views)).filter_by(posting_user = users.username).scalar())
+    for users in random_users: #printing users max views, still need to get ids and link to the post.
+        use = db.session.query(func.max(Posts.article_views)).filter_by(posting_user = users.username).scalar()
+        spaz=Posts.query.filter_by(article_views = use).first()
+        if spaz is not None:
+            list.append(spaz)
+            print(spaz)
+            if len(list) == 3:
+                break
+
     print(list)
-    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, random_users = random_users[0:3], users = list)
+    #for items in list:
+    #   list1.append(Posts.query.filter_by(article_views = items).first())
+    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, random_users = random_users[0:3], list = list)
 
 @app.route ('/user/<username>')
 def all_post(username):
@@ -202,10 +212,12 @@ def all_post(username):
     user = Users.query.filter_by(username = username).first_or_404()
     posts = Posts.query.filter_by(posting_user=user.username).order_by(Posts.id.desc()).paginate(page = page, per_page = 3)
     newest_user = Users.query.order_by(Users.id.desc()).all()
-    if bool(posts) is True:
+    newest_posts = Posts.query.order_by(Posts.id.desc()).first()
+    print(posts.items)
+    if posts.items == []:
         flash('You do not have any current post to show!', 'no_post')
         return redirect(url_for('dashboard'))
-    return render_template("total_users_post.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, user = user)
+    return render_template("total_users_post.html", posts = posts, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, user = user, loggedin = current_user.is_active, newest_posts = newest_posts)
 
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required

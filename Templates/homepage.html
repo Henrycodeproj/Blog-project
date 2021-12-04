@@ -149,7 +149,7 @@
             {% if posts == [] %}
             <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span></li>
             {% else %}
-            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span> {{ posts.items[0].posting_user}}</li>
+            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span><a href="{{url_for('expanded_post', postID = posts.items[0].id)}}"> {{ posts.items[0].title}}</a></li>
             {% endif %}
 
             {% if newest_user == [] %}
@@ -181,22 +181,22 @@
           </div>
           <div class = "recommendations">
             <h3>Daily Recommendations</h3>
-            {% for highlight in random_users %}
+            {% for highlight in list %}
             <div class = "recommended_profiles">
-              {% if highlight.profimage == None %}
-              <a href="{{url_for('public_user_dashboard', poster = highlight.username )}}" class= "recommend_links"><img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}" alt=""><span>{{highlight.username}}</span></a> 
-              <span>Top Article: Lorem ipsum dolor sit amet consectetur adipisicing elit. Veniam, pariatur.</span>
+              {% if highlight.poster.profimage == None or '' or [] %}
+              <a href="{{url_for('public_user_dashboard', poster = highlight.poster.username )}}" class= "recommend_links"><img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}" alt=""><span>{{highlight.poster.username}}</span></a> 
+              <span>Top Viewed Article: {{highlight.title}} </span>
               {% else %}
-              <a href="{{url_for('public_user_dashboard', poster = highlight.username )}}" class= "recommend_links"><img class = "tree" src="{{url_for('static', filename='/images/' + highlight.profimage) }}" alt=""><span>{{highlight.username}}</span></a>
-              <span>Top Article: Lorem ipsum dolor sit amet consectetur adipisicing elit. Veniam, pariatur.</span>
+              <a href="{{url_for('public_user_dashboard', poster = highlight.poster.username )}}" class= "recommend_links">
+                <img class = "tree" src="{{url_for('static', filename='/images/' + highlight.poster.profimage) }}" alt="">
+                <span>{{highlight.poster.username}}</span>
+              </a>
+              <span>Top viewed Article: </span><a href="">{{highlight.title}}</a>
             </div>
               {% endif %}
             {% endfor %}
-            {% for z in users%}
-            {{z}}
-            {%endfor%}
             </div>
-            <div>board game</div>
+            <div>Board Game:The Shinning</div>
           </div>
       </div>
     </div>
