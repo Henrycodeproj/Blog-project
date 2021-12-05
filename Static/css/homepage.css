@@ -16,6 +16,9 @@ body{
     position: relative;
     top:25%;
 }
+.recommended_profiles{
+    display:flex;
+}
 .recommendations{
     background-color: tomato;
     color:white;

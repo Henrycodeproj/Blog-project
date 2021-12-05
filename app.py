@@ -188,21 +188,16 @@ def index():
     newest_user = Users.query.order_by(Users.id.desc()).all()
     random_users=Users.query.order_by(Users.id).all()
     random.shuffle(random_users) # shuffles list of users and will return first 3 -> (random_list[0:3])
-    print(random_users)
-    list = []
+    random_users_list = []
     for users in random_users: #printing users max views, still need to get ids and link to the post.
-        use = db.session.query(func.max(Posts.article_views)).filter_by(posting_user = users.username).scalar()
-        spaz=Posts.query.filter_by(article_views = use).first()
-        if spaz is not None:
-            list.append(spaz)
-            print(spaz)
-            if len(list) == 3:
-                break
-
-    print(list)
-    #for items in list:
-    #   list1.append(Posts.query.filter_by(article_views = items).first())
-    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, random_users = random_users[0:3], list = list)
+        max_views = db.session.query(func.max(Posts.article_views)).filter_by(posting_user = users.username).scalar()
+        top_post_id=Posts.query.filter_by(article_views = max_views, posting_user = users.username).first()
+        if len(random_users_list) < 3:
+            if top_post_id is not None:
+                random_users_list.append(top_post_id)
+        else:
+            break
+    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, random_users_list = random_users_list)
 
 @app.route ('/user/<username>')
 def all_post(username):

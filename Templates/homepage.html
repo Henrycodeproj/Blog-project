@@ -181,17 +181,29 @@
           </div>
           <div class = "recommendations">
             <h3>Daily Recommendations</h3>
-            {% for highlight in list %}
+            {% for highlight in random_users_list %}
             <div class = "recommended_profiles">
-              {% if highlight.poster.profimage == None or '' or [] %}
-              <a href="{{url_for('public_user_dashboard', poster = highlight.poster.username )}}" class= "recommend_links"><img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}" alt=""><span>{{highlight.poster.username}}</span></a> 
-              <span>Top Viewed Article: {{highlight.title}} </span>
+                {% if highlight.poster.profimage == None or '' or [] %}
+                <div>
+                  <a href="{{url_for('public_user_dashboard', poster = highlight.poster.username )}}" class= "recommend_links">
+                    <img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}" alt="">
+                  </a>
+                </div>
+                <div>
+                  <div>{{highlight.poster.username}}</div> 
+                  <span>Top Viewed Article: </span><a href="{{url_for('expanded_post', postID = highlight.id)}}">{{highlight.title}}</a>
+                </div>
+            </div>
               {% else %}
-              <a href="{{url_for('public_user_dashboard', poster = highlight.poster.username )}}" class= "recommend_links">
-                <img class = "tree" src="{{url_for('static', filename='/images/' + highlight.poster.profimage) }}" alt="">
-                <span>{{highlight.poster.username}}</span>
-              </a>
-              <span>Top viewed Article: </span><a href="">{{highlight.title}}</a>
+              <div class = "recom1">
+                <a href="{{url_for('public_user_dashboard', poster = highlight.poster.username )}}" class= "recommend_links">
+                  <img class = "tree" src="{{url_for('static', filename='/images/' + highlight.poster.profimage) }}" alt="">
+                </a>
+              </div>
+                <div class = "recomm2">
+                  <div>{{highlight.poster.username}}</div>
+                  <span>Top viewed Article: </span><a href="{{url_for('expanded_post', postID = highlight.id)}}">{{highlight.title}}</a>
+                </div>
             </div>
               {% endif %}
             {% endfor %}
@@ -204,3 +216,4 @@
 </div> 
 
 {% endblock %}
+
