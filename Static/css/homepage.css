@@ -5,11 +5,47 @@ body{
     /* background: linear-gradient(#373B44 0%, #4286f4 100%); */
     background: linear-gradient(#141E30 0%, #243B55 100%); 
 }
+.ccc{
+    color:white;
+}
 .error_text{
     color:red;
 }
+.recommend_title_link{
+    text-decoration: none;
+    color: black;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+.random_boardgame_title{
+    text-decoration: none;
+    font-style: italic;
+    color: black;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+.recommended_title{
+    border-bottom-style: solid;
+    border-width: 2px;
+    border-color: rgba(128, 128, 128, 0.199)
+}
+.content-section{
+    padding-top:5px;
+}
 .coloring{
     color:White;
+}
+.recommend_profile_name{
+    text-transform: capitalize;
+    text-decoration: none;
+    color:rgb(43, 43, 43);
+    font-size: 1.1rem;
+    font-weight:495;
+    font-style: italic;
+}
+.recommended_article_section{
+    font-size: 1rem;
+    color:gray;
 }
 .dots{
     color:white;
@@ -18,11 +54,15 @@ body{
 }
 .recommended_profiles{
     display:flex;
+    margin-bottom: 5px;
+    align-items: center;
 }
 .recommendations{
-    background-color: tomato;
-    color:white;
+    background: #ffffff;
+    color:black;
     margin:50px 0px 50px 0px;
+    border-radius: 5px;
+    padding:10px;
 }
 .category_container{
     color:White;

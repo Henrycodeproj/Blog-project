@@ -60,22 +60,22 @@
                             {{ form.hidden_tag() }}
                             <div class="row">
                                 <div class="mb-3 col-md-6">
-                                    {{ wtf.form_field(form.name) }}
+                                    {{ wtf.form_field(form.name)|safe }}
                                 </div>
         
                                 <div class="mb-3 col-md-6">
-                                    {{ wtf.form_field(form.email) }}
+                                    {{ wtf.form_field(form.email)|safe }}
                                 </div>
 
                                 <div class="mb-3 col-md-12">
-                                    {{ wtf.form_field(form.username) }}
+                                    {{ wtf.form_field(form.username)|safe }}
                                 </div>
 
                                 <div class="mb-3 col-md-12">
-                                    {{ wtf.form_field(form.password) }}
+                                    {{ wtf.form_field(form.password)|safe }}
                                 </div>
                                 <div class="mb-3 col-md-12">
-                                    {{ wtf.form_field(form.confirm_password) }}
+                                    {{ wtf.form_field(form.confirm_password)|safe }}
                                 </div>
                                 <div class="col-md-12">
                                    <button type = "submit" class="btn btn-dark float-end">Signup Now</button>

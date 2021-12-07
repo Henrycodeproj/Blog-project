@@ -67,6 +67,12 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     {% endif %}
+    {% if category == "success"%}
+    <div class="alert alert-success alert-dismissible fade show container">
+        <strong>{{ message }}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
     </ul>
   {% endfor %}
   {% endif %}
@@ -146,10 +152,10 @@
             <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Today's Date:</span> {{ current_date }}</li>
             <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Announcements:</span> This site is still a work in progress and will always continue updating to be better </li>
 
-            {% if posts == [] %}
+            {% if posts.items == [] %}
             <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span></li>
             {% else %}
-            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span><a href="{{url_for('expanded_post', postID = posts.items[0].id)}}"> {{ posts.items[0].title}}</a></li>
+            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span><a class = "random_boardgame_title" href="{{url_for('expanded_post', postID = posts.items[0].id)}}"> {{ posts.items[0].title}}</a></li>
             {% endif %}
 
             {% if newest_user == [] %}
@@ -180,7 +186,7 @@
             <div class = "category">three</div>
           </div>
           <div class = "recommendations">
-            <h3>Daily Recommendations</h3>
+            <h3 class = "recommended_title">Daily Recommendations</h3>
             {% for highlight in random_users_list %}
             <div class = "recommended_profiles">
                 {% if highlight.poster.profimage == None or '' or [] %}
@@ -190,25 +196,25 @@
                   </a>
                 </div>
                 <div>
-                  <div>{{highlight.poster.username}}</div> 
-                  <span>Top Viewed Article: </span><a href="{{url_for('expanded_post', postID = highlight.id)}}">{{highlight.title}}</a>
+                  <div><a class = "recommend_profile_name" href="{{url_for('public_user_dashboard', poster = highlight.poster.username )}}">{{highlight.poster.username}}</a></div> 
+                  <span class = "recommended_article_section">Top Viewed Article: <a class = "recommend_title_link" href="{{url_for('expanded_post', postID = highlight.id)}}">{{highlight.title}}</a></span>
                 </div>
             </div>
               {% else %}
-              <div class = "recom1">
+              <div>
                 <a href="{{url_for('public_user_dashboard', poster = highlight.poster.username )}}" class= "recommend_links">
                   <img class = "tree" src="{{url_for('static', filename='/images/' + highlight.poster.profimage) }}" alt="">
                 </a>
               </div>
-                <div class = "recomm2">
-                  <div>{{highlight.poster.username}}</div>
-                  <span>Top viewed Article: </span><a href="{{url_for('expanded_post', postID = highlight.id)}}">{{highlight.title}}</a>
+                <div>
+                  <div><a class = "recommend_profile_name" href="{{url_for('public_user_dashboard', poster = highlight.poster.username )}}">{{highlight.poster.username}}</a></div>
+                  <span class = "recommended_article_section">Top viewed Article: <a class = "recommend_title_link" href="{{url_for('expanded_post', postID = highlight.id)}}">{{highlight.title}}</a></span>
                 </div>
             </div>
               {% endif %}
             {% endfor %}
-            </div>
             <div>Board Game:The Shinning</div>
+            </div>
           </div>
       </div>
     </div>

@@ -24,6 +24,10 @@
   <div class = "expanded_title">{{ expanded_post.title}}</div>
   <div class = "bar"></div>
   <div>{{ expanded_post.content }}</div>
+
+  <i class="far fa-thumbs-up" id = "like" onclick="like()"></i>
+  <i class="far fa-thumbs-down" id = "disliked" onclick="dislike()"></i>
+
   <div class = "comments_title">Comments</div>
   {% if loggedin == True %}
     <form action="" method="POST">
@@ -42,7 +46,6 @@
         {% endif %}
   {% else %}
   {% endif %}
-
 <div class = "d-flex flex-column-reverse">
   {% for users in show_comments %}
   <div class = "wrapper d-flex">

@@ -57,10 +57,10 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return Users.query.get(int(user_id))
 
-tags = db.Table('tags',
+'''tags = db.Table('tags',   -this is a many to many-
     db.Column('adventure_id', db.Integer, db.ForeignKey('adventure.id'), primary_key=True),
     db.Column('rpg_id', db.Integer, db.ForeignKey('rpg.id'), primary_key=True)
-)
+)'''
 
 class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
     id = db.Column(db.Integer, primary_key=True)
@@ -88,6 +88,8 @@ class Posts(db.Model): #post skeleton and columns
     article_views = db.Column(db.Integer)
     poster_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     comments = db.relationship('Comments', backref = 'user_comments', lazy = True)
+    genres = db.relationship('Categories', backref='genre', lazy=True)
+
 
 class Comments(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -97,30 +99,24 @@ class Comments(db.Model):
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
     poster_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
-class Adventure(db.Model):
+class Categories(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255))
-    tags = db.relationship('Rpg', secondary=tags, lazy='subquery',backref=db.backref('category', lazy=True))
+    category = db.Column(db.String(255))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
 
-
-class Rpg(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255))
-
-@app.route('/test') #How I will add tags, finally 
+'''@app.route('/test') #How I will add tags, finally 
 def test():
     adventure=Adventure(title = "test2")
-    '''rpg=Rpg(title = "test2")
+    rpg=Rpg(title = "test2")
     db.session.add(rpg)
     db.session.add(adventure)
     db.session.commit()
     cate_id= Adventure.query.filter_by(title = "test2").first()
     category_id=Rpg.query.filter_by(title = "test").first()
     category_id.category.append(cate_id)
-    db.session.commit()'''
-
+    db.session.commit()
     fun=Rpg.query.filter_by(title = 'test').first()
-    return render_template('test.html', fun = fun)
+    return render_template('test.html', fun = fun)'''
 
 
 def checkemail():
@@ -214,6 +210,20 @@ def all_post(username):
         return redirect(url_for('dashboard'))
     return render_template("total_users_post.html", posts = posts, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, user = user, loggedin = current_user.is_active, newest_posts = newest_posts)
 
+@app.route ('/tag')
+def categories():
+    hottest_post=db.session.query(func.max(Posts.article_views)).scalar()
+    hottest_post_id=Posts.query.filter_by(article_views = hottest_post).first()
+    page = request.args.get('page', 1, type = int)
+    posts = Categories.query.filter_by(category = 'adventure').order_by(Categories.id.desc()).paginate(page = page, per_page = 3)
+    newest_user = Users.query.order_by(Users.id.desc()).all()
+    newest_posts = Posts.query.order_by(Posts.id.desc()).first()
+    print(posts.items)
+    if posts.items == []:
+        flash('You do not have any current post to show!', 'no_post')
+        return redirect(url_for('dashboard'))
+    return render_template("category_tag.html", posts = posts, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, loggedin = current_user.is_active, newest_posts = newest_posts)
+
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload_profile():
@@ -295,12 +305,16 @@ def delete(postID):
         return redirect(url_for('index'))
     try:
         delete_id = Posts.query.get(postID)
+        category_id = Categories.query.filter_by(post_id = delete_id.id).first()
+        #category_id = Categories.filter_by()
         old_image = delete_id.image # removes old photo from folder before updating
         path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
         os.remove(path)
         current_user.total_post -= 1
         db.session.delete(delete_id)
+        db.session.delete(category_id)
         db.session.commit()
+        flash('Your post has been sucessfully deleted', 'success')
         return redirect(url_for('index'))
     except:
         flash('Opps, something went wrong. Your post was not deleted.', 'false_user')
@@ -353,8 +367,11 @@ def post():
             picture.save(os.path.join(app.config['UPLOAD_FOLDER'], hexed_name), quality = 100)
             posting = Posts(title = form.title.data, content = form.content.data, image = hexed_name, posting_user = current_user.username, date_posted = datetime.datetime.now().date(), article_views = 0, poster_id = current_user.id)
             current_user.total_post += 1
-            category = Adventure(title = form.title.data)
             db.session.add(posting)
+            db.session.commit()
+            postid = Posts.query.filter_by(title = form.title.data, posting_user = current_user.username).first()
+            category= Categories(category = request.form['genre'], post_id = postid.id)
+            db.session.add(category)
             db.session.commit()
             flash('Your post has been added', 'posted')
             return redirect(url_for('post'))

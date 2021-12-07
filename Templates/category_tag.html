@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block body %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for category, message in messages %}
+    {% if category == "edit"%}
+    <div class="alert alert-info alert-dismissible fade show container">
+        <strong>{{ message }}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+    {% if category == "false_user"%}
+    <div class="alert alert-danger alert-dismissible fade show container">
+        <strong>{{ message }}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+    </ul>
+  {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class = "container">
+  <div class = "flex">
+    <!-- <div class = 'pas'>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Deserunt dicta minima aperiam. Voluptatum delectus nulla deserunt commodi, sed id quo voluptate asperiores necessitatibus eligendi iste ea repellendus aut? Eius culpa optio reiciendis ipsa neque vitae, consectetur voluptas! Cumque debitis, aperiam fuga nam odit ipsa? Beatae sequi sint at delectus unde quibusdam repellendus veniam hic. Iusto delectus dignissimos quo. Laudantium labore voluptatum cupiditate eligendi perferendis modi assumenda temporibus reprehenderit aut eaque? Dolor placeat, amet voluptatum, dignissimos cum libero cupiditate quod illo soluta nemo quaerat dicta! Hic ipsum ut libero labore mollitia accusamus magnam tenetur blanditiis temporibus nesciunt, nobis perspiciatis, numquam dolore.</div> -->
+    <div class = "d-flex flex-column wrap">
+        {% for post in posts.items %}
+        <div class = "post_container posting">
+          {% if post.genre.poster.profimage == None %}
+          <div class = "">
+            <a href="{{url_for('public_user_dashboard', poster = post.genre.poster.username )}}" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}" alt="">
+              -{{post.genre.posting_user}}
+            </a>
+          </div>
+          {% else %}
+        <div class = "">
+          <a href="{{url_for('public_user_dashboard', poster = post.genre.poster.username )}}" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/' + post.genre.poster.profimage) }}" alt="">
+            -{{post.genre.posting_user}}
+          </a>
+        </div>
+          {% endif %}
+          <img class = "posted_images img-fluid" src="{{url_for('static', filename='/images/' + post.genre.image) }}" alt="Image" />
+        <div class = "title">{{ post.genre.title }} </div>
+        <div class = "bar"></div>
+        <div class = "content">{{ post.genre.content| truncate(500) }}</div>
+        <div>
+          {% if current_user.username == post.genre.posting_user %}
+          <div class = "posting_date_show justify-content-between">
+            <div>
+            <a class = "btn btn-dark btn-sm" href="{{ url_for('expanded_post', postID = post.genre.id) }}">View</a>
+            <a class = "btn btn-primary btn-sm" href="{{ url_for('edit', postID = post.genre.id) }}">Edit</a> 
+            <a class = "btn btn-danger btn-sm" onclick= "return confirm('Are you sure you want to delete this post?');" href="{{ url_for('delete', postID = post.genre.id) }}">Delete</a>
+            </div>
+              <div class = "posting_date">
+                <div class = "date_view_column">
+                  <div>{{post.genre.date_posted}}</div>
+                  <div class = "post_views">Views: {{post.genre.article_views}}</div>
+                </div>
+              </div>
+          </div>
+          {% else %}
+          <div class = "posting_date justify-content-between">
+            <div><a class = "btn btn-dark btn-sm" href="{{ url_for('expanded_post', postID = post.id) }}">View</a></div>
+              <div class = "date_view_column">
+                <div>{{post.genre.date_posted}}</div>
+                <div class = "post_views">Views: {{post.genre.article_views}}</div>
+              </div>
+          </div>
+          {% endif %}
+        </div>
+        </div>
+        {% endfor %}
+    <div class = "container contain">
+      {% for page_number in posts.iter_pages(left_edge=1, left_current=1, right_current=2, right_edge=1) %}
+        {% if page_number %}
+          {% if posts.page == page_number%}
+            <a class = "btn btn-light page_number" href="{{ url_for('categories', genre = posts, page=page_number)}}">{{page_number}}</a>
+          {% else %}
+            <a class = "btn btn-outline-light page_number" href="{{ url_for('categories', genre = posts, page=page_number)}}">{{page_number}}</a>
+          {% endif %}
+        {% else %}
+        <span class = "dots">...</span>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+    <div class = "lok">
+      <div class="sidesection">
+        <div class="content-section ">
+        <h3 class = "sidebar_text">Sidebar</h3>
+        <p class='text-muted'>
+          <ul class="list-group">
+            <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Today's Date:</span> {{ current_date }}</li>
+            <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Announcements:</span> This site is still a work in progress and will always continue updating to be better </li>
+
+            {% if posts == [] %}
+            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span></li>
+            {% else %}
+            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span> <a href="{{url_for('expanded_post', postID = newest_posts.id)}}">{{newest_posts.title}}</a></li>
+            {% endif %}
+
+            {% if newest_user == [] %}
+            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Newest Users:</span></li> 
+            {% else %}
+            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Newest Users:</span> {{newest_user[0].username}}</li>
+            {% endif %}
+
+            <li class="list-group-item list-group-item-light right-bar">
+              <span class = "sidebar_header">Hotest article:</span>
+              <span>
+                <a class = "hottest_link" href="{{url_for('expanded_post', postID = hottest_post_id.id)}}">{{hottest_post_id.title}}</a>
+              </span> by {{hottest_post_id.posting_user}}
+             </li>
+          </ul>
+        </p>
+        </div>
+          <div class = "category_container">
+            <h1>category</h1>
+            <div class = "category">one</div>
+            <div class = "category">two</div>
+            <div class = "category">three</div>
+            <div class = "category">one</div>
+            <div class = "category">two</div>
+            <div class = "category">three</div>
+            <div class = "category">one</div>
+            <div class = "category">two</div>
+            <div class = "category">three</div>
+          </div>
+      </div>
+    </div>
+</div> 
+{% endblock %}
