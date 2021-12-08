@@ -67,6 +67,12 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     {% endif %}
+    {% if category == "no_post"%}
+    <div class="alert alert-danger alert-dismissible fade show container">
+        <strong>{{ message }}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
     {% if category == "success"%}
     <div class="alert alert-success alert-dismissible fade show container">
         <strong>{{ message }}</strong>
@@ -165,7 +171,7 @@
             {% endif %}
 
             <li class="list-group-item list-group-item-light right-bar">
-              <span class = "sidebar_header">Hotest article:</span>
+              <i class="fas fa-fire"></i><span class = "sidebar_header"> Hotest article:</span>
               <span>
                 <a class = "hottest_link" href="{{url_for('expanded_post', postID = hottest_post_id.id)}}">{{hottest_post_id.title}}</a>
               </span> by {{hottest_post_id.posting_user}}
@@ -174,17 +180,22 @@
         </p>
         </div>
           <div class = "category_container">
-            <h3>Categories</h3>
-            <div class = "category">one</div>
-            <div class = "category">two</div>
-            <div class = "category">three</div>
-            <div class = "category">one</div>
-            <div class = "category">two</div>
-            <div class = "category">three</div>
-            <div class = "category">one</div>
-            <div class = "category">two</div>
-            <div class = "category">three</div>
+            <h3 class = "category_title">Categories</h3>
+            <ol class = "breadcrumb">
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'adventure' )}}" title = "a player plays as a unique individual character (or a party of such characters) that improves through gameplay">Adventure</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Rpg' )}}">Rpg</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'co-op' )}}">Co-op</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Fantasy' )}}">Fantasy</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Area-control' )}}">Area-control</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Strategy' )}}">Strategy</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Deck-Builder' )}}">Deck-Builder</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Card-Game' )}}">Card-game</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Horror' )}}">Horror</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Fighting' )}}">Fighting</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Other' )}}">Other</a></li>
+            </ol>
           </div>
+
           <div class = "recommendations">
             <h3 class = "recommended_title">Daily Recommendations</h3>
             {% for highlight in random_users_list %}
@@ -213,7 +224,6 @@
             </div>
               {% endif %}
             {% endfor %}
-            <div>Board Game:The Shinning</div>
             </div>
           </div>
       </div>

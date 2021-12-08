@@ -76,9 +76,9 @@
       {% for page_number in posts.iter_pages(left_edge=1, left_current=1, right_current=2, right_edge=1) %}
         {% if page_number %}
           {% if posts.page == page_number%}
-            <a class = "btn btn-light page_number" href="{{ url_for('categories', genre = posts, page=page_number)}}">{{page_number}}</a>
+          <a class = "btn btn-outline-light page_number" href="{{ url_for('categories', page = page_number, category = category)}}">{{page_number}}</a>
           {% else %}
-            <a class = "btn btn-outline-light page_number" href="{{ url_for('categories', genre = posts, page=page_number)}}">{{page_number}}</a>
+            <a class = "btn btn-outline-light page_number" href="{{ url_for('categories', page = page_number, category = category)}}">{{page_number}}</a>
           {% endif %}
         {% else %}
         <span class = "dots">...</span>
@@ -118,16 +118,20 @@
         </p>
         </div>
           <div class = "category_container">
-            <h1>category</h1>
-            <div class = "category">one</div>
-            <div class = "category">two</div>
-            <div class = "category">three</div>
-            <div class = "category">one</div>
-            <div class = "category">two</div>
-            <div class = "category">three</div>
-            <div class = "category">one</div>
-            <div class = "category">two</div>
-            <div class = "category">three</div>
+            <h1>Categories</h1>
+            <ol class = "breadcrumb">
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'adventure' )}}" title = "a player plays as a unique individual character (or a party of such characters) that improves through gameplay">Adventure</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Rpg' )}}">Rpg</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'co-op' )}}">Co-op</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Fantasy' )}}">Fantasy</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Area-control' )}}">Area-control</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Strategy' )}}">Strategy</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Deck-Builder' )}}">Deck-Builder</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Card-Game' )}}">Card-game</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Horror' )}}">Horror</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Fighting' )}}">Fighting</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Other' )}}">Other</a></li>
+            </ol>
           </div>
       </div>
     </div>

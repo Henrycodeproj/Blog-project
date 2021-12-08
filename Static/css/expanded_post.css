@@ -1,5 +1,6 @@
 body{
-    height: auto;
+    max-height: auto;
+    min-height: 100vh;
     width: auto;
     background: linear-gradient(#141E30 0%, #243B55 100%);
 }
@@ -84,7 +85,7 @@ body{
     cursor: pointer;
 }
 .fa-thumbs-down{
-    margin: 0px 15px 0px 15px !important;
+    margin: 0px 0px 0px 15px !important;
     cursor: pointer;
 }
 .comment_box{

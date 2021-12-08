@@ -24,9 +24,16 @@
   <div class = "expanded_title">{{ expanded_post.title}}</div>
   <div class = "bar"></div>
   <div>{{ expanded_post.content }}</div>
-
-  <i class="far fa-thumbs-up" id = "like" onclick="like()"></i>
-  <i class="far fa-thumbs-down" id = "disliked" onclick="dislike()"></i>
+<div>
+  <div class = "likes">
+    <span id = "like"><i class="far fa-thumbs-up"></i></span>
+    <span id = "count">0</span>
+  </div>
+  <div class = "dislikes">
+    <span id = "dislike"><i class="far fa-thumbs-down"></i></span>
+    <span id = "dislike_count">0</span>
+  </div>
+</div>
 
   <div class = "comments_title">Comments</div>
   {% if loggedin == True %}
@@ -56,8 +63,13 @@
     {% endif %}
     <div class = "info_wrap">
         <div class = "commenter_username">
+          {% if users.posting_user == expanded_post.posting_user %}
           <a class = "commentor_name_link" href="{{url_for('public_user_dashboard', poster = users.posting_user )}}">{{users.posting_user}}</a>
-            <span class = "comment_date">{{users.date}}</span>
+            <span class = "comment_date">{{users.date}} </span>
+          {% else %}
+          <a class = "commentor_name_link" href="{{url_for('public_user_dashboard', poster = users.posting_user )}}">{{users.posting_user}}</a>
+            <span class = "comment_date">{{users.date}} </span>
+          {% endif %}
         </div>
       <div>{{users.comment}}</div>
     </div>

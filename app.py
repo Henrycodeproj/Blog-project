@@ -118,6 +118,8 @@ def test():
     fun=Rpg.query.filter_by(title = 'test').first()
     return render_template('test.html', fun = fun)'''
 
+def testing(category):
+    return str(category)
 
 def checkemail():
     user = Users.query.filter_by(email=request.form.get('email')).first()
@@ -210,19 +212,18 @@ def all_post(username):
         return redirect(url_for('dashboard'))
     return render_template("total_users_post.html", posts = posts, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, user = user, loggedin = current_user.is_active, newest_posts = newest_posts)
 
-@app.route ('/tag')
-def categories():
+@app.route ('/tag/<category>')
+def categories(category):
     hottest_post=db.session.query(func.max(Posts.article_views)).scalar()
     hottest_post_id=Posts.query.filter_by(article_views = hottest_post).first()
     page = request.args.get('page', 1, type = int)
-    posts = Categories.query.filter_by(category = 'adventure').order_by(Categories.id.desc()).paginate(page = page, per_page = 3)
+    posts = Categories.query.filter_by(category = category).order_by(Categories.id.desc()).paginate(page = page, per_page = 3)
     newest_user = Users.query.order_by(Users.id.desc()).all()
     newest_posts = Posts.query.order_by(Posts.id.desc()).first()
-    print(posts.items)
     if posts.items == []:
-        flash('You do not have any current post to show!', 'no_post')
-        return redirect(url_for('dashboard'))
-    return render_template("category_tag.html", posts = posts, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, loggedin = current_user.is_active, newest_posts = newest_posts)
+        flash('There are currently no post in that category.', 'no_post')
+        return redirect(url_for('index'))
+    return render_template("category_tag.html", posts = posts, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, loggedin = current_user.is_active, newest_posts = newest_posts, category = category)
 
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required
@@ -361,7 +362,7 @@ def post():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             hexed_name = hex(filename) # passes original name of file into hex function and returns hexed name, prevents long names, overloads, injections
-            output_size = (300,300)
+            output_size = (550,550)
             picture = Image.open(file)   # converts uploaded images into smaller thumbnails or any pixel related size
             picture.thumbnail(output_size, Image.ANTIALIAS)
             picture.save(os.path.join(app.config['UPLOAD_FOLDER'], hexed_name), quality = 100)
