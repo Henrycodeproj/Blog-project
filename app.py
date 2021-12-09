@@ -9,7 +9,7 @@ from flask_sqlalchemy import Pagination, SQLAlchemy
 from flask_login import current_user, UserMixin, LoginManager
 from itsdangerous.serializer import Serializer
 from sqlalchemy.orm import dynamic_loader, relation, relationship
-from sqlalchemy.sql.schema import PrimaryKeyConstraint
+from sqlalchemy.sql.schema import ForeignKey, PrimaryKeyConstraint
 from wtforms.fields.core import BooleanField
 from wtforms.fields.simple import SubmitField
 from wtforms.validators import ValidationError
@@ -57,10 +57,16 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return Users.query.get(int(user_id))
 
-'''tags = db.Table('tags',   -this is a many to many-
-    db.Column('adventure_id', db.Integer, db.ForeignKey('adventure.id'), primary_key=True),
-    db.Column('rpg_id', db.Integer, db.ForeignKey('rpg.id'), primary_key=True)
-)'''
+likes = db.Table('likes',
+    db.Column('Users_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
+    db.Column('Post_id', db.Integer, db.ForeignKey('posts.id'), primary_key=True),
+    db.Column('Liked_status', db.Boolean, default = False)
+)
+
+followers = db.Table('followers',
+    db.Column('followed_id', db.Integer, db.ForeignKey('users.id')),
+    db.Column('follower_id', db.Integer, db.ForeignKey('users.id')),
+)
 
 class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
     id = db.Column(db.Integer, primary_key=True)
@@ -76,7 +82,16 @@ class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
     total_post = db.Column(db.Integer)
     posts = db.relationship('Posts', backref='poster', lazy = True)
     comments = db.relationship('Comments', backref='commentor', lazy = True)
-    
+    likes = db.relationship('Posts', secondary=likes, lazy='subquery',
+        backref=db.backref('liking', lazy=True))
+    followers = db.relationship(
+                             'Users',
+                             secondary=followers,
+                             primaryjoin=(followers.c.followed_id == id),
+                             secondaryjoin=(followers.c.follower_id == id),
+                             backref = db.backref('other_people_rating', lazy='dynamic'), lazy='dynamic'
+                             )
+
 
 class Posts(db.Model): #post skeleton and columns
     id = db.Column(db.Integer, primary_key=True)
@@ -86,6 +101,8 @@ class Posts(db.Model): #post skeleton and columns
     posting_user = db.Column(db.String(255))
     date_posted = db.Column(db.String(255))
     article_views = db.Column(db.Integer)
+    likes = db.Column(db.Integer)
+    dislikes = db.Column(db.Integer)
     poster_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     comments = db.relationship('Comments', backref = 'user_comments', lazy = True)
     genres = db.relationship('Categories', backref='genre', lazy=True)
@@ -103,6 +120,13 @@ class Categories(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     category = db.Column(db.String(255))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+
+@app.route('/followers/<user>', methods = ["GET","POST"])
+def followers(user):
+    if request.method == "POST":
+        print(user)
+    return render_template('test.html')
+
 
 '''@app.route('/test') #How I will add tags, finally 
 def test():
@@ -366,13 +390,16 @@ def post():
             picture = Image.open(file)   # converts uploaded images into smaller thumbnails or any pixel related size
             picture.thumbnail(output_size, Image.ANTIALIAS)
             picture.save(os.path.join(app.config['UPLOAD_FOLDER'], hexed_name), quality = 100)
-            posting = Posts(title = form.title.data, content = form.content.data, image = hexed_name, posting_user = current_user.username, date_posted = datetime.datetime.now().date(), article_views = 0, poster_id = current_user.id)
+            posting = Posts(title = form.title.data, content = form.content.data, image = hexed_name, posting_user = current_user.username, date_posted = datetime.datetime.now().date(), article_views = 0, poster_id = current_user.id, likes = 0, dislikes = 0)
             current_user.total_post += 1
             db.session.add(posting)
             db.session.commit()
             postid = Posts.query.filter_by(title = form.title.data, posting_user = current_user.username).first()
             category= Categories(category = request.form['genre'], post_id = postid.id)
             db.session.add(category)
+            db.session.commit()
+            new_post_id = Posts.query.filter_by(image = hexed_name, posting_user = current_user.username).first()
+            new_post_id.liking.append(current_user)
             db.session.commit()
             flash('Your post has been added', 'posted')
             return redirect(url_for('post'))

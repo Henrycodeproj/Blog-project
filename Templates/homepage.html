@@ -91,10 +91,14 @@
     {% for post in posts.items %}
     <div class = "post_container posting">
       {% if post.poster.profimage == None %}
-      <div class = "">
+      <div class = "d-flex justify-content-between">
         <a href="{{url_for('public_user_dashboard', poster = post.poster.username )}}" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}" alt="">
           -{{post.posting_user}}
         </a>
+        <div>
+        <form action="{{url_for('followers',user = post.poster.id)}}" method="POST">
+          <button type="submit" class= "btn btn-dark btn-sm">Follow</button>
+        </form></div>
       </div>
       {% else %}
     <div class = "">
