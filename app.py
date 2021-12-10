@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import unique
 from flask_login.mixins import AnonymousUserMixin
-from flask import Flask, render_template, request, url_for, redirect, flash
+from flask import Flask, json, render_template, request, url_for, redirect, flash, jsonify
 from flask_login.utils import login_required, login_user, logout_user
 from flask.sessions import NullSession
 from flask_bootstrap import Bootstrap
@@ -89,7 +89,7 @@ class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
                              secondary=followers,
                              primaryjoin=(followers.c.followed_id == id),
                              secondaryjoin=(followers.c.follower_id == id),
-                             backref = db.backref('other_people_rating', lazy='dynamic'), lazy='dynamic'
+                             backref = db.backref('follows', lazy=True), lazy=True,
                              )
 
 
@@ -121,12 +121,20 @@ class Categories(db.Model):
     category = db.Column(db.String(255))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
 
-@app.route('/followers/<user>', methods = ["GET","POST"])
-def followers(user):
-    if request.method == "POST":
-        print(user)
-    return render_template('test.html')
+@app.route('/followers/<posting_user>', methods = ["GET","POST"])
+def followers(posting_user):
+    random_user = Users.query.get(posting_user)
+    random_user.follows.append(current_user)
+    db.session.commit()
+    return redirect(url_for('index'))
 
+'''@app.route('/jscript', methods = ["GET", "POST"])
+def script():
+    clicked=None
+    if request.method == "POST":
+          clicked=request.form['data']
+          print(clicked)
+    return render_template('')'''
 
 '''@app.route('/test') #How I will add tags, finally 
 def test():
@@ -202,7 +210,6 @@ If you did not send this email, please ignore this message.
 #homepage
 @app.route ('/')
 def index():
-    #hottest_post = Posts.query.order_by(Posts.article_views.asc()).first()
     hottest_post=db.session.query(func.max(Posts.article_views)).scalar()
     hottest_post_id=Posts.query.filter_by(article_views = hottest_post).first()
     page = request.args.get('page', 1, type = int)
@@ -410,7 +417,8 @@ def post():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template("Dashboard.html", name = current_user.name, last_logged = current_user.last_login, profimage = current_user.profimage, description = current_user.description, views = current_user.profile_views, total_post = current_user.total_post, username = current_user.username)
+    print(Users.query)
+    return render_template("Dashboard.html", name = current_user.name, last_logged = current_user.last_login, profimage = current_user.profimage, description = current_user.description, views = current_user.profile_views, total_post = current_user.total_post, username = current_user.username, current_user = current_user)
 
 #public profiles for each poster
 @app.route('/dashboard/<poster>')

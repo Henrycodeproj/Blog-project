@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 {% block style %}
 <link rel="stylesheet" href="{{ url_for('static', filename = './css/expanded_post.css') }}">
@@ -24,16 +25,16 @@
   <div class = "expanded_title">{{ expanded_post.title}}</div>
   <div class = "bar"></div>
   <div>{{ expanded_post.content }}</div>
-<div>
+<form action="" method="POST">
   <div class = "likes">
     <span id = "like"><i class="far fa-thumbs-up"></i></span>
-    <span id = "count">0</span>
+    <span id = "count">{{expanded_post.likes}}</span>
   </div>
   <div class = "dislikes">
     <span id = "dislike"><i class="far fa-thumbs-down"></i></span>
     <span id = "dislike_count">0</span>
   </div>
-</div>
+</form>
 
   <div class = "comments_title">Comments</div>
   {% if loggedin == True %}

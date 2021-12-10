@@ -121,7 +121,9 @@
           <div class="col-md-4 p-0 border-end">
               <div class="viewbox">
                   <p class="blue">100</p>
-                  <p><i class="fas fa-users"></i>Followers</p>
+                  <p><i class="fas fa-users">
+                    <a href="">Followers</a>
+                  </i></p>
               </div>
           </div>
           <div class="col-md-4 p-0">
@@ -149,6 +151,9 @@
                   <div class="w-100 ps-2">
                       <a href=""><p class="">Delete your profile</p></a>
                       <p class="textmuted mb-2">Erase your account and post(s) permanently.</p>
+                      {% for followers in current_user.follows %}
+                      {{followers.username}}
+                      {% endfor %}
                   </div>
               </div>
           </div>

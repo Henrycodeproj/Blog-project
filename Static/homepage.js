@@ -38,3 +38,19 @@ dislikeBtn.addEventListener("click", () =>{
         dislikeCount.textContent--
     }
 });
+
+var likes ={
+    "count": likecount
+}
+
+$(document).ready(function(){
+    var clicked;
+    $(".add").click(function(){
+    clicked = $(this).attr("name");
+    $.ajax({
+      type : 'POST',
+      url : "{{url_for('jscript')}}",
+      data : {'data':clicked}
+    });
+     });
+    });
