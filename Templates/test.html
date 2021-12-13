@@ -5,6 +5,10 @@
 {% endblock %}
 
 {% block body %}
-<span class = "name">0</span>
-<button type="submit" class = "add" onclick="clicked()">increment</button>
+<h1 id = "change"></h1>
+<button class = "name" onclick="test();">here</button>
 {% endblock %}
+
+{% block js %}
+<script src="{{url_for('static', filename='test.js')}}"></script>
+{% endblock%}

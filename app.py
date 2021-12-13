@@ -58,9 +58,8 @@ def load_user(user_id):
     return Users.query.get(int(user_id))
 
 likes = db.Table('likes',
-    db.Column('Users_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
-    db.Column('Post_id', db.Integer, db.ForeignKey('posts.id'), primary_key=True),
-    db.Column('Liked_status', db.Boolean, default = False)
+    db.Column('users_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
+    db.Column('post_id', db.Integer, db.ForeignKey('posts.id'), primary_key=True),
 )
 
 followers = db.Table('followers',
@@ -128,13 +127,24 @@ def followers(posting_user):
     db.session.commit()
     return redirect(url_for('index'))
 
-'''@app.route('/jscript', methods = ["GET", "POST"])
+@app.route('/jscript', methods = ["GET"])
 def script():
-    clicked=None
-    if request.method == "POST":
-          clicked=request.form['data']
-          print(clicked)
-    return render_template('')'''
+    likes=Posts.query.filter_by(id = 1).first()
+    test = {'likes':likes.id}
+    jsonify(test)
+    return render_template('test.html', test=test)
+
+@app.route('/likes/<post_id>', methods = ["GET", "POST"])
+def likes(post_id):
+    if request.method == "GET":
+        current_posting =Posts.query.filter_by(id=post_id).first()
+        current_posting.liking.append(current_user)
+        db.session.commit()
+        return redirect(url_for('expanded_post', postID = post_id))
+    
+
+
+
 
 '''@app.route('/test') #How I will add tags, finally 
 def test():
@@ -357,12 +367,11 @@ def expanded_post(postID):
     show_comments = Comments.query.filter_by(post_id = postID).all() #gets all post that equals the to current post
     original_poster = Posts.query.get(postID)
     expanded_post=Posts.query.get(postID)
+    number_of_likes = expanded_post.liking
+    print(number_of_likes)
     form = Commentsform()
     print(current_user)
-    if current_user.get_id() == None:
-        expanded_post.article_views += 1
-        db.session.commit()
-    elif current_user.username != original_poster.posting_user:
+    if current_user.get_id() == None or current_user.username != original_poster.posting_user:
         expanded_post.article_views += 1
         db.session.commit()
     if request.method == "POST":
@@ -372,7 +381,7 @@ def expanded_post(postID):
         db.session.commit()
         return redirect(url_for('expanded_post', postID = postID))
         #poster_image = current_user.profimage
-    return render_template('expanded_post.html', expanded_post = expanded_post, form = form, show_comments = show_comments, loggedin = current_user.is_active, current_user_check = current_user.is_anonymous, current_user = current_user) # current_user doesn't work if changed to check if user is active. So i passed two variables instead to check for if the user exist and then the method to call image
+    return render_template('expanded_post.html', expanded_post = expanded_post, form = form, show_comments = show_comments, loggedin = current_user.is_active, current_user_check = current_user.is_anonymous, current_user = current_user, likes = len(number_of_likes)) # current_user doesn't work if changed to check if user is active. So i passed two variables instead to check for if the user exist and then the method to call image
 
 #posting for blog articles/status
 @app.route('/post', methods = ["POST", "GET"])
@@ -405,8 +414,8 @@ def post():
             category= Categories(category = request.form['genre'], post_id = postid.id)
             db.session.add(category)
             db.session.commit()
-            new_post_id = Posts.query.filter_by(image = hexed_name, posting_user = current_user.username).first()
-            new_post_id.liking.append(current_user)
+            #new_post_id = Posts.query.filter_by(image = hexed_name, posting_user = current_user.username).first()
+            #new_post_id.liking.append(current_user)
             db.session.commit()
             flash('Your post has been added', 'posted')
             return redirect(url_for('post'))

@@ -24,12 +24,14 @@
   <img class = "posted_images img-fluid" src="{{url_for('static', filename='/images/' + expanded_post.image) }}" alt="Image" />
   <div class = "expanded_title">{{ expanded_post.title}}</div>
   <div class = "bar"></div>
-  <div>{{ expanded_post.content }}</div>
+  <div>{{expanded_post.content}}</div>
 <form action="" method="POST">
   <div class = "likes">
-    <span id = "like"><i class="far fa-thumbs-up"></i></span>
-    <span id = "count">{{expanded_post.likes}}</span>
+    <a href="{{url_for('likes', post_id = expanded_post.id)}}"><span id = "like"><i class="far fa-thumbs-up"></i></span></a>
+    <span id = "count">{{likes}}</span>
   </div>
+</form>
+<form action="">
   <div class = "dislikes">
     <span id = "dislike"><i class="far fa-thumbs-down"></i></span>
     <span id = "dislike_count">0</span>
