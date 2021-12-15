@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import unique
 from flask_login.mixins import AnonymousUserMixin
-from flask import Flask, json, render_template, request, url_for, redirect, flash, jsonify
+from flask import Flask, json, render_template, request, url_for, redirect, flash, jsonify, make_response
 from flask_login.utils import login_required, login_user, logout_user
 from flask.sessions import NullSession
 from flask_bootstrap import Bootstrap
@@ -120,30 +120,52 @@ class Categories(db.Model):
     category = db.Column(db.String(255))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
 
-@app.route('/followers/<posting_user>', methods = ["GET","POST"])
-def followers(posting_user):
-    random_user = Users.query.get(posting_user)
-    random_user.follows.append(current_user)
-    db.session.commit()
-    return redirect(url_for('index'))
-
-@app.route('/jscript', methods = ["GET"])
+@app.route('/jscript', methods = ["GET", "POST"])
 def script():
-    likes=Posts.query.filter_by(id = 1).first()
-    test = {'likes':likes.id}
-    jsonify(test)
-    return render_template('test.html', test=test)
+    if request.method == "GET":
+        likes=Posts.query.filter_by(id = 1).first()
+        test = {'likes':likes.id}
+        print(request, 'test')
+        jsonify(test)
+        return render_template('test.html', test=test)
+    if request.method == "POST":
+        likes=Posts.query.filter_by(id = 1).first()
+        test = {'likes':likes.id}
+        resultData = request.data
+        print(type(json.loads(resultData.decode('utf-8'))), 'test') # b'{name: henry}'
+        jsonify(test)
+        return render_template('test.html', test=test)
+# res.body
+#     
+@app.route('/jsonpost/<postID>')
+def jscript(postID):
+    post=Posts.query.filter_by(id=postID).first()
+    object = {'posts': post.id}
+    return jsonify(object)
+
+
 
 @app.route('/likes/<post_id>', methods = ["GET", "POST"])
+@login_required
 def likes(post_id):
-    if request.method == "GET":
+    if request.method == "POST":
         current_posting =Posts.query.filter_by(id=post_id).first()
         current_posting.liking.append(current_user)
         db.session.commit()
-        return redirect(url_for('expanded_post', postID = post_id))
+        print('success')
+        return "success"
+        #return redirect(url_for('expanded_post', postID = post_id))
+
+@app.route('/dislikes/<post_id>', methods = ["GET", "POST"])
+@login_required
+def dislikes(post_id):
+    if request.method == "POST":
+        current_posting =Posts.query.filter_by(id=post_id).first()
+        current_posting.liking.remove(current_user)
+        db.session.commit()
+        print('successfully removed')
+        return "success"
     
-
-
 
 
 '''@app.route('/test') #How I will add tags, finally 
@@ -159,9 +181,6 @@ def test():
     db.session.commit()
     fun=Rpg.query.filter_by(title = 'test').first()
     return render_template('test.html', fun = fun)'''
-
-def testing(category):
-    return str(category)
 
 def checkemail():
     user = Users.query.filter_by(email=request.form.get('email')).first()
@@ -252,6 +271,13 @@ def all_post(username):
         flash('You do not have any current post to show!', 'no_post')
         return redirect(url_for('dashboard'))
     return render_template("total_users_post.html", posts = posts, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, user = user, loggedin = current_user.is_active, newest_posts = newest_posts)
+
+@app.route('/followers/<posting_user>', methods = ["GET","POST"])
+def followers(posting_user):
+    random_user = Users.query.get(posting_user)
+    random_user.follows.append(current_user)
+    db.session.commit()
+    return redirect(url_for('index'))
 
 @app.route ('/tag/<category>')
 def categories(category):
@@ -362,26 +388,26 @@ def delete(postID):
         flash('Opps, something went wrong. Your post was not deleted.', 'false_user')
         return redirect(url_for('index'))
 
+
 @app.route('/view/<postID>', methods = ["POST", "GET"])
 def expanded_post(postID):
     show_comments = Comments.query.filter_by(post_id = postID).all() #gets all post that equals the to current post
     original_poster = Posts.query.get(postID)
     expanded_post=Posts.query.get(postID)
     number_of_likes = expanded_post.liking
-    print(number_of_likes)
+    postid=Posts.query.get(postID)
+    json_postid = {"postID":postid.id}#json object
     form = Commentsform()
-    print(current_user)
     if current_user.get_id() == None or current_user.username != original_poster.posting_user:
         expanded_post.article_views += 1
         db.session.commit()
     if request.method == "POST":
         comment = Comments(comment=form.comment.data, post_id = postID, date = datetime.datetime.now().date(), posting_user = current_user.username, poster_id = current_user.id)
-        print(current_user.profimage)
         db.session.add(comment)
         db.session.commit()
         return redirect(url_for('expanded_post', postID = postID))
         #poster_image = current_user.profimage
-    return render_template('expanded_post.html', expanded_post = expanded_post, form = form, show_comments = show_comments, loggedin = current_user.is_active, current_user_check = current_user.is_anonymous, current_user = current_user, likes = len(number_of_likes)) # current_user doesn't work if changed to check if user is active. So i passed two variables instead to check for if the user exist and then the method to call image
+    return render_template('expanded_post.html', expanded_post = expanded_post, form = form, show_comments = show_comments, loggedin = current_user.is_active, current_user_check = current_user.is_anonymous, current_user = current_user, likes = len(number_of_likes), liked = number_of_likes, user = current_user, json_postid = json_postid) # current_user doesn't work if changed to check if user is active. So i passed two variables instead to check for if the user exist and then the method to call image
 
 #posting for blog articles/status
 @app.route('/post', methods = ["POST", "GET"])

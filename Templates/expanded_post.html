@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 {% block style %}
 <link rel="stylesheet" href="{{ url_for('static', filename = './css/expanded_post.css') }}">
@@ -25,18 +24,11 @@
   <div class = "expanded_title">{{ expanded_post.title}}</div>
   <div class = "bar"></div>
   <div>{{expanded_post.content}}</div>
-<form action="" method="POST">
-  <div class = "likes">
-    <a href="{{url_for('likes', post_id = expanded_post.id)}}"><span id = "like"><i class="far fa-thumbs-up"></i></span></a>
-    <span id = "count">{{likes}}</span>
-  </div>
-</form>
-<form action="">
-  <div class = "dislikes">
-    <span id = "dislike"><i class="far fa-thumbs-down"></i></span>
-    <span id = "dislike_count">0</span>
-  </div>
-</form>
+  {% if user in liked %}
+  <i class="fa fa-thumbs-up" id = "thumbs"></i><span id = "count">{{likes}}</span>
+  {% else %}
+  <i class="far fa-thumbs-up" id = "thumbs"></i><span id = "count">{{likes}}</span>
+  {% endif %}
 
   <div class = "comments_title">Comments</div>
   {% if loggedin == True %}
@@ -45,7 +37,7 @@
         {% if current_user_check == False %}
           {% if current_user.profimage == None or '' %}
           <img class = "thumbnail" src="{{url_for('static', filename='/images/default.jpg') }}" alt="">
-          {% else%}
+          {% else %}
           <img class = "spec-thumbnail" src="{{url_for('static', filename='/images/' + current_user.profimage) }}" alt="">
           {% endif %}
         {{form.comment(cols = "2", rows = "2", placeholder = "Post a comment", class ="comment_box")}}
@@ -81,4 +73,60 @@
 </div>
 {% endblock %}
 
-Lorem ipsum dolor sit amet, consectetur adipisicing elit. Perferendis accusantium totam laboriosam inventore omnis iusto excepturi sunt officia quo. Soluta molestiae eligendi fuga officiis corrupti, ullam earum animi commodi modi dolores. Odit tempore delectus quaerat vel animi ad facere beatae odio saepe dolores ab placeat eveniet labore autem soluta accusamus iste nostrum architecto enim non earum maiores, nam eaque! Iure, iste ducimus, natus, soluta officia tempore eum molestias aliquam vero nulla reprehenderit? Odit molestiae exercitationem fugiat corrupti voluptatem aperiam quibusdam fuga dolorum illo tempora? Minima nemo qui, nisi explicabo esse asperiores iste cumque, ratione officia dolore pariatur veniam, molestias adipisci illum doloremque at? Error molestias aspernatur quam. Iure mollitia minus ullam alias, doloribus laudantium. Tenetur libero quo, iste commodi voluptatum dolorem error quae id? Dolores officiis asperiores aperiam tenetur itaque veniam accusamus quo voluptatem doloremque atque quia, minima perferendis, vitae assumenda placeat fugiat at accusantium, ipsam voluptates dicta aliquam optio perspiciatis alias mollitia? Id tempora praesentium nemo autem. Officia natus tempore vel iusto, facilis nostrum rem rerum ullam ratione esse doloribus est itaque consectetur ipsa. Qui nobis rem, nemo quidem delectus similique ipsa dolore debitis ipsum, mollitia tenetur sit animi voluptas quasi corporis quas, iusto suscipit exercitationem placeat quam sint quae totam consequuntur. Assumenda, cumque eos veniam nulla suscipit tenetur blanditiis sint eius quasi qui corrupti quod. Aperiam ad a amet harum fugit, molestiae consectetur ullam rerum autem labore perspiciatis optio, tempora nam officia incidunt eligendi porro sapiente, placeat temporibus ea perferendis totam accusantium. Asperiores qui eligendi magnam, iure quisquam quaerat beatae assumenda inventore, ad accusamus adipisci perspiciatis eaque exercitationem, accusantium eius? Aperiam atque illum eius ab voluptatibus consectetur suscipit fugit eaque. Molestias commodi id modi, iste totam quidem consequatur iusto natus corrupti quod in, maxime ad? Quos dignissimos et deleniti blanditiis, cum repudiandae beatae, sequi, maiores nam soluta delectus.
+{% block js %}
+<script>
+  //let idJSON='{{json_postid|tojson}}';
+  //let parsedObj = JSON.parse(idJSON);
+  //let { postID } = parsedObj
+  function like(id) {
+  let idJSON='{{json_postid|tojson}}';
+  let parsedObj = JSON.parse(idJSON);
+  let { postID } = parsedObj
+  console.log('like')
+    const url = `/likes/${postID}`;
+    console.log(url);
+    fetch(url, {
+      method: 'POST',
+    }).then((response) => {
+    console.log(response)
+   });
+  }
+
+  function dislike(id) {
+  let idJSON='{{json_postid|tojson}}';
+  let parsedObj = JSON.parse(idJSON);
+  let { postID } = parsedObj
+  console.log('dislike')
+    const url = `/dislikes/${postID}`;
+    console.log(url);
+    fetch(url, {
+      method: 'POST',
+    }).then((response) => {
+    console.log(response)
+   });
+  }
+
+const toggle = document.querySelector('.fa-thumbs-up')
+const numUpdate = document.querySelector('#count')
+
+  toggle.addEventListener('click', () =>{
+  if (toggle.classList.contains('far')){
+  toggle.classList.remove('far')
+  toggle.classList.add('fa')
+  numUpdate.textContent++
+  //toggle.style.color = "blue"
+  like()
+  }
+  else{
+    if(toggle.classList.contains('fa'))
+    toggle.classList.remove('fa')
+    toggle.classList.add('far')
+    dislike()
+    numUpdate.textContent--
+    //toggle.style.color = "black"
+  }
+});
+
+</script>
+{% endblock%}
+

@@ -84,10 +84,13 @@ body{
     margin: 15px 0px 15px 0px !important;
     cursor: pointer;
 }
-.fa-thumbs-down{
+.fa-thumbs-up:hover{
+    font-size:3rem;
+}
+/* .fa-thumbs-down{
     margin: 0px 0px 0px 15px !important;
     cursor: pointer;
-}
+} */
 .comment_box{
     width: 100%;
 }
