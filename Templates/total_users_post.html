@@ -117,18 +117,22 @@
           </ul>
         </p>
         </div>
-          <div class = "category_container">
-            <h1>category</h1>
-            <div class = "category">one</div>
-            <div class = "category">two</div>
-            <div class = "category">three</div>
-            <div class = "category">one</div>
-            <div class = "category">two</div>
-            <div class = "category">three</div>
-            <div class = "category">one</div>
-            <div class = "category">two</div>
-            <div class = "category">three</div>
-          </div>
+        <div class = "category_container">
+          <h3 class = "category_title">Categories</h3>
+          <ol class = "breadcrumb">
+            <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'adventure' )}}" title = "a player plays as a unique individual character (or a party of such characters) that improves through gameplay">Adventure</a></li>
+            <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Rpg' )}}">Rpg</a></li>
+            <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'co-op' )}}">Co-op</a></li>
+            <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Fantasy' )}}">Fantasy</a></li>
+            <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Area-control' )}}">Area-control</a></li>
+            <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Strategy' )}}">Strategy</a></li>
+            <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Deck-Builder' )}}">Deck-Builder</a></li>
+            <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Card-Game' )}}">Card-game</a></li>
+            <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Horror' )}}">Horror</a></li>
+            <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Fighting' )}}">Fighting</a></li>
+            <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Other' )}}">Other</a></li>
+          </ol>
+        </div>
       </div>
     </div>
 </div> 

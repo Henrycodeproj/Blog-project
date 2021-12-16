@@ -9,6 +9,7 @@ from flask_sqlalchemy import Pagination, SQLAlchemy
 from flask_login import current_user, UserMixin, LoginManager
 from itsdangerous.serializer import Serializer
 from sqlalchemy.orm import dynamic_loader, relation, relationship
+from sqlalchemy.sql.functions import ReturnTypeFromArgs
 from sqlalchemy.sql.schema import ForeignKey, PrimaryKeyConstraint
 from wtforms.fields.core import BooleanField
 from wtforms.fields.simple import SubmitField
@@ -67,6 +68,9 @@ followers = db.Table('followers',
     db.Column('follower_id', db.Integer, db.ForeignKey('users.id')),
 )
 
+#global variables
+view_count = {}
+
 class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), unique = False)
@@ -83,13 +87,14 @@ class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
     comments = db.relationship('Comments', backref='commentor', lazy = True)
     likes = db.relationship('Posts', secondary=likes, lazy='subquery',
         backref=db.backref('liking', lazy=True))
-    followers = db.relationship(
+    following = db.relationship(
                              'Users',
                              secondary=followers,
-                             primaryjoin=(followers.c.followed_id == id),
-                             secondaryjoin=(followers.c.follower_id == id),
-                             backref = db.backref('follows', lazy=True), lazy=True,
+                             primaryjoin=(followers.c.follower_id == id),
+                             secondaryjoin=(followers.c.followed_id == id),
+                             backref= db.backref('followers', lazy=True), lazy=True,
                              )
+
 
 
 class Posts(db.Model): #post skeleton and columns
@@ -106,7 +111,6 @@ class Posts(db.Model): #post skeleton and columns
     comments = db.relationship('Comments', backref = 'user_comments', lazy = True)
     genres = db.relationship('Categories', backref='genre', lazy=True)
 
-
 class Comments(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     posting_user = db.Column(db.String(255))
@@ -120,32 +124,8 @@ class Categories(db.Model):
     category = db.Column(db.String(255))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
 
-@app.route('/jscript', methods = ["GET", "POST"])
-def script():
-    if request.method == "GET":
-        likes=Posts.query.filter_by(id = 1).first()
-        test = {'likes':likes.id}
-        print(request, 'test')
-        jsonify(test)
-        return render_template('test.html', test=test)
-    if request.method == "POST":
-        likes=Posts.query.filter_by(id = 1).first()
-        test = {'likes':likes.id}
-        resultData = request.data
-        print(type(json.loads(resultData.decode('utf-8'))), 'test') # b'{name: henry}'
-        jsonify(test)
-        return render_template('test.html', test=test)
-# res.body
-#     
-@app.route('/jsonpost/<postID>')
-def jscript(postID):
-    post=Posts.query.filter_by(id=postID).first()
-    object = {'posts': post.id}
-    return jsonify(object)
-
-
-
-@app.route('/likes/<post_id>', methods = ["GET", "POST"])
+#routes that handle likes, does not return anything a template
+@app.route('/likes/<post_id>', methods = ["GET", "POST"]) 
 @login_required
 def likes(post_id):
     if request.method == "POST":
@@ -275,7 +255,7 @@ def all_post(username):
 @app.route('/followers/<posting_user>', methods = ["GET","POST"])
 def followers(posting_user):
     random_user = Users.query.get(posting_user)
-    random_user.follows.append(current_user)
+    random_user.followers.append(current_user)
     db.session.commit()
     return redirect(url_for('index'))
 
@@ -388,7 +368,6 @@ def delete(postID):
         flash('Opps, something went wrong. Your post was not deleted.', 'false_user')
         return redirect(url_for('index'))
 
-
 @app.route('/view/<postID>', methods = ["POST", "GET"])
 def expanded_post(postID):
     show_comments = Comments.query.filter_by(post_id = postID).all() #gets all post that equals the to current post
@@ -398,8 +377,15 @@ def expanded_post(postID):
     postid=Posts.query.get(postID)
     json_postid = {"postID":postid.id}#json object
     form = Commentsform()
-    if current_user.get_id() == None or current_user.username != original_poster.posting_user:
-        expanded_post.article_views += 1
+    if current_user.get_id() == None:
+        pass
+    elif current_user.username != original_poster.posting_user:
+        print(view_count.get(current_user.id))
+        if postID not in view_count.get(current_user.id):
+            expanded_post.article_views += 1
+            view_count[current_user.id].append(postID)
+        else:
+            print('hello')
         db.session.commit()
     if request.method == "POST":
         comment = Comments(comment=form.comment.data, post_id = postID, date = datetime.datetime.now().date(), posting_user = current_user.username, poster_id = current_user.id)
@@ -438,6 +424,7 @@ def post():
             db.session.commit()
             postid = Posts.query.filter_by(title = form.title.data, posting_user = current_user.username).first()
             category= Categories(category = request.form['genre'], post_id = postid.id)
+            print(category)
             db.session.add(category)
             db.session.commit()
             #new_post_id = Posts.query.filter_by(image = hexed_name, posting_user = current_user.username).first()
@@ -445,6 +432,8 @@ def post():
             db.session.commit()
             flash('Your post has been added', 'posted')
             return redirect(url_for('post'))
+        flash('Your file extension is not allowed', 'posted')
+        return redirect(url_for('post'))
     else:
         return render_template("post.html", form = form, loggedin = current_user.is_active)
 
@@ -452,8 +441,7 @@ def post():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    print(Users.query)
-    return render_template("Dashboard.html", name = current_user.name, last_logged = current_user.last_login, profimage = current_user.profimage, description = current_user.description, views = current_user.profile_views, total_post = current_user.total_post, username = current_user.username, current_user = current_user)
+    return render_template("Dashboard.html", name = current_user.name, last_logged = current_user.last_login, profimage = current_user.profimage, description = current_user.description, views = current_user.profile_views, total_post = current_user.total_post, username = current_user.username, current_user = current_user, follower_count = len(current_user.followers))
 
 #public profiles for each poster
 @app.route('/dashboard/<poster>')
@@ -467,9 +455,9 @@ def public_user_dashboard(poster):
         elif current_user != user.username:
             user.profile_views += 1
             db.session.commit()
-    return render_template('public_profile.html', user = user)
+    return render_template('public_profile.html', user = user, user_followers = len(user.followers))
 
-#login method
+#login method/handler
 @app.route('/login', methods = ["POST", "GET"])
 def login():
     form = LoginForm()
@@ -481,6 +469,8 @@ def login():
             if check_password_hash(user.password, form.password.data) == True:
                 login_user(user, remember = form.remember_me.data)
                 flash('You have been successfully logged in!', 'success')
+                view_count[current_user.id] = []
+                print(view_count)
                 return redirect(url_for('dashboard'))
         flash('Incorrect username or password', 'login_error')  
         return redirect(url_for('login'))
@@ -553,6 +543,8 @@ def signup():
 def logout():
     current_user.last_login = datetime.datetime.now().date()
     db.session.commit()
+    print(view_count)
+    #view_count.pop(current_user.id)
     logout_user()
     flash('You have been successfully logged out', 'logout')
     return redirect(url_for("login"))

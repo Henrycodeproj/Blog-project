@@ -20,7 +20,7 @@
     {% endif %}
     <div class = "posting_date">{{expanded_post.date_posted}} <div class = "views">Views: {{expanded_post.article_views}}</div></div>
   </div>
-  <img class = "posted_images img-fluid" src="{{url_for('static', filename='/images/' + expanded_post.image) }}" alt="Image" />
+  <div class = "d-flex justify-content-around"><img class = "posted_images img-fluid" src="{{url_for('static', filename='/images/' + expanded_post.image) }}" alt="Image" /></div>
   <div class = "expanded_title">{{ expanded_post.title}}</div>
   <div class = "bar"></div>
   <div>{{expanded_post.content}}</div>
@@ -30,7 +30,7 @@
   <i class="far fa-thumbs-up" id = "thumbs"></i><span id = "count">{{likes}}</span>
   {% endif %}
 
-  <div class = "comments_title">Comments</div>
+  <div class = "comments_title">Comments   <i class="far fa-comment"></i></div>
   {% if loggedin == True %}
     <form action="" method="POST">
       <div class = "post_wrapper">
@@ -60,7 +60,7 @@
         <div class = "commenter_username">
           {% if users.posting_user == expanded_post.posting_user %}
           <a class = "commentor_name_link" href="{{url_for('public_user_dashboard', poster = users.posting_user )}}">{{users.posting_user}}</a>
-            <span class = "comment_date">{{users.date}} </span>
+            <span class = "comment_date">{{users.date}} </span><i class="fab fa-hotjar" title="Original Poster"></i>
           {% else %}
           <a class = "commentor_name_link" href="{{url_for('public_user_dashboard', poster = users.posting_user )}}">{{users.posting_user}}</a>
             <span class = "comment_date">{{users.date}} </span>
@@ -78,7 +78,7 @@
   //let idJSON='{{json_postid|tojson}}';
   //let parsedObj = JSON.parse(idJSON);
   //let { postID } = parsedObj
-  function like(id) {
+  function like(id) { // sends to python route for likes without updating
   let idJSON='{{json_postid|tojson}}';
   let parsedObj = JSON.parse(idJSON);
   let { postID } = parsedObj
@@ -92,7 +92,7 @@
    });
   }
 
-  function dislike(id) {
+  function dislike(id) {  //sends to python route for dislikes without updating 
   let idJSON='{{json_postid|tojson}}';
   let parsedObj = JSON.parse(idJSON);
   let { postID } = parsedObj
@@ -108,25 +108,38 @@
 
 const toggle = document.querySelector('.fa-thumbs-up')
 const numUpdate = document.querySelector('#count')
+var current_user_is_anony = '{{current_user_check}}'
+console.log(current_user_is_anony)
 
-  toggle.addEventListener('click', () =>{
-  if (toggle.classList.contains('far')){
+  toggle.addEventListener('click', () =>{ // checks status for users
+  if (current_user_is_anony == "True"){
+    console.log('Anonymous')
+    likeDislike()
+  }
+  else{
+    likeDislike() // returns handler for likes and dislikes
+  }
+
+
+  function likeDislike(){
+  if (toggle.classList.contains('far')){ 
   toggle.classList.remove('far')
   toggle.classList.add('fa')
   numUpdate.textContent++
   //toggle.style.color = "blue"
   like()
   }
-  else{
-    if(toggle.classList.contains('fa'))
+  else if(toggle.classList.contains('fa')){
     toggle.classList.remove('fa')
     toggle.classList.add('far')
     dislike()
     numUpdate.textContent--
     //toggle.style.color = "black"
   }
+  }
 });
 
 </script>
 {% endblock%}
 
+Lorem ipsum dolor sit amet consectetur, adipisicing elit. Fugiat, dicta! Facere in ducimus, sint nulla laborum odio quos suscipit beatae voluptate blanditiis, repudiandae necessitatibus, natus officiis aspernatur est saepe modi harum obcaecati nobis similique ratione soluta tenetur quia. Animi nostrum, corrupti pariatur sed labore tenetur eos maxime repellat nisi cupiditate voluptatem perspiciatis, assumenda numquam, porro provident architecto qui doloribus. Fuga quo sapiente sequi quos tenetur. Error, temporibus aspernatur magni unde accusamus repellat officia corrupti veniam sit dolor libero excepturi ad porro odio suscipit? Provident velit, dicta vero vitae officia laudantium magni dolores placeat nisi commodi dolorem, excepturi quia exercitationem quidem, tenetur quos ipsam ratione! Cumque quisquam maxime vitae incidunt sit sint? Obcaecati, aut! Tenetur illo sapiente voluptatibus illum nobis pariatur odit aspernatur molestias autem? Debitis doloremque illo recusandae, corporis harum ea exercitationem dicta similique voluptatibus et blanditiis ullam cupiditate maiores impedit asperiores alias deleniti optio eaque tenetur consectetur neque velit ut. Ducimus nostrum nihil impedit optio dicta, quo velit eveniet ipsam, tenetur exercitationem fuga deserunt perspiciatis repudiandae, alias quae debitis excepturi. Illum nihil vel modi quos eaque dolorem veritatis nostrum distinctio? Facere sapiente, excepturi nemo animi itaque reprehenderit. Reiciendis culpa natus consequuntur quibusdam accusantium excepturi impedit dolor officiis nisi unde, ut cum veniam accusamus non itaque laborum. Reiciendis nihil omnis eligendi consectetur nemo, quia aliquid inventore nostrum ipsa a odio! Odio, adipisci dicta. Suscipit voluptatum quas repellat distinctio sed sit quam explicabo quisquam est obcaecati, provident soluta nostrum recusandae ipsum iste non corporis sapiente vitae porro expedita nemo mollitia tempora ipsa. Officia ab unde eum soluta? Dolorum officiis facilis natus hic quaerat voluptates, repudiandae neque? Laudantium dolore impedit ea rerum assumenda, aut debitis? Sapiente quas nesciunt quis provident! Quaerat magni recusandae ex perspiciatis, culpa voluptates deleniti iste nulla ullam, voluptatem et. Nisi nostrum aliquid, libero esse blanditiis debitis nulla consectetur.

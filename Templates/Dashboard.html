@@ -120,9 +120,9 @@
           </div>
           <div class="col-md-4 p-0 border-end">
               <div class="viewbox">
-                  <p class="blue">100</p>
+                  <p class="blue">{{follower_count}}</p>
                   <p><i class="fas fa-users">
-                    <a href="">Followers</a>
+                    Followers
                   </i></p>
               </div>
           </div>
@@ -151,13 +151,56 @@
                   <div class="w-100 ps-2">
                       <a href=""><p class="">Delete your profile</p></a>
                       <p class="textmuted mb-2">Erase your account and post(s) permanently.</p>
-                      {% for followers in current_user.follows %}
+                      following me
+                      {% for followers in current_user.followers %}
                       {{followers.username}}
+                      {% endfor %}
+                      who i am following
+                      {% for following in current_user.following %}
+                      {{following.username}}
                       {% endfor %}
                   </div>
               </div>
           </div>
       </div>
   </div>
+  <!-- Button trigger modal -->
+<a href="" data-bs-toggle="modal" data-bs-target="#exampleModal">test</a>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Following</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      {% for followers in current_user.followers %}
+      <div class="modal-body">
+        {% if followers.profimage == None %}
+        <div class = "d-flex">
+          <img class="follows_thumbnail" src="{{url_for ('static', filename ='/images/default.jpg') }}" alt="Image" />
+          <div>
+              {{followers.username}}
+          </div>
+        </div>
+        {% else %}
+        <div class = "d-flex">
+          <img class="follows_thumbnail" src="{{url_for ('static', filename ='/images/' + followers.profimage) }}" alt="Image" />
+          <div>
+            {{followers.username}}
+        </div>
+        </div>
+        {% endif %}
+        
+      </div>
+      {% endfor %}
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 </div>
 {% endblock %}
