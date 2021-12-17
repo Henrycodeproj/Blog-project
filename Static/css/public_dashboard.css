@@ -28,7 +28,6 @@ p {
 .container {
     margin: 20px auto;
 }
-
 .box {
     background-color: #e1f5fe;
     padding: 30px;
@@ -91,6 +90,25 @@ p {
 }
 .s_dash{
     text-transform: lowercase;
+}
+.followers_thumbnail, .following_thumbnail{
+    border-style: solid;
+    color: rgba(0, 0, 0, 0.144);
+    width:40px;
+    height:40px;
+    border-radius: 50%;
+    margin-right:5px;
+}
+.followers_name, .following_name{
+    text-transform: capitalize;
+}
+.followers_description{
+    color:rgb(126, 123, 123);
+}
+.following_name_link, .followers_name_link{
+    text-transform: capitalize;
+    text-decoration: none;
+    color:black;
 }
 /* .icon1 {
     font-size: 10px;

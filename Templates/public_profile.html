@@ -61,7 +61,7 @@
             <div class="col-md-4 p-0 border-end">
                 <div class="viewbox">
                     <p class="blue">{{user_followers}}</p>
-                    <p><i class="fas fa-users"></i>Followers</p>
+                    <p><i class="fas fa-users"></i><a class="" data-bs-toggle="modal" href="#exampleModalToggle" role="button">Followers</a></p>
                 </div>
             </div>
             <div class="col-md-4 p-0">
@@ -70,6 +70,94 @@
                     <p><i class="fas fa-icons"></i><a href="{{url_for('all_post', username = user.username)}}">Total Posts</a></p>
                 </div>
             </div>
+        </div>
+        <div class="modal fade" id="exampleModalToggle" aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalToggleLabel">Followers</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              {% for followers in user.followers %}
+              <div class= "modal-body">
+                <div class = "d-flex align-">
+                  <div class = "followers_image">
+                    {% if followers.profimage == None%}
+                    <a href="{{url_for('public_user_dashboard', poster = followers.username)}}">
+                      <img class = "followers_thumbnail"  src="{{url_for ('static', filename ='/images/default.jpg') }}" alt="Image" />
+                    </a>
+                    {% else %}
+                    <a href="{{url_for('public_user_dashboard', poster = followers.username)}}">
+                      <img class = "followers_thumbnail" src="{{url_for ('static', filename ='/images/' + followers.profimage) }}" alt="Image" />
+                    </a>
+                    {% endif %}
+                  </div>
+                  <div class = "followers_information_wrap">
+                    <div class = "followers_name">
+                      <a class = "followers_name_link" href="{{url_for('public_user_dashboard', poster = followers.username)}}">
+                        {{followers.username}}
+                      </a>
+                    </div>
+                    <div>
+                      {% if followers.description == None %}
+                      <span class = "followers_description">No current description.</span> 
+                      {% else %}
+                      <span class = "followers_description">{{followers.description | truncate(40)}}</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+              <div class="modal-footer">
+                <button class="btn btn-primary" data-bs-target="#exampleModalToggle2" data-bs-toggle="modal">Following</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="exampleModalToggle2" aria-hidden="true" aria-labelledby="exampleModalToggleLabel2" tabindex="-1">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalToggleLabel2">Following</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              {% for following in user.following%}
+              <div class= "modal-body">
+                <div class = "d-flex align-">
+                  <div class = "followers_image">
+                    {% if following.profimage == None%}
+                      <a href="{{url_for('public_user_dashboard', poster = following.username)}}">
+                        <img class = "followers_thumbnail"  src="{{url_for ('static', filename ='/images/default.jpg') }}" alt="Image" />
+                      </a>
+                    {% else %}
+                    <a href="{{url_for('public_user_dashboard', poster = following.username)}}">
+                      <img class = "following_thumbnail" src="{{url_for ('static', filename ='/images/' + following.profimage) }}" alt="Image" />
+                    </a>    
+                    {% endif %}
+                  </div>
+                  <div class = "following_information_wrap">
+                    <div class = "following_name">
+                      <a class = "following_name_link" href="{{url_for('public_user_dashboard', poster = following.username)}}">
+                        {{following.username}}
+                      </a>
+                    </div>
+                    <div>
+                      {% if following.description == None %}
+                      <span class = "followers_description">No current description.</span> 
+                      {% else %}
+                      <span class = "followers_description">{{following.description | truncate(40)}}</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+              <div class="modal-footer">
+                <button class="btn btn-primary" data-bs-target="#exampleModalToggle" data-bs-toggle="modal">Followers</button>
+              </div>
+            </div>
+          </div>
         </div>
     </div>
 {% endblock %}

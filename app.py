@@ -471,6 +471,7 @@ def login():
                 flash('You have been successfully logged in!', 'success')
                 view_count[current_user.id] = []
                 print(view_count)
+                print(current_user.following)
                 return redirect(url_for('dashboard'))
         flash('Incorrect username or password', 'login_error')  
         return redirect(url_for('login'))
