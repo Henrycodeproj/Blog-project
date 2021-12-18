@@ -171,9 +171,33 @@
             <h5 class="modal-title" id="exampleModalToggleLabel">Followers</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          {% for followers in current_user.followers%}
+          {% for followers in current_user.followers %}
           <div class="modal-body">
-            {{followers}}
+            <div class = "d-flex ">
+              {% if followers.profimage == None%}
+                <a href="{{url_for('public_user_dashboard', poster = followers.username)}}">
+                  <img class = "followers_thumbnail"  src="{{url_for ('static', filename ='/images/default.jpg') }}" alt="Image" />
+                </a>
+              {% else %}
+                <a href="{{url_for('public_user_dashboard', poster = followers.username)}}">
+                  <img class = "following_thumbnail" src="{{url_for ('static', filename ='/images/' + followers.profimage) }}" alt="Image" />
+                </a>    
+              {% endif %}
+              <div class = "following_information_wrap">
+                <div class = "following_name">
+                  <a class = "following_name_link" href="{{url_for('public_user_dashboard', poster = followers.username)}}">
+                    {{followers.username}}
+                  </a>
+                </div>
+                <div>
+                  {% if followers.description == None %}
+                  <span class = "followers_description">No current description.</span> 
+                  {% else %}
+                  <span class = "followers_description">{{followers.description | truncate(40)}}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
           </div>
           {% endfor %}
           <div class="modal-footer">
@@ -189,9 +213,37 @@
             <h5 class="modal-title" id="exampleModalToggleLabel2">Following</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
+          {% for following in current_user.following %}
           <div class="modal-body">
-            Hide this modal and show the first with the button below.
+            <div class = "d-flex">
+              <div class = "followers_image">
+                {% if following.profimage == None%}
+                  <a href="{{url_for('public_user_dashboard', poster = following.username)}}">
+                    <img class = "followers_thumbnail"  src="{{url_for ('static', filename ='/images/default.jpg') }}" alt="Image" />
+                  </a>
+                {% else %}
+                <a href="{{url_for('public_user_dashboard', poster = following.username)}}">
+                  <img class = "following_thumbnail" src="{{url_for ('static', filename ='/images/' + following.profimage) }}" alt="Image" />
+                </a>    
+                {% endif %}
+              </div>
+              <div class = "following_information_wrap">
+                <div class = "following_name">
+                  <a class = "following_name_link" href="{{url_for('public_user_dashboard', poster = following.username)}}">
+                    {{following.username}}
+                  </a>
+                </div>
+                <div>
+                  {% if following.description == None %}
+                  <span class = "followers_description">No current description.</span> 
+                  {% else %}
+                  <span class = "followers_description">{{following.description | truncate(40)}}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
           </div>
+          {% endfor %}
           <div class="modal-footer">
             <button class="btn btn-primary" data-bs-target="#exampleModalToggle" data-bs-toggle="modal">Followers</button>
           </div>

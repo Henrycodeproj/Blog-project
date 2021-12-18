@@ -384,8 +384,6 @@ def expanded_post(postID):
         if postID not in view_count.get(current_user.id):
             expanded_post.article_views += 1
             view_count[current_user.id].append(postID)
-        else:
-            print('hello')
         db.session.commit()
     if request.method == "POST":
         comment = Comments(comment=form.comment.data, post_id = postID, date = datetime.datetime.now().date(), posting_user = current_user.username, poster_id = current_user.id)
@@ -394,6 +392,12 @@ def expanded_post(postID):
         return redirect(url_for('expanded_post', postID = postID))
         #poster_image = current_user.profimage
     return render_template('expanded_post.html', expanded_post = expanded_post, form = form, show_comments = show_comments, loggedin = current_user.is_active, current_user_check = current_user.is_anonymous, current_user = current_user, likes = len(number_of_likes), liked = number_of_likes, user = current_user, json_postid = json_postid) # current_user doesn't work if changed to check if user is active. So i passed two variables instead to check for if the user exist and then the method to call image
+
+@app.route('/comment_delete/<commentID>')
+def delete_comment(commentID):
+    user_comment=Comments.query.get(commentID).first()
+    db.session.delete(user_comment)
+
 
 #posting for blog articles/status
 @app.route('/post', methods = ["POST", "GET"])
@@ -453,7 +457,10 @@ def public_user_dashboard(poster):
         if user.username == current_user.username:
             return redirect(url_for('dashboard'))
         elif current_user != user.username:
-            user.profile_views += 1
+            if poster not in view_count.get(current_user.id):
+                user.profile_views += 1
+                view_count[current_user.id].append(user.username)
+                print(view_count)
             db.session.commit()
     return render_template('public_profile.html', user = user, user_followers = len(user.followers))
 

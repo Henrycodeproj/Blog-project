@@ -44,33 +44,42 @@
         </div>
       <div class = "d-flex submit"><input type="submit" value="submit" class = "btn btn-dark comment_submit_button"></div>
     </form>
-        {% else %}
         {% endif %}
-  {% else %}
   {% endif %}
-<div class = "d-flex flex-column-reverse">
-  {% for users in show_comments %}
-  <div class = "wrapper d-flex">
-    {% if users.commentor.profimage == None or '' %}
-    <a href="{{url_for('public_user_dashboard', poster = users.posting_user )}}"><img class = "comment_thumbnail" src="{{url_for('static', filename='/images/default.jpg')}}" alt=""></a>
-    {% else %}
-    <a href="{{url_for('public_user_dashboard', poster = users.posting_user )}}"><img class = "comment_thumbnail" src="{{url_for('static', filename='/images/' + users.commentor.profimage)}}" alt=""></a>
-    {% endif %}
-    <div class = "info_wrap">
-        <div class = "commenter_username">
-          {% if users.posting_user == expanded_post.posting_user %}
-          <a class = "commentor_name_link" href="{{url_for('public_user_dashboard', poster = users.posting_user )}}">{{users.posting_user}}</a>
-            <span class = "comment_date">{{users.date}} </span><i class="fab fa-hotjar" title="Original Poster"></i>
+    {% for comment in show_comments%}
+  <div class = "d-flex flex-column-reverse">
+    <div class = "d-flex wrapper">
+      <div>
+        {%if comment.profimage == None %}
+          <a href="{{url_for('public_user_dashboard', poster = comment.posting_user )}}"><img class = "comment_thumbnail" src="{{url_for('static', filename='/images/default.jpg')}}" alt=""></a>
+        {% else %}
+          <a href="{{url_for('public_user_dashboard', poster = comment.posting_user )}}"><img class = "comment_thumbnail" src="{{url_for('static', filename='/images/' + comment.commentor.   profimage)}}" alt=""></a>
+        {% endif %}
+      </div>
+      <div class = "tess">
+        <div>
+          {% if expanded_post.posting_user == comment.posting_user %}
+          <a class = "commenter_username" href="{{url_for('public_user_dashboard', poster = comment.posting_user)}}">{{comment.posting_user}}</a>
+          <span class = "comment_date">{{comment.date}}</span><i class="fab fa-hotjar" title="Original Poster"></i>
           {% else %}
-          <a class = "commentor_name_link" href="{{url_for('public_user_dashboard', poster = users.posting_user )}}">{{users.posting_user}}</a>
-            <span class = "comment_date">{{users.date}} </span>
+          <a class = "commenter_username" href="{{url_for('public_user_dashboard', poster = comment.posting_user)}}">{{comment.posting_user}}</a>
+          <span class = "comment_date">{{comment.date}}</span>
           {% endif %}
+          {% if comment.posting_user == current_user.username %}
+          <span class="btn-group comment_dropdown">
+            <button type="button" class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"></button>
+          {% endif %}
+            <ul class="dropdown-menu">
+              <a href="" class = "commenter_username">Edit</a>
+              <a href="" class = "commenter_username">Delete</a>
+            </ul>
+          </span>
         </div>
-      <div>{{users.comment}}</div>
+        <div>{{comment.comment}}</div>
+      </div>
     </div>
-  </div>
   {% endfor %}
-</div>
+  </div>
 {% endblock %}
 
 {% block js %}
@@ -105,6 +114,18 @@
     console.log(response)
    });
   }
+
+  // function deleteComment(id) {  //sends to python route for dislikes without updating 
+  // let { commentID } = ''
+  // console.log('dislike')
+  //   const url = `/dislikes/${postID}`;
+  //   console.log(url);
+  //   fetch(url, {
+  //     method: 'POST',
+  //   }).then((response) => {
+  //   console.log(response)
+  //  });
+  // }
 
 const toggle = document.querySelector('.fa-thumbs-up')
 const numUpdate = document.querySelector('#count')

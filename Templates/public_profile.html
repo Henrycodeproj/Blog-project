@@ -124,7 +124,7 @@
               </div>
               {% for following in user.following%}
               <div class= "modal-body">
-                <div class = "d-flex align-">
+                <div class = "d-flex">
                   <div class = "followers_image">
                     {% if following.profimage == None%}
                       <a href="{{url_for('public_user_dashboard', poster = following.username)}}">
