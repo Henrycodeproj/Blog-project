@@ -70,8 +70,8 @@
             <button type="button" class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"></button>
           {% endif %}
             <ul class="dropdown-menu">
-              <a href="" class = "commenter_username">Edit</a>
-              <a href="" class = "commenter_username">Delete</a>
+              <a class="commenter_username" data-bs-toggle="modal" data-bs-target="#exampleModal" role="button" onclick="editComment('{{comment.id}}')">Edit</a>
+              <div class = "commenter_username" onclick="deleteComment('{{comment.id}}')">Delete</div>
             </ul>
           </span>
         </div>
@@ -80,6 +80,25 @@
     </div>
   {% endfor %}
   </div>
+
+  <!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {{form.comment}}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block js %}
@@ -115,17 +134,25 @@
    });
   }
 
-  // function deleteComment(id) {  //sends to python route for dislikes without updating 
-  // let { commentID } = ''
-  // console.log('dislike')
-  //   const url = `/dislikes/${postID}`;
-  //   console.log(url);
-  //   fetch(url, {
-  //     method: 'POST',
-  //   }).then((response) => {
-  //   console.log(response)
-  //  });
-  // }
+  function deleteComment(id) {  //sends to python route for dislikes without updating 
+    const url = `/comment_delete/${id}`;
+    console.log(url);
+    fetch(url, {
+      method: 'POST',
+    }).then((response) => {
+    console.log(response)
+   });
+  }
+
+  function editComment(id) {  //sends to python route for dislikes without updating 
+    const url = `/comment_edit/${id}`;
+    console.log(url);
+    fetch(url, {
+      method: 'POST',
+    }).then((response) => {
+    console.log(response)
+   });
+  }
 
 const toggle = document.querySelector('.fa-thumbs-up')
 const numUpdate = document.querySelector('#count')

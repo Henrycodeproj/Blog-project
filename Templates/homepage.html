@@ -95,18 +95,22 @@
         <a href="{{url_for('public_user_dashboard', poster = post.poster.username )}}" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}" alt="">
           -{{post.posting_user}}
         </a>
+        {% if post.poster.username != current_user.username%}
         <div>
           <a class= "btn btn-dark btn-sm" href="{{url_for('followers', posting_user = post.poster.id )}}">Follow</button></a>
-      </div>
+        </div>
+        {% endif %}
       </div>
       {% else %}
     <div class = "d-flex justify-content-between">
       <a href="{{url_for('public_user_dashboard', poster = post.poster.username )}}" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/' + post.poster.profimage) }}" alt="">
         -{{post.posting_user}}
       </a>
+      {%if post.poster.username != current_user.username %}
       <div>
         <a class= "btn btn-dark btn-sm" href="{{url_for('followers', posting_user = post.poster.id )}}">Follow</button></a>
-    </div>
+      </div>
+      {% endif %}
     </div>
       {% endif %}
       <img class = "posted_images img-fluid" src="{{url_for('static', filename='/images/' + post.image) }}" alt="Image" />

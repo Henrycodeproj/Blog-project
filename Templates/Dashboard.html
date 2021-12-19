@@ -149,14 +149,6 @@
                   <div class="w-100 ps-2">
                       <a href=""><p class="">Delete your profile</p></a>
                       <p class="textmuted mb-2">Erase your account and post(s) permanently.</p>
-                      following me
-                      {% for followers in current_user.followers %}
-                      {{followers.username}}
-                      {% endfor %}
-                      who i am following
-                      {% for following in current_user.following %}
-                      {{following.username}}
-                      {% endfor %}
                   </div>
               </div>
           </div>

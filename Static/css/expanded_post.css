@@ -141,6 +141,7 @@ body{
     font-weight: bolder;
     text-decoration: none;
     color:black;
+    cursor: pointer;
 }
 .post_wrapper{
     display: flex;

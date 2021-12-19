@@ -235,7 +235,7 @@ def index():
                 random_users_list.append(top_post_id)
         else:
             break
-    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, random_users_list = random_users_list)
+    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, random_users_list = random_users_list, current_user = current_user)
 
 @app.route ('/user/<username>')
 def all_post(username):
@@ -393,10 +393,24 @@ def expanded_post(postID):
         #poster_image = current_user.profimage
     return render_template('expanded_post.html', expanded_post = expanded_post, form = form, show_comments = show_comments, loggedin = current_user.is_active, current_user_check = current_user.is_anonymous, current_user = current_user, likes = len(number_of_likes), liked = number_of_likes, user = current_user, json_postid = json_postid) # current_user doesn't work if changed to check if user is active. So i passed two variables instead to check for if the user exist and then the method to call image
 
-@app.route('/comment_delete/<commentID>')
+@app.route('/comment_delete/<commentID>', methods = ["POST"])
 def delete_comment(commentID):
-    user_comment=Comments.query.get(commentID).first()
-    db.session.delete(user_comment)
+    if request.method == "POST":
+        user_comment=Comments.query.get(commentID)
+        db.session.delete(user_comment)
+        db.session.commit()
+    return "success"
+
+@app.route('/comment_edit/<commentID>', methods = ['POST'])
+def edit_comment(commentID):
+    form = Commentsform()
+    user_comment = Comments.query.get(commentID)
+    user_comment.comment = form.comment.data
+    if request.method == "POST":
+        db.session.add(user_comment)
+        db.session.commit()
+        return "Success"
+
 
 
 #posting for blog articles/status
