@@ -9,7 +9,7 @@ from flask_sqlalchemy import Pagination, SQLAlchemy
 from flask_login import current_user, UserMixin, LoginManager
 from itsdangerous.serializer import Serializer
 from sqlalchemy.orm import dynamic_loader, relation, relationship
-from sqlalchemy.sql.functions import ReturnTypeFromArgs
+from sqlalchemy.sql.functions import ReturnTypeFromArgs, user
 from sqlalchemy.sql.schema import ForeignKey, PrimaryKeyConstraint
 from wtforms.fields.core import BooleanField
 from wtforms.fields.simple import SubmitField
@@ -380,11 +380,11 @@ def expanded_post(postID):
     if current_user.get_id() == None:
         pass
     elif current_user.username != original_poster.posting_user:
-        print(view_count.get(current_user.id))
-        if postID not in view_count.get(current_user.id):
-            expanded_post.article_views += 1
-            view_count[current_user.id].append(postID)
-        db.session.commit()
+        # print(view_count.get(current_user.id))
+        # if postID not in view_count.get(current_user.id):
+        #     expanded_post.article_views += 1
+        #     view_count[current_user.id].append(postID)
+         db.session.commit()
     if request.method == "POST":
         comment = Comments(comment=form.comment.data, post_id = postID, date = datetime.datetime.now().date(), posting_user = current_user.username, poster_id = current_user.id)
         db.session.add(comment)
@@ -401,17 +401,21 @@ def delete_comment(commentID):
         db.session.commit()
     return "success"
 
-@app.route('/comment_edit/<commentID>', methods = ['POST'])
+@app.route('/edit_comment/<commentID>', methods = ['POST'])
 def edit_comment(commentID):
-    form = Commentsform()
     user_comment = Comments.query.get(commentID)
-    user_comment.comment = form.comment.data
+    new_comment = request.get_json(force = True)
     if request.method == "POST":
+        user_comment.comment = new_comment
         db.session.add(user_comment)
         db.session.commit()
-        return "Success"
+        return "success 200"
+    return "success"
 
-
+@app.route('/get_comment/<commentID>', methods = ["POST"])
+def getComment(commentID):
+    comment = Comments.query.get(commentID)
+    return jsonify(comment.comment)
 
 #posting for blog articles/status
 @app.route('/post', methods = ["POST", "GET"])

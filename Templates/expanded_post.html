@@ -46,8 +46,8 @@
     </form>
         {% endif %}
   {% endif %}
-    {% for comment in show_comments%}
-  <div class = "d-flex flex-column-reverse">
+<div class = "d-flex flex-column-reverse">
+  {% for comment in show_comments %}
     <div class = "d-flex wrapper">
       <div>
         {%if comment.profimage == None %}
@@ -70,31 +70,33 @@
             <button type="button" class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"></button>
           {% endif %}
             <ul class="dropdown-menu">
-              <a class="commenter_username" data-bs-toggle="modal" data-bs-target="#exampleModal" role="button" onclick="editComment('{{comment.id}}')">Edit</a>
+              <a class="commenter_username" data-bs-toggle="modal" data-bs-target="#exampleModal" role="button" onclick="getComment('{{comment.id}}')">Edit</a>
               <div class = "commenter_username" onclick="deleteComment('{{comment.id}}')">Delete</div>
             </ul>
           </span>
         </div>
-        <div>{{comment.comment}}</div>
+        <div id = "user_comment">{{comment.comment}}</div>
       </div>
     </div>
   {% endfor %}
-  </div>
+</div>
 
   <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Editing Comment</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        {{form.comment}}
+        <form action="" method="POST" enctype="multipart/form-data">
+          <textarea class="form-control" id="message-text" name = "comment_edit">{{comment}}</textarea>
+        </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" name = "comment_edit" id = 'comment_submit'>Save changes</button>
       </div>
     </div>
   </div>
@@ -144,11 +146,38 @@
    });
   }
 
-  function editComment(id) {  //sends to python route for dislikes without updating 
-    const url = `/comment_edit/${id}`;
+ var commentID = 0
+ const submit = document.querySelector('#comment_submit')
+
+ submit.addEventListener('click', () =>{ 
+    editComment(commentID)
+  })
+
+
+
+  function getComment(id) {  //gets comment data and inputs it into the textbox
+    const url = `/get_comment/${id}`;
     console.log(url);
     fetch(url, {
       method: 'POST',
+    }).then(response => {
+    return response.json();
+   }).then (response_data => {
+    let data = response_data
+    var x = document.getElementById("message-text").value = data;
+  commentID = id
+   })
+  }
+
+
+
+  function editComment(commentID) {  //sends to python route for dislikes without updating
+    const url = `/edit_comment/${commentID}`;
+    var newComment = document.getElementById("message-text").value;
+    console.log(url);
+    fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(newComment),
     }).then((response) => {
     console.log(response)
    });
@@ -157,11 +186,9 @@
 const toggle = document.querySelector('.fa-thumbs-up')
 const numUpdate = document.querySelector('#count')
 var current_user_is_anony = '{{current_user_check}}'
-console.log(current_user_is_anony)
 
   toggle.addEventListener('click', () =>{ // checks status for users
   if (current_user_is_anony == "True"){
-    console.log('Anonymous')
     likeDislike()
   }
   else{
