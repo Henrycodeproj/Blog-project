@@ -83,6 +83,7 @@ body{
     font-weight: 700;
 }
 .comment_submit_button{
+    text-transform: capitalize;
     margin:5px 0px 5px 0px;
 }
 .views{

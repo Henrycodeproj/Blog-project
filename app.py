@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import unique
 from flask_login.mixins import AnonymousUserMixin
-from flask import Flask, json, render_template, request, url_for, redirect, flash, jsonify, make_response
+from flask import Flask, json, render_template, request, url_for, redirect, flash, jsonify, stream_with_context, Response
 from flask_login.utils import login_required, login_user, logout_user
 from flask.sessions import NullSession
 from flask_bootstrap import Bootstrap
@@ -20,12 +20,14 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 from flask_mail import Mail, Message
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-#from sqlalchemy import func
+#from gevent import monkey; monkey.patch_all()
+#from gevent.pywsgi import WSGIServer
 from sqlalchemy.sql.expression import func
 import random
 import datetime
 import os
 import secrets
+import time
 
 
 app = Flask(__name__)
@@ -216,6 +218,17 @@ If you did not send this email, please ignore this message.
 '''
     mail.send(message)
 
+'''@app.route("/listen")   #SSE(server sent events) setup if ever needed
+def listen():
+
+  def respond_to_client():
+    while True:
+        fun = 1
+        #_data = json.dumps({"color":color, "counter":counter})
+        yield f"id: 1\ndata: {fun}\nevent: online\n\n"
+        time.sleep(1)
+  return Response(respond_to_client(), mimetype='text/event-stream')'''
+  
 #homepage
 @app.route ('/')
 def index():
@@ -409,7 +422,7 @@ def edit_comment(commentID):
         user_comment.comment = new_comment
         db.session.add(user_comment)
         db.session.commit()
-        return "success 200"
+        return jsonify(user_comment.comment)
     return "success"
 
 @app.route('/get_comment/<commentID>', methods = ["POST"])
@@ -475,10 +488,10 @@ def public_user_dashboard(poster):
         if user.username == current_user.username:
             return redirect(url_for('dashboard'))
         elif current_user != user.username:
-            if poster not in view_count.get(current_user.id):
-                user.profile_views += 1
-                view_count[current_user.id].append(user.username)
-                print(view_count)
+            #if poster not in view_count.get(current_user.id):
+            #    user.profile_views += 1
+            #    view_count[current_user.id].append(user.username)
+            #    print(view_count)
             db.session.commit()
     return render_template('public_profile.html', user = user, user_followers = len(user.followers))
 
@@ -578,3 +591,5 @@ def logout():
 if __name__ == '__main__':
     db.create_all()
     app.run(debug=True)
+    #http_server = WSGIServer(("localhost", 5000), app)
+    #http_server.serve_forever()
