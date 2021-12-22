@@ -22,8 +22,8 @@ from flask_mail import Mail, Message
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from pytz import timezone
 from sqlalchemy.sql.expression import func
-from gevent import monkey; monkey.patch_all()
-from gevent.pywsgi import WSGIServer
+#from gevent import monkey; monkey.patch_all()
+#from gevent.pywsgi import WSGIServer
 import pytz
 import random
 import datetime
@@ -220,7 +220,7 @@ If you did not send this email, please ignore this message.
 '''
     mail.send(message)
 
-@app.route("/sse")
+'''@app.route("/sse")
 def sse():
     return render_template('ses.html')
     
@@ -229,11 +229,14 @@ def listen():
 
   def respond_to_client():
     while True:
-        color = 'red'
-        _data = json.dumps({"color":color})
-        yield f"id: 1\ndata: {_data}\nevent: online\n\n"
+        comment = Comments.query.all()
+        if len(Comments.query.all()) != 1:
+            for id in comment:
+                print(id.id)
+                _data = json.dumps=({'comment':str(id.id), "color":'red'})
+                yield f"id: 1\ndata: {_data}\nevent: online\n\n"
         time.sleep(1)
-  return Response(respond_to_client(), mimetype='text/event-stream')
+  return Response(respond_to_client(), mimetype='text/event-stream')'''
   
 #homepage
 @app.route ('/')
@@ -277,6 +280,14 @@ def followers(posting_user):
     random_user.followers.append(current_user)
     db.session.commit()
     return redirect(url_for('index'))
+
+@app.route('/unfollow/<posting_user>', methods = ["GET"])
+def unfollow(posting_user):
+    if request.method == "GET":
+        random_user = Users.query.get(posting_user)
+        random_user.followers.remove(current_user)
+        db.session.commit()
+    return "success"
 
 @app.route ('/tag/<category>')
 def categories(category):
@@ -421,6 +432,12 @@ def delete_comment(commentID):
         db.session.delete(user_comment)
         db.session.commit()
     return "success"
+
+@app.route('/random', methods = ["GET", "POST"])
+def randoming():
+    if request.method == "GET":
+        word = "hello"
+        return jsonify(word)
 
 @app.route('/edit_comment/<commentID>', methods = ['POST'])
 def edit_comment(commentID):

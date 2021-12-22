@@ -97,6 +97,7 @@
       <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           <button type="button" class="btn btn-primary" data-bs-dismiss="modal" name = "comment_edit" id = 'comment_submit'>Save changes</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" name = "comment_edit" id = 'comment_submit' onclick= "test()">S</button>
       </div>
     </div>
   </div>
@@ -133,6 +134,16 @@
       method: 'POST',
     }).then((response) => {
     console.log(response)
+   });
+  }
+
+  function test() {  //sends to python route for dislikes without updating 
+    const url = `/random`;
+    //console.log(url);
+    fetch(url, {
+      method: "GET",
+    }).then((response) => {
+    console.log(response.json())
    });
   }
 

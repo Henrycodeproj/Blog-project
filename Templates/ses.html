@@ -13,14 +13,13 @@
     var eventSource = new EventSource("/listen")
     
     eventSource.addEventListener("message", function(e) {
-      console.log(e.data.color)
     }, true)
 
     eventSource.addEventListener("online", function(e) {
       console.log(e.data.color)
       data = JSON.parse(e.data)
       console.log(data.color)
-      document.querySelector("#counter").innerText = data.counter
+      document.querySelector("#counter").innerText = data.comment
       document.querySelector("body").style.background= data.color
     }, true)
 

@@ -96,9 +96,15 @@
           -{{post.posting_user}}
         </a>
         {% if post.poster.username != current_user.username%}
+        {% if post.poster is in current_user.following%}
         <div>
-          <a class= "btn btn-dark btn-sm" href="{{url_for('followers', posting_user = post.poster.id )}}">Follow</button></a>
+          <div class= "btn btn-secondary btn-sm" onclick="unfollow('{{post.poster.id}}')" id = "following">Following<i class="fas fa-check-circle"></i></div>
         </div>
+        {% else %}
+          <div>
+            <a class= "btn btn-dark btn-sm" href="{{url_for('followers', posting_user = post.poster.id )}}" id = "notFollowing">Follow</button></a>
+          </div>
+        {% endif %}
         {% endif %}
       </div>
       {% else %}
@@ -107,9 +113,15 @@
         -{{post.posting_user}}
       </a>
       {%if post.poster.username != current_user.username %}
-      <div>
-        <a class= "btn btn-dark btn-sm" href="{{url_for('followers', posting_user = post.poster.id )}}">Follow</button></a>
-      </div>
+        {% if post.poster is in current_user.following%}
+        <div>
+          <div class= "btn btn-secondary btn-sm" onclick="unfollow('{{post.poster.id}}')" id = "following">Following<i class="fas fa-check-circle"></i></div>
+        </div>
+        {% else %}
+          <div>
+            <a class= "btn btn-dark btn-sm" href="{{url_for('followers', posting_user = post.poster.id )}}" id = "notFollowing">Follow</button></a>
+          </div>
+        {% endif %}
       {% endif %}
     </div>
       {% endif %}
@@ -243,3 +255,20 @@
 
 {% endblock %}
 
+{%block js%}
+<script>
+  function unfollow(id) {  //sends to python route for dislikes without updating
+      const url = `/unfollow/${id}`;
+    console.log(url);
+    fetch(url, {
+      method: 'GET',
+    }).then((response) => {
+      var unfollow =response.json
+      var following = document.getElementById('following')
+      if (unfollow = "success"){
+        following.classList.remove('btn', 'btn-secondary', 'btn-sm')
+      }
+   });
+  }
+</script>
+{%endblock%}
