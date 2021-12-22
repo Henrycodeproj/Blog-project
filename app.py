@@ -20,9 +20,11 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 from flask_mail import Mail, Message
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-#from gevent import monkey; monkey.patch_all()
-#from gevent.pywsgi import WSGIServer
+from pytz import timezone
 from sqlalchemy.sql.expression import func
+from gevent import monkey; monkey.patch_all()
+from gevent.pywsgi import WSGIServer
+import pytz
 import random
 import datetime
 import os
@@ -218,16 +220,20 @@ If you did not send this email, please ignore this message.
 '''
     mail.send(message)
 
-'''@app.route("/listen")   #SSE(server sent events) setup if ever needed
+@app.route("/sse")
+def sse():
+    return render_template('ses.html')
+    
+@app.route("/listen")   #SSE(server sent events) setup if ever needed
 def listen():
 
   def respond_to_client():
     while True:
-        fun = 1
-        #_data = json.dumps({"color":color, "counter":counter})
-        yield f"id: 1\ndata: {fun}\nevent: online\n\n"
+        color = 'red'
+        _data = json.dumps({"color":color})
+        yield f"id: 1\ndata: {_data}\nevent: online\n\n"
         time.sleep(1)
-  return Response(respond_to_client(), mimetype='text/event-stream')'''
+  return Response(respond_to_client(), mimetype='text/event-stream')
   
 #homepage
 @app.route ('/')
@@ -399,7 +405,9 @@ def expanded_post(postID):
         #     view_count[current_user.id].append(postID)
          db.session.commit()
     if request.method == "POST":
-        comment = Comments(comment=form.comment.data, post_id = postID, date = datetime.datetime.now().date(), posting_user = current_user.username, poster_id = current_user.id)
+        date = datetime.datetime.now(tz=pytz.utc)
+        date = date.astimezone(timezone('US/Pacific'))
+        comment = Comments(comment=form.comment.data, post_id = postID, date = date.strftime("%m/%d/%y %I:%M%p"), posting_user = current_user.username, poster_id = current_user.id)
         db.session.add(comment)
         db.session.commit()
         return redirect(url_for('expanded_post', postID = postID))
