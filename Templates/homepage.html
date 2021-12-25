@@ -86,7 +86,6 @@
 
 <div class = "container">
   <div class = "flex">
-    <!-- <div class = 'pas'>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Deserunt dicta minima aperiam. Voluptatum delectus nulla deserunt commodi, sed id quo voluptate asperiores necessitatibus eligendi iste ea repellendus aut? Eius culpa optio reiciendis ipsa neque vitae, consectetur voluptas! Cumque debitis, aperiam fuga nam odit ipsa? Beatae sequi sint at delectus unde quibusdam repellendus veniam hic. Iusto delectus dignissimos quo. Laudantium labore voluptatum cupiditate eligendi perferendis modi assumenda temporibus reprehenderit aut eaque? Dolor placeat, amet voluptatum, dignissimos cum libero cupiditate quod illo soluta nemo quaerat dicta! Hic ipsum ut libero labore mollitia accusamus magnam tenetur blanditiis temporibus nesciunt, nobis perspiciatis, numquam dolore.</div> -->
     <div class = "d-flex flex-column wrap">
     {% for post in posts.items %}
     <div class = "post_container posting">
@@ -96,15 +95,17 @@
           -{{post.posting_user}}
         </a>
         {% if post.poster.username != current_user.username%}
-        {% if post.poster is in current_user.following%}
-        <div>
-          <div class= "btn btn-secondary btn-sm" onclick="unfollow('{{post.poster.id}}')" id = "following">Following<i class="fas fa-check-circle"></i></div>
-        </div>
-        {% else %}
-          <div>
-            <a class= "btn btn-dark btn-sm" href="{{url_for('followers', posting_user = post.poster.id )}}" id = "notFollowing">Follow</button></a>
-          </div>
-        {% endif %}
+          {%if anonymous_check != True %}
+            {% if post.poster is in current_user.following%}
+            <div>
+              <div class= "btn btn-secondary btn-sm following" id = "following" onclick="getUserID('{{post.poster.id}}')">Following <i class="fas fa-check-circle" id = "check"></i></div>
+            </div>
+            {% else %}
+              <div>
+                <div class= "btn btn-dark btn-sm follow" id = "following" onclick="getUserID('{{post.poster.id}}')">Follow <i id = "check"></i></div>
+              </div>
+            {% endif %}
+          {%endif%}
         {% endif %}
       </div>
       {% else %}
@@ -113,14 +114,16 @@
         -{{post.posting_user}}
       </a>
       {%if post.poster.username != current_user.username %}
-        {% if post.poster is in current_user.following%}
-        <div>
-          <div class= "btn btn-secondary btn-sm" onclick="unfollow('{{post.poster.id}}')" id = "following">Following<i class="fas fa-check-circle"></i></div>
-        </div>
-        {% else %}
+        {%if anonymous_check != True %}
+          {% if post.poster is in current_user.following%}
           <div>
-            <a class= "btn btn-dark btn-sm" href="{{url_for('followers', posting_user = post.poster.id )}}" id = "notFollowing">Follow</button></a>
+            <div class= "btn btn-secondary btn-sm following" id = "following" onclick="getUserID('{{post.poster.id}}')">Following <i class="fas fa-check-circle" id = "check"></i></div>
           </div>
+          {% else %}
+            <div>
+              <div class= "btn btn-dark btn-sm follow" id = "following" onclick="getUserID('{{post.poster.id}}')">Follow<i id = "check"></i></div>
+            </div>
+          {% endif %}
         {% endif %}
       {% endif %}
     </div>
@@ -215,6 +218,7 @@
               <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Horror' )}}">Horror</a></li>
               <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Fighting' )}}">Fighting</a></li>
               <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Other' )}}">Other</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'off-topic' )}}" id = "anything">Off-topic</a></li>
             </ol>
           </div>
 
@@ -250,25 +254,56 @@
           </div>
       </div>
     </div>
-
 </div> 
 
 {% endblock %}
 
 {%block js%}
 <script>
-  function unfollow(id) {  //sends to python route for dislikes without updating
-      const url = `/unfollow/${id}`;
-    console.log(url);
-    fetch(url, {
-      method: 'GET',
-    }).then((response) => {
-      var unfollow =response.json
-      var following = document.getElementById('following')
-      if (unfollow = "success"){
-        following.classList.remove('btn', 'btn-secondary', 'btn-sm')
-      }
-   });
+
+ var button = document.getElementById('following')
+ var check = document.getElementById('check')
+ 
+ function getUserID(ID){
+  return followUnfollow(ID)
+ }
+
+//  button.addEventListener('click', ()=>{
+//   followUnfollow(getUserID)
+// });
+
+function followUnfollow(ID){
+ if(button.classList.contains('follow')){
+    button.classList.remove('btn', 'btn-dark', 'btn-sm','follow')
+    button.classList.add('btn', 'btn-secondary', 'btn-sm','following')
+    button.innerText = "Following"
+    button.appendChild(check)
+    check.classList.add('fas','fa-check-circle')
+    follow(ID)
+   }
+  else if(button.classList.contains('following')){
+    button.classList.remove('btn', 'btn-secondary', 'btn-sm','following')
+    button.classList.add('btn', 'btn-dark', 'btn-sm','follow')
+    button.innerText = "Follow"
+    check.classList.remove('fas', 'fa-check-circle')
+    unfollow(ID)
   }
-</script>
+};
+function unfollow(ID) {  //sends to python route for dislikes without updating
+    const url = `/unfollow/${ID}`;
+  fetch(url, {
+    method: 'POST',
+  }).then((response) => {
+    var unfollow =response.json
+    var following = document.getElementById('following')
+ });
+}
+function follow(ID) {  //sends to python route for dislikes without updating
+    const url = `/follow/${ID}`;
+  fetch(url, {
+    method: 'POST',
+  }).then((response) => {
+ });
+}
+// </script>
 {%endblock%}

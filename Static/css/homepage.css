@@ -238,6 +238,12 @@ body{
     display:flex;
     flex-direction: row;
 }
+#anything{
+    font-weight: bolder;
+}
+.fa-check-circle{
+    margin-left: 5px;
+}
 .tree{
     border-style: solid;
     color: rgba(0, 0, 0, 0.144);

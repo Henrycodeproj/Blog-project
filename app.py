@@ -1,12 +1,16 @@
 from datetime import datetime
 from enum import unique
+from flask_admin.actions import action
 from flask_login.mixins import AnonymousUserMixin
 from flask import Flask, json, render_template, request, url_for, redirect, flash, jsonify, stream_with_context, Response
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
 from flask_login.utils import login_required, login_user, logout_user
 from flask.sessions import NullSession
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import Pagination, SQLAlchemy
 from flask_login import current_user, UserMixin, LoginManager
+from flask_sqlalchemy.model import Model
 from itsdangerous.serializer import Serializer
 from sqlalchemy.orm import dynamic_loader, relation, relationship
 from sqlalchemy.sql.functions import ReturnTypeFromArgs, user
@@ -27,13 +31,16 @@ from sqlalchemy.sql.expression import func
 import pytz
 import random
 import datetime
-import os
+import os 
 import secrets
 import time
+from flask_admin.contrib.fileadmin import FileAdmin
+import os.path as op
 
 
 app = Flask(__name__)
 Bootstrap(app)
+
 
 UPLOAD_FOLDER = 'static/images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -44,11 +51,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
-
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
-app.config['MAIL_USERNAME'] = 'lihenryhl.work@gmail.com'
-app.config['MAIL_PASSWORD'] = 'Creation101'
+app.config['MAIL_USERNAME'] = os.environ['MAIL_USERNAME']
+app.config['MAIL_PASSWORD'] = os.environ['MAIL_PASSWORD']
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 
@@ -99,8 +105,6 @@ class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
                              backref= db.backref('followers', lazy=True), lazy=True,
                              )
 
-
-
 class Posts(db.Model): #post skeleton and columns
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(50))
@@ -127,6 +131,26 @@ class Categories(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     category = db.Column(db.String(255))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+
+class MyModelView(ModelView):
+    def is_accessible(self):
+        return current_user.is_authenticated
+
+    def delete_model(self, model):
+        old_image = model.image # removes old photo from folder before updating
+        path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
+        os.remove(path)
+        self.session.delete(model)
+        self.session.commit()
+
+admin = Admin(app)
+admin.add_view(MyModelView(Users, db.session))
+admin.add_view(MyModelView(Posts, db.session))
+admin.add_view(MyModelView(Comments, db.session))
+
+path = op.join(op.dirname(__file__), 'static')
+admin.add_view(FileAdmin(path, name='Static Files'))
+
 
 #routes that handle likes, does not return anything a template
 @app.route('/likes/<post_id>', methods = ["GET", "POST"]) 
@@ -190,7 +214,8 @@ def hex(file):
     return random_hex + split[1]
 
 def word_check(word_data):
-    word_set ={'penis','nigga','queer','fag','pussy','cunt','douche','nigger','retard','gay','chink'}
+    word_set = os.environ['Filtered_Words']
+    #{'penis','nigga','queer','fag','pussy','cunt','douche','nigger','retard','gay','chink'}
     if word_data in word_set:
         return True
     else:
@@ -237,6 +262,10 @@ def listen():
                 yield f"id: 1\ndata: {_data}\nevent: online\n\n"
         time.sleep(1)
   return Response(respond_to_client(), mimetype='text/event-stream')'''
+
+@app.route("/testing")
+def testing():
+    return render_template('test.html')
   
 #homepage
 @app.route ('/')
@@ -257,7 +286,7 @@ def index():
                 random_users_list.append(top_post_id)
         else:
             break
-    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, random_users_list = random_users_list, current_user = current_user)
+    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, random_users_list = random_users_list, current_user = current_user, anonymous_check = current_user.is_anonymous)
 
 @app.route ('/user/<username>')
 def all_post(username):
@@ -274,19 +303,25 @@ def all_post(username):
         return redirect(url_for('dashboard'))
     return render_template("total_users_post.html", posts = posts, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, user = user, loggedin = current_user.is_active, newest_posts = newest_posts)
 
-@app.route('/followers/<posting_user>', methods = ["GET","POST"])
+@app.route('/follow/<posting_user>', methods = ["GET","POST"])
+@login_required
 def followers(posting_user):
-    random_user = Users.query.get(posting_user)
-    random_user.followers.append(current_user)
-    db.session.commit()
-    return redirect(url_for('index'))
+    if request.method == "POST":
+        random_user = Users.query.get(posting_user)
+        print(random_user)
+        random_user.followers.append(current_user)
+        db.session.commit()
+        print('following')
+    return "success"
 
-@app.route('/unfollow/<posting_user>', methods = ["GET"])
+@app.route('/unfollow/<posting_user>', methods = ["GET","POST"])
+@login_required
 def unfollow(posting_user):
-    if request.method == "GET":
+    if request.method == "POST":
         random_user = Users.query.get(posting_user)
         random_user.followers.remove(current_user)
         db.session.commit()
+        print('unfollow')
     return "success"
 
 @app.route ('/tag/<category>')
@@ -401,6 +436,7 @@ def delete(postID):
 @app.route('/view/<postID>', methods = ["POST", "GET"])
 def expanded_post(postID):
     show_comments = Comments.query.filter_by(post_id = postID).all() #gets all post that equals the to current post
+    print(show_comments)
     original_poster = Posts.query.get(postID)
     expanded_post=Posts.query.get(postID)
     number_of_likes = expanded_post.liking
@@ -436,8 +472,20 @@ def delete_comment(commentID):
 @app.route('/random', methods = ["GET", "POST"])
 def randoming():
     if request.method == "GET":
-        word = "hello"
+        word = [{
+            'id':1,
+            'comment':'first'
+        },
+        {
+            'id':2,
+            'comment':'second'
+        }
+        ]
         return jsonify(word)
+
+@app.route('/info')
+def experiment():
+    return render_template('testing.html')
 
 @app.route('/edit_comment/<commentID>', methods = ['POST'])
 def edit_comment(commentID):

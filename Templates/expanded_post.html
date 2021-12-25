@@ -32,7 +32,7 @@
 
   <div class = "comments_title">Comments   <i class="far fa-comment"></i></div>
   {% if loggedin == True %}
-    <form action="" method="POST">
+    <form action="" method="POST" >
       <div class = "post_wrapper">
         {% if current_user_check == False %}
           {% if current_user.profimage == None or '' %}
@@ -50,7 +50,7 @@
   {% for comment in show_comments %}
     <div class = "d-flex wrapper" id = {{comment.id}}wrap>
       <div>
-        {%if comment.profimage == None %}
+        {%if comment.commentor.profimage == None %}
           <a href="{{url_for('public_user_dashboard', poster = comment.posting_user )}}"><img class = "comment_thumbnail" src="{{url_for('static', filename='/images/default.jpg')}}" alt=""></a>
         {% else %}
           <a href="{{url_for('public_user_dashboard', poster = comment.posting_user )}}"><img class = "comment_thumbnail" src="{{url_for('static', filename='/images/' + comment.commentor.   profimage)}}" alt=""></a>
@@ -97,7 +97,6 @@
       <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           <button type="button" class="btn btn-primary" data-bs-dismiss="modal" name = "comment_edit" id = 'comment_submit'>Save changes</button>
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" name = "comment_edit" id = 'comment_submit' onclick= "test()">S</button>
       </div>
     </div>
   </div>
@@ -201,7 +200,7 @@
 
 const toggle = document.querySelector('.fa-thumbs-up')
 const numUpdate = document.querySelector('#count')
-var current_user_is_anony = '{{current_user_check}}'
+var current_user_is_anony = '{{current_user_check|safe}}'
 
   toggle.addEventListener('click', () =>{ // checks status for users
   if (current_user_is_anony == "True"){
