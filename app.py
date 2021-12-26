@@ -1,9 +1,11 @@
 from datetime import datetime
 from enum import unique
 from flask_admin.actions import action
+from flask_admin.base import AdminIndexView
+import flask_login
 from flask_login.mixins import AnonymousUserMixin
-from flask import Flask, json, render_template, request, url_for, redirect, flash, jsonify, stream_with_context, Response
-from flask_admin import Admin
+from flask import Flask, json, render_template, request, url_for, redirect, flash, jsonify, stream_with_context, Response, abort
+from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_login.utils import login_required, login_user, logout_user
 from flask.sessions import NullSession
@@ -25,7 +27,7 @@ from PIL import Image
 from flask_mail import Mail, Message
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from pytz import timezone
-from sqlalchemy.sql.expression import func
+from sqlalchemy.sql.expression import func, intersect_all
 #from gevent import monkey; monkey.patch_all()
 #from gevent.pywsgi import WSGIServer
 import pytz
@@ -105,6 +107,13 @@ class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
                              backref= db.backref('followers', lazy=True), lazy=True,
                              )
 
+    def is_admin(self):
+        admins = ['henry','test']
+        if self.username in admins:
+            return True
+        else:
+            return False
+
 class Posts(db.Model): #post skeleton and columns
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(50))
@@ -116,7 +125,7 @@ class Posts(db.Model): #post skeleton and columns
     likes = db.Column(db.Integer)
     dislikes = db.Column(db.Integer)
     poster_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    comments = db.relationship('Comments', backref = 'user_comments', lazy = True)
+    comments = db.relationship('Comments', backref = 'user_comments', lazy = False)
     genres = db.relationship('Categories', backref='genre', lazy=True)
 
 class Comments(db.Model):
@@ -132,25 +141,60 @@ class Categories(db.Model):
     category = db.Column(db.String(255))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
 
+
 class MyModelView(ModelView):
+    def authorize(self):
+        return (current_user.username)
+
+        if self != 'henry':
+            column_exclude_list = ['password']
+
     def is_accessible(self):
-        return current_user.is_authenticated
+        if current_user.is_admin():
+            return True
+        else:
+            redirect(url_for('index'))
+            return False
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('login'))
 
     def delete_model(self, model):
-        old_image = model.image # removes old photo from folder before updating
-        path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
-        os.remove(path)
-        self.session.delete(model)
-        self.session.commit()
+        if hasattr(model,'image'):
+            previous_category = model.genres[0]
+            previous_comments = model.comments
+            old_image = model.image # removes old photo from folder before updating
+            for comments in previous_comments:
+                self.session.delete(comments)
+            self.session.delete(model)
+            self.session.delete(previous_category)
+            self.session.commit()
+            path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
+            os.remove(path)
+            model.poster.total_post-=1
+        else:
+            self.session.delete(model)
+            self.session.commit()
+        return flash('Succesfully deleted post.', 'success')
 
-admin = Admin(app)
+class Files(FileAdmin):
+    def is_visible(self):
+        if current_user.is_admin():
+            return True
+        return False
+
+class allowedAdminView(AdminIndexView):
+    def is_accessible(self):
+            return current_user.is_admin()
+
+
+admin = Admin(app, index_view=allowedAdminView())
 admin.add_view(MyModelView(Users, db.session))
 admin.add_view(MyModelView(Posts, db.session))
 admin.add_view(MyModelView(Comments, db.session))
 
-path = op.join(op.dirname(__file__), 'static')
-admin.add_view(FileAdmin(path, name='Static Files'))
-
+path = op.join(op.dirname(__file__), 'static/images')
+admin.add_view(Files(path, name='Uploaded Images'))
 
 #routes that handle likes, does not return anything a template
 @app.route('/likes/<post_id>', methods = ["GET", "POST"]) 
@@ -174,8 +218,6 @@ def dislikes(post_id):
         print('successfully removed')
         return "success"
     
-
-
 '''@app.route('/test') #How I will add tags, finally 
 def test():
     adventure=Adventure(title = "test2")
@@ -270,6 +312,7 @@ def testing():
 #homepage
 @app.route ('/')
 def index():
+    test=Posts.query.first()
     hottest_post=db.session.query(func.max(Posts.article_views)).scalar()
     hottest_post_id=Posts.query.filter_by(article_views = hottest_post).first()
     page = request.args.get('page', 1, type = int)
@@ -420,13 +463,15 @@ def delete(postID):
         delete_id = Posts.query.get(postID)
         category_id = Categories.query.filter_by(post_id = delete_id.id).first()
         #category_id = Categories.filter_by()
-        old_image = delete_id.image # removes old photo from folder before updating
-        path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
-        os.remove(path)
         current_user.total_post -= 1
+        for comments in delete_id.comments:
+            db.session.delete(comments)
         db.session.delete(delete_id)
         db.session.delete(category_id)
         db.session.commit()
+        old_image = delete_id.image # removes old photo from folder before updating
+        path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
+        os.remove(path)
         flash('Your post has been sucessfully deleted', 'success')
         return redirect(url_for('index'))
     except:
@@ -482,6 +527,7 @@ def randoming():
         }
         ]
         return jsonify(word)
+    return '<h1>hello</h1>'
 
 @app.route('/info')
 def experiment():
@@ -552,9 +598,12 @@ def dashboard():
     return render_template("Dashboard.html", name = current_user.name, last_logged = current_user.last_login, profimage = current_user.profimage, description = current_user.description, views = current_user.profile_views, total_post = current_user.total_post, username = current_user.username, current_user = current_user, follower_count = len(current_user.followers))
 
 #public profiles for each poster
-@app.route('/dashboard/<poster>')
+@app.route('/public_dashboard/<poster>')
 def public_user_dashboard(poster):
     user = Users.query.filter_by(username = poster).first()
+    if user == None:
+        flash('There is no user with that username.','no_post')
+        return redirect(url_for('index'))
     if user.is_anonymous == True:
         return render_template('public_profile.html', user = user)
     if current_user.is_active:
@@ -582,7 +631,7 @@ def login():
                 flash('You have been successfully logged in!', 'success')
                 view_count[current_user.id] = []
                 print(view_count)
-                print(current_user.following)
+                print(MyModelView.authorize(current_user.username))
                 return redirect(url_for('dashboard'))
         flash('Incorrect username or password', 'login_error')  
         return redirect(url_for('login'))

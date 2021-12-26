@@ -29,6 +29,38 @@
 {% endblock %}
 
 {% block body %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for category, message in messages %}
+    {% if category == "edit"%}
+    <div class="alert alert-info alert-dismissible fade show container">
+        <strong>{{ message }}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+    {% if category == "false_user"%}
+    <div class="alert alert-danger alert-dismissible fade show container">
+        <strong>{{ message }}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+    {% if category == "no_post"%}
+    <div class="alert alert-danger alert-dismissible fade show container">
+        <strong>{{ message }}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+    {% if category == "success"%}
+    <div class="alert alert-success alert-dismissible fade show container">
+        <strong>{{ message }}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+    </ul>
+  {% endfor %}
+  {% endif %}
+{% endwith %}
 
 <div class = "container welcome-intro">
   {% if user.profimage == None%}
