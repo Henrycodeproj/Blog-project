@@ -17,6 +17,7 @@ from itsdangerous.serializer import Serializer
 from sqlalchemy.orm import dynamic_loader, relation, relationship
 from sqlalchemy.sql.functions import ReturnTypeFromArgs, user
 from sqlalchemy.sql.schema import ForeignKey, PrimaryKeyConstraint
+from werkzeug.datastructures import Authorization
 from wtforms.fields.core import BooleanField
 from wtforms.fields.simple import SubmitField
 from wtforms.validators import ValidationError
@@ -27,7 +28,8 @@ from PIL import Image
 from flask_mail import Mail, Message
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from pytz import timezone
-from sqlalchemy.sql.expression import func, intersect_all
+from sqlalchemy.sql.expression import column, func, intersect_all
+from flask_admin.contrib.fileadmin import FileAdmin
 #from gevent import monkey; monkey.patch_all()
 #from gevent.pywsgi import WSGIServer
 import pytz
@@ -36,7 +38,6 @@ import datetime
 import os 
 import secrets
 import time
-from flask_admin.contrib.fileadmin import FileAdmin
 import os.path as op
 
 
@@ -53,6 +54,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
+
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USERNAME'] = os.environ['MAIL_USERNAME']
@@ -65,6 +67,7 @@ mail = Mail(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+login_manager.session_protection = "basic"
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -111,8 +114,6 @@ class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
         admins = ['henry','test']
         if self.username in admins:
             return True
-        else:
-            return False
 
 class Posts(db.Model): #post skeleton and columns
     id = db.Column(db.Integer, primary_key=True)
@@ -126,7 +127,7 @@ class Posts(db.Model): #post skeleton and columns
     dislikes = db.Column(db.Integer)
     poster_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     comments = db.relationship('Comments', backref = 'user_comments', lazy = False)
-    genres = db.relationship('Categories', backref='genre', lazy=True)
+    genres = db.relationship('Categories', backref='genre', lazy=True, uselist = False)
 
 class Comments(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -141,14 +142,7 @@ class Categories(db.Model):
     category = db.Column(db.String(255))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
 
-
 class MyModelView(ModelView):
-    def authorize(self):
-        return (current_user.username)
-
-        if self != 'henry':
-            column_exclude_list = ['password']
-
     def is_accessible(self):
         if current_user.is_admin():
             return True
@@ -180,19 +174,22 @@ class MyModelView(ModelView):
 class Files(FileAdmin):
     def is_visible(self):
         if current_user.is_admin():
+            print(current_user)
             return True
         return False
 
 class allowedAdminView(AdminIndexView):
     def is_accessible(self):
-            return current_user.is_admin()
+        if current_user.is_anonymous:
+            return False
+        return current_user.is_admin()
+
 
 
 admin = Admin(app, index_view=allowedAdminView())
 admin.add_view(MyModelView(Users, db.session))
 admin.add_view(MyModelView(Posts, db.session))
 admin.add_view(MyModelView(Comments, db.session))
-
 path = op.join(op.dirname(__file__), 'static/images')
 admin.add_view(Files(path, name='Uploaded Images'))
 
@@ -257,7 +254,6 @@ def hex(file):
 
 def word_check(word_data):
     word_set = os.environ['Filtered_Words']
-    #{'penis','nigga','queer','fag','pussy','cunt','douche','nigger','retard','gay','chink'}
     if word_data in word_set:
         return True
     else:
@@ -313,6 +309,7 @@ def testing():
 @app.route ('/')
 def index():
     test=Posts.query.first()
+    #print(test.json.dumps())
     hottest_post=db.session.query(func.max(Posts.article_views)).scalar()
     hottest_post_id=Posts.query.filter_by(article_views = hottest_post).first()
     page = request.args.get('page', 1, type = int)
@@ -386,13 +383,14 @@ def upload_profile():
     profile = Addprofile()
     user = Users.query.get(current_user.id)
     if request.method == 'POST':  #allows user to add just description and passes onto to file check for further submission
-        if profile.description.data != '':
-            user.description = profile.description.data
-            db.session.add(user)
-            db.session.commit()
-            flash('You have sucessfully changed your profile description!', 'prof_description')
-            return redirect(url_for('dashboard'))
-        #check if the post request has the file part
+        if profile.validate_on_submit():
+            if profile.description.data != '':
+                user.description = profile.description.data
+                db.session.add(user)
+                db.session.commit()
+                flash('You have sucessfully changed your profile description!', 'prof_description')
+                return redirect(url_for('dashboard'))
+            #check if the post request has the file part
         if 'file' not in request.files:
             flash('There was not file uploaded!', 'no_file')
             return redirect(request.url)
@@ -433,12 +431,15 @@ def upload_profile():
                 return redirect(url_for('dashboard', name=filename))
     return render_template('upload.html', profile = profile)
 
-#post editing
-@app.route('/dashboard/edit/<postID>', methods = ["POST", "GET"])
+#post editing needs work to protect url numbers
+@app.route('/edit/<postID>', methods = ["POST", "GET"])
+@login_required
 def edit(postID):
     form = Postform()
     current_blog = Posts.query.get(postID)
-    if current_user.username != current_blog.poster.username: #checks to make sure that user editing is the right user or else returns them to homepage
+    if current_blog is None:
+        flash('This blog does not exist', 'false_user')
+    elif current_user.username != current_blog.poster.username: #checks to make sure that user editing is the right user or else returns them to homepage
         flash('Error: You are not the original poster of this user', 'false_user')
         return redirect(url_for('index'))
     elif request.method == "POST":
@@ -604,6 +605,8 @@ def public_user_dashboard(poster):
     if user == None:
         flash('There is no user with that username.','no_post')
         return redirect(url_for('index'))
+    top_post=db.session.query(func.max(Posts.article_views)).scalar()
+    top_article=Posts.query.filter_by(posting_user = user.username, article_views = top_post).first()
     if user.is_anonymous == True:
         return render_template('public_profile.html', user = user)
     if current_user.is_active:
@@ -615,7 +618,8 @@ def public_user_dashboard(poster):
             #    view_count[current_user.id].append(user.username)
             #    print(view_count)
             db.session.commit()
-    return render_template('public_profile.html', user = user, user_followers = len(user.followers))
+    print(current_user)
+    return render_template('public_profile.html', user = user, user_followers = len(user.followers), current_user = current_user, top_article = top_article)
 
 #login method/handler
 @app.route('/login', methods = ["POST", "GET"])
@@ -631,7 +635,6 @@ def login():
                 flash('You have been successfully logged in!', 'success')
                 view_count[current_user.id] = []
                 print(view_count)
-                print(MyModelView.authorize(current_user.username))
                 return redirect(url_for('dashboard'))
         flash('Incorrect username or password', 'login_error')  
         return redirect(url_for('login'))
@@ -705,7 +708,7 @@ def logout():
     current_user.last_login = datetime.datetime.now().date()
     db.session.commit()
     print(view_count)
-    #view_count.pop(current_user.id)
+    #view_count.pop(current_user.id) # takes user out of viewcount dict
     logout_user()
     flash('You have been successfully logged out', 'logout')
     return redirect(url_for("login"))

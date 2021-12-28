@@ -109,6 +109,7 @@
             {% endif %}
 
             <li class="list-group-item list-group-item-light right-bar">
+              <i class="fas fa-fire"></i>
               <span class = "sidebar_header">Hotest article:</span>
               <span>
                 <a class = "hottest_link" href="{{url_for('expanded_post', postID = hottest_post_id.id)}}">{{hottest_post_id.title}}</a>
@@ -131,6 +132,7 @@
             <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Horror' )}}">Horror</a></li>
             <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Fighting' )}}">Fighting</a></li>
             <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Other' )}}">Other</a></li>
+            <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'off-topic' )}}" id = "anything">Off-topic</a></li>
           </ol>
         </div>
       </div>

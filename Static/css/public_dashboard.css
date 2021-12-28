@@ -19,11 +19,14 @@ text-align: center;
 p {
     margin: 0
 }
-.fa-user-circle{
-    padding-right:10px;
+strong{
+    text-transform: capitalize;
 }
 .fa-icons{
     padding-right:10px;
+}
+.check{
+    padding:0px;
 }
 .container {
     margin: 20px auto;
@@ -110,6 +113,13 @@ p {
     text-decoration: none;
     color:black;
 }
+.follow_button{
+    text-align: center;
+}
+.top_article_title{
+margin-left:5px;
+text-transform: capitalize;
+}
 /* .icon1 {
     font-size: 10px;
     position: absolute;
@@ -133,16 +143,18 @@ p {
     left: 50%;
     top: -10px
 } */
-
+.accordion{
+    margin-top:20px;
+}
 .far.fa-star {
     font-size: 10px;
     padding: 10px
 }
 
-.fas.fa-check {
-    font-size: 10px;
-    padding: 10px;
-    color: #237518
+.fa-check-circle{
+    padding:0px !important;
+    font-size:15px !important;
+    color:white;
 }
 .ps-2{
     padding:0 !important;
@@ -151,6 +163,9 @@ img {
     border-radius: 50%;
     border-style: solid;
     border-color: black;
+}
+.prof-button{
+    margin-right:5px;
 }
 .prof-image{
     display:flex;

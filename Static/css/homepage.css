@@ -232,7 +232,6 @@ body{
     width: 100%;
     height: auto;
   }
-
 .testm{
     height: 100%;
     display:flex;
@@ -242,6 +241,7 @@ body{
     font-weight: bolder;
 }
 .fa-check-circle{
+    color:rgb(0, 110, 74);
     margin-left: 5px;
 }
 .tree{
@@ -272,7 +272,7 @@ body{
         width:100%;
     }
     .content-section{
-        margin:10px;
+        margin:0px;
     }
     .sidesection{
         order: 1;
@@ -287,6 +287,9 @@ body{
     }
 }
 @media (max-width:400px){
+    .sidesection{
+        margin:20px;
+    }
     .wrap{
         width:100%;
         margin: 0;

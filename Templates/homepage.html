@@ -1,55 +1,5 @@
 {% extends 'base.html' %}
 
-{% block nav%}
-    {% if loggedin == True %}
-    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-secondary nav-color">
-        <div class="container-fluid">
-          <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">Blog</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false"    aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{{ url_for('index') }}">What's New</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{{ url_for('post') }}">Post</a>
-              </li>
-            </ul>
-            <form class="d-flex">
-              <a class="btn btn-outline-info prof-button" href = "{{ url_for('dashboard') }}">Profile</a>
-              <a class="btn btn-outline-light" href = "{{ url_for('logout') }}">Logout</a>
-            </form>
-          </div>
-        </div>
-      </nav>
-      {% else %}
-      <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-secondary nav-color">
-        <div class="container-fluid">
-          <a class="navbar-brand fw-bold" href="{{url_for('index')}}">BoredGame Blogs</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link fs-5" href="{{ url_for('login') }}">Login</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link fs-5" href="{{ url_for('signup') }}">Signup</a>
-              </li>
-            </ul>
-            <form class="nav-item">
-              <a class="btn btn-outline-light" href = "{{ url_for('signup') }}">Register Here</a>
-            </form>
-          </div>
-        </div>
-      </nav>
-    {% endif %}
-
-{% endblock %}
-
 {% block body%}
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
@@ -98,12 +48,8 @@
           {%if anonymous_check != True %}
             {% if post.poster is in current_user.following%}
             <div>
-              <div class= "btn btn-secondary btn-sm following" id = "following" onclick="getUserID('{{post.poster.id}}')">Following <i class="fas fa-check-circle" id = "check"></i></div>
+              <div><i class="fas fa-check-circle" id = "check" title = "Following"></i></div>
             </div>
-            {% else %}
-              <div>
-                <div class= "btn btn-dark btn-sm follow" id = "following" onclick="getUserID('{{post.poster.id}}')">Follow <i id = "check"></i></div>
-              </div>
             {% endif %}
           {%endif%}
         {% endif %}
@@ -117,18 +63,16 @@
         {%if anonymous_check != True %}
           {% if post.poster is in current_user.following%}
           <div>
-            <div class= "btn btn-secondary btn-sm following" id = "following" onclick="getUserID('{{post.poster.id}}')">Following <i class="fas fa-check-circle" id = "check"></i></div>
+            <div><i class="fas fa-check-circle" id = "check" title = "Following"></i></div>
           </div>
-          {% else %}
-            <div>
-              <div class= "btn btn-dark btn-sm follow" id = "following" onclick="getUserID('{{post.poster.id}}')">Follow<i id = "check"></i></div>
-            </div>
           {% endif %}
         {% endif %}
       {% endif %}
     </div>
       {% endif %}
+      {%if post.image != None or '' or [] %}
       <img class = "posted_images img-fluid" src="{{url_for('static', filename='/images/' + post.image) }}" alt="Image" />
+      {% endif %}
     <div class = "title">{{ post.title }} </div>
     <div class = "bar"></div>
     <div class = "content">{{ post.content| truncate(500) }}</div>
@@ -180,7 +124,7 @@
         <!-- <h3 class = "sidebar_text">Sidebar</h3> -->
         <p class='text-muted'>
           <ul class="list-group">
-            <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Today's Date:</span> {{ current_date }}</li>
+            <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Today's Date:</span>{{ current_date }}</li>
             <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Announcements:</span> This site is still a work in progress and will always continue updating to be better </li>
 
             {% if posts.items == [] %}

@@ -24,21 +24,22 @@
   <div class = "expanded_title">{{ expanded_post.title}}</div>
   <div class = "bar"></div>
   <div>{{expanded_post.content}}</div>
-  {% if user in liked %}
-  <i class="fa fa-thumbs-up" id = "thumbs"></i><span id = "count">{{likes}}</span>
-  {% else %}
-  <i class="far fa-thumbs-up" id = "thumbs"></i><span id = "count">{{likes}}</span>
-  {% endif %}
-
+  {% if loggedin == True%}
+    {% if user in liked %}
+    <i class="fa fa-thumbs-up" id = "thumbs"></i><span id = "count">{{likes}}</span>
+    {% else %}
+    <i class="far fa-thumbs-up" id = "thumbs"></i><span id = "count">{{likes}}</span>
+    {% endif %}
+  {%endif%}
   <div class = "comments_title">Comments   <i class="far fa-comment"></i></div>
   {% if loggedin == True %}
     <form action="" method="POST" >
       <div class = "post_wrapper">
         {% if current_user_check == False %}
           {% if current_user.profimage == None or '' %}
-          <img class = "thumbnail" src="{{url_for('static', filename='/images/default.jpg') }}" alt="">
+          <img class = "post_thumbnail" src="{{url_for('static', filename='/images/default.jpg') }}" alt="">
           {% else %}
-          <img class = "spec-thumbnail" src="{{url_for('static', filename='/images/' + current_user.profimage) }}" alt="">
+          <img class = "post_thumbnail" src="{{url_for('static', filename='/images/' + current_user.profimage) }}" alt="">
           {% endif %}
         {{form.comment(cols = "2", rows = "2", placeholder = "Post a comment", class ="comment_box")}}
         </div>
