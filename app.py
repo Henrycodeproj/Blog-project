@@ -30,6 +30,9 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from pytz import timezone
 from sqlalchemy.sql.expression import column, func, intersect_all
 from flask_admin.contrib.fileadmin import FileAdmin
+from flask_ipban import IpBan
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 #from gevent import monkey; monkey.patch_all()
 #from gevent.pywsgi import WSGIServer
 import pytz
@@ -40,10 +43,16 @@ import secrets
 import time
 import os.path as op
 
-
 app = Flask(__name__)
-Bootstrap(app)
 
+'''limiter = Limiter( #limiter if I ever need it
+    app,
+    key_func=get_remote_address,
+    default_limits=["10 per day", "50 per hour"]
+)'''
+
+ip_ban = IpBan(app)
+Bootstrap(app)
 
 UPLOAD_FOLDER = 'static/images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -93,6 +102,7 @@ class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
     password = db.Column(db.String(255))
     email = db.Column(db.String(50), unique = True)
     profimage = db.Column(db.String(255))
+    hobbies = db.Column(db.String(255))
     description = db.Column(db.Text)
     date_joined = db.Column(db.String(50))
     last_login = db.Column(db.String(50))
@@ -193,7 +203,7 @@ admin.add_view(MyModelView(Comments, db.session))
 path = op.join(op.dirname(__file__), 'static/images')
 admin.add_view(Files(path, name='Uploaded Images'))
 
-#routes that handle likes, does not return anything a template
+#routes for backend, does not return templates
 @app.route('/likes/<post_id>', methods = ["GET", "POST"]) 
 @login_required
 def likes(post_id):
@@ -214,29 +224,37 @@ def dislikes(post_id):
         db.session.commit()
         print('successfully removed')
         return "success"
-    
-'''@app.route('/test') #How I will add tags, finally 
-def test():
-    adventure=Adventure(title = "test2")
-    rpg=Rpg(title = "test2")
-    db.session.add(rpg)
-    db.session.add(adventure)
-    db.session.commit()
-    cate_id= Adventure.query.filter_by(title = "test2").first()
-    category_id=Rpg.query.filter_by(title = "test").first()
-    category_id.category.append(cate_id)
-    db.session.commit()
-    fun=Rpg.query.filter_by(title = 'test').first()
-    return render_template('test.html', fun = fun)'''
 
-def checkemail():
+@app.route('/follow/<posting_user>', methods = ["GET","POST"])
+@login_required
+def followers(posting_user):
+    if request.method == "POST":
+        random_user = Users.query.get(posting_user)
+        print(random_user)
+        random_user.followers.append(current_user)
+        db.session.commit()
+        print('following')
+    return "success"
+
+@app.route('/unfollow/<posting_user>', methods = ["GET","POST"])
+@login_required
+def unfollow(posting_user):
+    if request.method == "POST":
+        random_user = Users.query.get(posting_user)
+        random_user.followers.remove(current_user)
+        db.session.commit()
+        print('unfollow')
+    return "success"
+#end non-template routes
+
+def checkemail(): # checks email during sgnup
     user = Users.query.filter_by(email=request.form.get('email')).first()
     if user == None:
         return False
     else:
         return True
 
-def checkusername():
+def checkusername(): #checks if username isn't appropriate during signup
     user = Users.query.filter_by(username = request.form.get('username')).first()
     if user == None:
         return False
@@ -343,27 +361,6 @@ def all_post(username):
         return redirect(url_for('dashboard'))
     return render_template("total_users_post.html", posts = posts, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, user = user, loggedin = current_user.is_active, newest_posts = newest_posts)
 
-@app.route('/follow/<posting_user>', methods = ["GET","POST"])
-@login_required
-def followers(posting_user):
-    if request.method == "POST":
-        random_user = Users.query.get(posting_user)
-        print(random_user)
-        random_user.followers.append(current_user)
-        db.session.commit()
-        print('following')
-    return "success"
-
-@app.route('/unfollow/<posting_user>', methods = ["GET","POST"])
-@login_required
-def unfollow(posting_user):
-    if request.method == "POST":
-        random_user = Users.query.get(posting_user)
-        random_user.followers.remove(current_user)
-        db.session.commit()
-        print('unfollow')
-    return "success"
-
 @app.route ('/tag/<category>')
 def categories(category):
     hottest_post=db.session.query(func.max(Posts.article_views)).scalar()
@@ -382,16 +379,48 @@ def categories(category):
 def upload_profile():
     profile = Addprofile()
     user = Users.query.get(current_user.id)
-    if request.method == 'POST':  #allows user to add just description and passes onto to file check for further submission
-        if profile.validate_on_submit():
-            if profile.description.data != '':
+    if request.method == 'POST':  #checks all the data that has been submitted 
+        if 'file' not in request.files: #check if the post request has a file
+            flash('There was not file uploaded!', 'no_file')
+            return redirect(request.url)
+        file = request.files['file'] # gets file if everything is valid
+        if profile.description.data and profile.hobbies.data and file and allowed_file(file.filename) == True: #function to update all three at once
+                filename = secure_filename(file.filename)
+                hexed_name = hex(filename) # passes original name of file and turns turns name into hex, prevents long names and overloads
+                output_size = (300,300)
+                picture = Image.open(file)   # converts uploaded images into smaller thumbnails or any pixel related size
+                picture.thumbnail(output_size, Image.ANTIALIAS)
+                picture.save(os.path.join(app.config['UPLOAD_FOLDER'], hexed_name), quality = 100)
+                user.profimage = hexed_name
+                user.description = profile.description.data
+                user.hobbies = profile.hobbies.data
+                print(profile.description.data)
+                print(profile.hobbies.data)
+                db.session.add(user)
+                db.session.commit()
+                flash('You have sucessfully changed your profile picture, hobbies and profile description.','prof_photo')
+                return redirect(url_for('dashboard', name=filename))
+        if profile.description.data or profile.hobbies.data != '': # if theres info inside of these description or hobby box, it will check for which
+            if profile.description.data != '' and profile.hobbies.data == '' : # if description is the only thing with info, it will only update this
                 user.description = profile.description.data
                 db.session.add(user)
                 db.session.commit()
                 flash('You have sucessfully changed your profile description!', 'prof_description')
                 return redirect(url_for('dashboard'))
-            #check if the post request has the file part
-        if 'file' not in request.files:
+            elif profile.description.data =='' and profile.hobbies.data != '': # if hobbies is the only thing with info, it will update only the hobbies.
+                user.hobbies = profile.hobbies.data
+                db.session.add(user)
+                db.session.commit()
+                flash('You have sucessfully changed your hobbies', 'prof_description')
+                return redirect(url_for('dashboard'))
+            elif profile.description.data and profile.hobbies.data != '': # if hobbies is the only thing with info, it will update only the hobbies.
+                user.hobbies = profile.hobbies.data
+                user.description = profile.description.data
+                db.session.add(user)
+                db.session.commit()
+                flash('You have sucessfully changed your hobbies and description', 'prof_description')
+                return redirect(url_for('dashboard'))
+        if 'file' not in request.files: #check if the post request has a file
             flash('There was not file uploaded!', 'no_file')
             return redirect(request.url)
         file = request.files['file']
@@ -410,6 +439,8 @@ def upload_profile():
                 picture.thumbnail(output_size, Image.ANTIALIAS)
                 picture.save(os.path.join(app.config['UPLOAD_FOLDER'], hexed_name), quality = 100)
                 user.profimage = hexed_name
+                print(profile.description.data)
+                print(profile.hobbies.data)
                 db.session.add(user)
                 db.session.commit()
                 flash('You have sucessfully uploaded your profile picture.','prof_photo')
@@ -429,6 +460,8 @@ def upload_profile():
                 db.session.commit()
                 flash('You have sucessfully changed your profile photo','prof_photo')
                 return redirect(url_for('dashboard', name=filename))
+    profile.description.data = user.description
+    profile.hobbies.data = user.hobbies
     return render_template('upload.html', profile = profile)
 
 #post editing needs work to protect url numbers
@@ -438,8 +471,9 @@ def edit(postID):
     form = Postform()
     current_blog = Posts.query.get(postID)
     if current_blog is None:
-        flash('This blog does not exist', 'false_user')
-    elif current_user.username != current_blog.poster.username: #checks to make sure that user editing is the right user or else returns them to homepage
+        flash('This post does not exist','false_user')
+        return redirect(url_for('index'))
+    if current_user.username != current_blog.poster.username: #checks to make sure that user editing is the right user or else returns them to homepage
         flash('Error: You are not the original poster of this user', 'false_user')
         return redirect(url_for('index'))
     elif request.method == "POST":
@@ -716,5 +750,7 @@ def logout():
 if __name__ == '__main__':
     db.create_all()
     app.run(debug=True)
+    ip_ban = IpBan(ban_seconds=200)
+    ip_ban.init_app(app)
     #http_server = WSGIServer(("localhost", 5000), app)
     #http_server.serve_forever()

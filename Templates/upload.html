@@ -36,7 +36,10 @@
           <div class="login-form bg-light mt-4 p-4">
               <form action="" method="POST" class="row g-3" enctype='multipart/form-data'>
                   <h4>Add a profile picture and description</h4>
-                  {{profile.description(cols="30", rows="15", placeholder = "Write a small description about yourself")}}
+                  {{profile.description.label}}
+                  {{profile.description(cols="30", rows="15", placeholder = "Write a small description about yourself.")}}
+                  {{profile.hobbies.label}}
+                  {{profile.hobbies(cols="30", rows="3", placeholder = "Write two or three hobbies in a list or a short phrase.", maxlength = '255')}}
                   {{profile.file}}
                   <div class="col-12">
                       <input type="submit" name = "post_submit" class="btn btn-dark float-end"></input>

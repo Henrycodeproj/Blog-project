@@ -5,3 +5,13 @@ body{
 .nav-color{
     background-color: #243655 !important;
 }
+label{
+    font-weight: bolder;
+    padding:0 !important;
+}
+#file{
+    padding:0 !important;
+}
+h4{
+    padding:0 !important;
+}

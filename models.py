@@ -28,6 +28,7 @@ class Postform(FlaskForm):
 class Addprofile(FlaskForm):
     file = FileField('image', validators=[FileAllowed(['jpg', 'png'])])
     description = StringField('Description', validators=[Length(min=0, max = 255)], widget=TextArea())
+    hobbies = StringField('Hobbies', widget=TextArea())
 
 class Passwordrequest(FlaskForm):
     email = StringField('Email', validators=[InputRequired(), Email(message='Invalid email'), Length(max = 50)])

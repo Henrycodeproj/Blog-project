@@ -244,6 +244,9 @@ body{
     color:rgb(0, 110, 74);
     margin-left: 5px;
 }
+.fa-user-check{
+    color:rgb(0, 110, 74);
+}
 .tree{
     border-style: solid;
     color: rgba(0, 0, 0, 0.144);
