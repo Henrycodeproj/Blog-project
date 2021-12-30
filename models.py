@@ -39,3 +39,7 @@ class Passwordsuccess(FlaskForm):
 
 class Commentsform(FlaskForm):
     comment = StringField('comment', validators=[InputRequired()], widget=TextArea())
+
+class Reportform(FlaskForm):
+    Poster_username = StringField('Title', validators=[InputRequired(), Length(min = 3, max = 50)])
+    reason = StringField('Reason', validators=[InputRequired()], widget=TextArea())

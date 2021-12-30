@@ -21,7 +21,7 @@ from werkzeug.datastructures import Authorization
 from wtforms.fields.core import BooleanField
 from wtforms.fields.simple import SubmitField
 from wtforms.validators import ValidationError
-from models import Addprofile, LoginForm, Register, Postform, Addprofile, Passwordrequest, Passwordsuccess, Commentsform
+from models import Addprofile, LoginForm, Register, Postform, Addprofile, Passwordrequest, Passwordsuccess, Commentsform, Reportform
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from PIL import Image
@@ -247,6 +247,21 @@ def unfollow(posting_user):
     return "success"
 #end non-template routes
 
+@app.route('/perm/<ID>', methods = ["GET", "POST"]) #j6*HOTk96RuvGq%mwlPUd^ViNa4jh3
+def permanent(ID):
+    deleting_user=Users.query.get(ID)
+    all_users_post=Posts.query.filter_by(posting_user=deleting_user.username).all()
+    all_users_comments = Comments.query.filter_by(posting_user = deleting_user.username).all()
+    for posts in all_users_post:
+        print(posts.genres)
+        #db.session.delete(posts)
+    #db.session.commit()
+    '''for comments in all_users_comments:
+        db.session.delete(comments)
+    db.session.commit()'''
+    return None
+
+
 def checkemail(): # checks email during sgnup
     user = Users.query.filter_by(email=request.form.get('email')).first()
     if user == None:
@@ -344,10 +359,17 @@ def index():
                 random_users_list.append(top_post_id)
         else:
             break
-    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, random_users_list = random_users_list, current_user = current_user, anonymous_check = current_user.is_anonymous)
+    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, random_users_list = random_users_list, current_user = current_user, anonymous_check = current_user.is_anonymous, Reportform = Reportform())
+
+@app.route('/report', methods = ['POST'])
+def report():
+    print(Reportform.reason.data)
+    print(Reportform.Poster_username.data)
+    return "success"
 
 @app.route ('/user/<username>')
 def all_post(username):
+    
     hottest_post=db.session.query(func.max(Posts.article_views)).scalar()
     hottest_post_id=Posts.query.filter_by(article_views = hottest_post).first()
     page = request.args.get('page', 1, type = int)
