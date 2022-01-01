@@ -41,33 +41,46 @@
     <div class = "post_container posting">
       {% if post.poster.profimage == None %}
       <div class = "d-flex justify-content-between">
-        <a href="{{url_for('public_user_dashboard', poster = post.poster.username )}}" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}" alt="">
-          -{{post.posting_user}}
-        </a>
+          <div class = "prof_header">
+          <a href="{{url_for('public_user_dashboard', poster = post.poster.username )}}" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}"  alt="">
+            -{{post.posting_user}}
+          </a>
+          <span>
+            {% if post.poster.username != current_user.username%}
+              {%if anonymous_check != True %}
+                {% if post.poster is in current_user.following%}
+                <i class="fas fa-check-circle" id = "check" title = "Following"></i>
+                {% endif %}
+              {%endif%}
+            {% endif %}
+          </span>
+          </div>
+          <i class = "fas fa-exclamation" data-bs-toggle="modal" data-bs-target="#exampleModal" title = "Report this post"></i>
+      </div>
+      {% else %}
+    <div class = "d-flex justify-content-between">
+    <div class = "prof_header">
+      <a href="{{url_for('public_user_dashboard', poster = post.poster.username )}}" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/' + post.poster.profimage) }}" alt="">
+        -{{post.posting_user}}
+      </a>
         {% if post.poster.username != current_user.username%}
           {%if anonymous_check != True %}
             {% if post.poster is in current_user.following%}
-            <div>
-              <div><i class="fas fa-check-circle" id = "check" title = "Following"></i><a class = "fas fa-check-circle"></a></div>
-            </div>
+            <i class="fas fa-check-circle" id = "check" title = "Following"></i>
             {% endif %}
           {%endif%}
         {% endif %}
       </div>
-      {% else %}
-    <div class = "d-flex justify-content-between">
-      <a href="{{url_for('public_user_dashboard', poster = post.poster.username )}}" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/' + post.poster.profimage) }}" alt="">
-        -{{post.posting_user}}
-      </a>
       {%if post.poster.username != current_user.username %}
         {%if anonymous_check != True %}
           {% if post.poster is in current_user.following%}
           <div>
-            <div><i class="fas fa-check-circle" id = "check" title = "Following"></i><a class = "fas fa-check-circle"></a></div>
+            <div><i class="fas fa-check-circle" id = "check" title = "Following"></i></div>
           </div>
           {% endif %}
         {% endif %}
       {% endif %}
+      <i class = "fas fa-exclamation" data-bs-toggle="modal" data-bs-target="#exampleModal" title = "report this post"></i>
     </div>
       {% endif %}
       {%if post.image != None or '' or [] %}
@@ -76,7 +89,33 @@
     <div class = "title">{{ post.title }} </div>
     <div class = "bar"></div>
     <div class = "content">{{ post.content| truncate(500) }}</div>
-    <i tabindex="0" class="fa fa-fire" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Report" data-bs-content="If this post is breaking Rules, send a report."></i>
+            <!-- modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form action="{{url_for('report')}}" method="POST" enctype="multipart/form-data" id = "report">
+              <div class="form-group">
+                <label for="recipient-name" class="col-form-label">Post title</label>
+                <input type="text" class="form-control" id="recipient-name" name = "post">
+              </div>
+              <div class="form-group">
+                <label for="message-text" class="col-form-label">Message:{{post.id}}</label>
+                <textarea class="form-control" id="message-text" name ="reason"></textarea>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id = "reportSubmit" onclick="getReport()" data-bs-target="#myModal">Save changes</button>
+          </div>
+        </form>
+        </div>
+      </div>
+      </div>
     <div>
       {% if current_user.username == post.posting_user %}
       <div class = "posting_date_show justify-content-between">
@@ -104,6 +143,7 @@
     </div>
     </div>
     {% endfor %}
+
     <div class = "container contain">
       {% for page_number in posts.iter_pages(left_edge=1, left_current=1, right_current=2, right_edge=1) %}
         {% if page_number %}
@@ -118,14 +158,13 @@
       {% endfor %}
     </div>
   </div>
-
+<!-- right sidebar -->
     <div class = "lok">
       <div class="sidesection">
-        <div class="content-section ">
-        <!-- <h3 class = "sidebar_text">Sidebar</h3> -->
+        <div class="content-section">
         <p class='text-muted'>
           <ul class="list-group">
-            <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Today's Date:</span>{{ current_date }}</li>
+            <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Today's Date:</span> {{ current_date }}</li>
             <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Announcements:</span> This site is still a work in progress and will always continue updating to be better </li>
 
             {% if posts.items == [] %}
@@ -166,7 +205,7 @@
               <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'off-topic' )}}" id = "anything">Off-topic</a></li>
             </ol>
           </div>
-
+<!-- recommendation -->
           <div class = "recommendations">
             <h3 class = "recommended_title">Daily Recommendations</h3>
             {% for highlight in random_users_list %}
@@ -201,44 +240,12 @@
     </div>
 </div> 
 
-<!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-  Launch demo modal
-</button>
-
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form action="" method="POST" enctype="multipart/form-data">
-          <div class="form-group">
-            <label for="recipient-name" class="col-form-label">Recipient:</label>
-            <input type="text" class="form-control" id="recipient-name">
-          </div>
-          <div class="form-group">
-            <label for="message-text" class="col-form-label">Message:</label>
-            <textarea class="form-control" id="message-text"></textarea>
-          </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" onclick="report()">Save changes</button>
-      </div>
-    </form>
-    </div>
-  </div>
-</div>
-
 
 {% endblock %}
 
 {%block js%}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+
 <script>
 
  var button = document.getElementById('following')
@@ -286,13 +293,40 @@ function follow(ID) {  //sends to python route for dislikes without updating
  });
 }
 
-function report() {  //sends to python route for dislikes without updating
-    const url = `/report/`;
+
+let reportingUser = JSON.stringify('{{current_user.username}}')
+var post = document.getElementById('message-text')
+var reason = document.getElementById('recipient-name')
+var myModal = new bootstrap.Modal(document.getElementById('myModal'), options)
+
+function getReport(postid){
+//var reportSubmit = document.getElementById('reportSubmit')
+//reportSubmit.addEventListener('click', () => {
+  console.log(postid)
+  var entry = {
+            postID: postid,
+            user: reportingUser,
+            posts:post.value,
+            reason:reason.value
+            };
+  report(entry)
+  post.value=''
+  reason.value=''
+}
+
+function report(entry) {  //sends to python route for dislikes without updating
+    const url = `/report`;
   fetch(url, {
     method: 'POST',
+    body: JSON.stringify(entry),
+    contentType: "application/json"
   }).then((response) => {
-    console.log(body)
- });
+    myModal.dispose()
+    return response.text();
+  }).then(function(entry){
+    console.log(text);
+  });
 }
+
 </script>
 {%endblock%}

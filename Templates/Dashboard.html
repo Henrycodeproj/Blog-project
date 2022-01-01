@@ -80,7 +80,7 @@
 </div>
 
 <div class = "container welcome-intro">
-  {% if profimage == None or '' %}
+  {% if current_user.profimage == None or '' %}
   <div class="container thumbnail">
     <img src="{{url_for ('static', filename ='/images/default.jpg') }}" alt="Image" />
   </div>
@@ -89,12 +89,12 @@
     <img src="{{url_for ('static', filename ='/images/' + profimage) }}" alt="Image" />
   </div>
   {% endif %}
-    <h1 class = "welcome_text">Hello {{ name }},</h1>
+    <h1 class = "welcome_text">Hello {{ current_user.name }},</h1>
     <span>
-      {% if last_logged == None %}
+      {% if current_user.last_login == None %}
         <h1>This is your first Login!</h1>
       {% else %}
-        <h1>Your last login date was {{last_logged}}</h1>
+        <h1>Your last login date was {{current_user.last_login}}</h1>
       {% endif %}
     </span>
 </div>
@@ -102,15 +102,15 @@
 <div class="container">
   <div class="box">
       <p class="h-dash">Your Dashboard</p>
-      {% if description != None %}
-      <p class="fst-italic textmuted mt-3 mb-3">{{description}}</p>
+      {% if current_user.description != None %}
+      <p class="fst-italic textmuted mt-3 mb-3">{{current_user.description}}</p>
       {% else %}
       <p class="fst-italic textmuted mt-3 mb-3">Add a description about yourself</p>
       {% endif %}
       <div class="row mx-0 mt-2">
           <div class="col-md-4 p-0 border-end">
               <div class="viewbox">
-                  <p class="blue">{{views}}</p>
+                  <p class="blue">{{current_user.profile_views}}</p>
                   <p><i class="fas fa-user-circle"></i>Profile views</p>
               </div>
           </div>
@@ -122,7 +122,7 @@
           </div>
           <div class="col-md-4 p-0">
               <div class="viewbox">
-                  <p class="blue">{{total_post}}</p>
+                  <p class="blue">{{current_user.total_post}}</p>
                   <p><i class="fas fa-icons"></i>Total Posts</p>
               </div>
           </div>
@@ -137,13 +137,13 @@
               </div>
               <div class="d-flex mt-2"> <span class="fas fa-money-bill-alt mt-1"></span>
                   <div class="w-100 border-bottom">
-                      <a href="{{url_for('all_post', username = username)}}"><p class="">See all of your own Post</p></a>
+                      <a href="{{url_for('all_post', username = current_user.username)}}"><p class="">See all of your own Post</p></a>
                       <p class="textmuted mb-2"> View all of your own posts.</p>
                   </div>
               </div>
               <div class="d-flex mt-2"> <span class="fas fa-bookmark ms-0 mt-1"></span>
                   <div class="w-100 ps-2">
-                      <a href=""><p class="">Delete your profile</p></a>
+                      <a href="{{url_for('permanent', ID = current_user.id )}}" onclick="return confirm('Are you sure you want to DELETE/DISBAND your account permanently? We cannot recover your account once its deleted.');"><p class="">Delete your profile</p></a>
                       <p class="textmuted mb-2">Erase your account and post(s) permanently.</p>
                   </div>
               </div>

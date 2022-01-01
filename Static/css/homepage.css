@@ -240,6 +240,14 @@ body{
 #anything{
     font-weight: bolder;
 }
+.fa-exclamation{
+    cursor: pointer;
+    padding-top:6px;
+    color:red;
+}
+.prof_header{
+    margin-bottom: 5px;
+}
 .fa-check-circle{
     color:rgb(0, 110, 74);
     margin-left: 5px;

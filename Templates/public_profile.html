@@ -130,7 +130,7 @@
           <div class="accordion-item">
             <h2 class="accordion-header" id="headingOne">
               <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                <i class="fas fa-user-edit"></i><strong>Bio: </strong>
+                <i class="fas fa-user-edit"></i><strong>Bio </strong>
               </button>
             </h2>
             <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
@@ -142,13 +142,13 @@
           <div class="accordion-item">
             <h2 class="accordion-header" id="headingTwo">
               <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                <i class="fas fa-mouse-pointer"></i><strong>Most Viewed Article:</strong><span class = "top_article_title">{{top_article.title}}</span>
+                <i class="fas fa-mouse-pointer"></i><strong>Most Viewed Article:</strong>
               </button>
             </h2>
             <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
               <div class="accordion-body">
-                <strong> Preview: </strong>
-                <div>{{top_article.content| truncate(50)}}</div>
+                <strong> Title: </strong><span class = "top_article_title">{{top_article.title}}</span>
+                <div>{{top_article.content| truncate(125)}}</div>
                 <div><a href="{{url_for('expanded_post', postID = top_article.id)}}">Read More</a></div>
               </div>
             </div>

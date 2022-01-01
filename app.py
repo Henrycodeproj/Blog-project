@@ -4,7 +4,7 @@ from flask_admin.actions import action
 from flask_admin.base import AdminIndexView
 import flask_login
 from flask_login.mixins import AnonymousUserMixin
-from flask import Flask, json, render_template, request, url_for, redirect, flash, jsonify, stream_with_context, Response, abort
+from flask import Flask, json, render_template, request, url_for, redirect, flash, jsonify, stream_with_context, Response, abort, make_response
 from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_login.utils import login_required, login_user, logout_user
@@ -14,7 +14,7 @@ from flask_sqlalchemy import Pagination, SQLAlchemy
 from flask_login import current_user, UserMixin, LoginManager
 from flask_sqlalchemy.model import Model
 from itsdangerous.serializer import Serializer
-from sqlalchemy.orm import dynamic_loader, relation, relationship
+from sqlalchemy.orm import dynamic_loader, relation, relationship, session
 from sqlalchemy.sql.functions import ReturnTypeFromArgs, user
 from sqlalchemy.sql.schema import ForeignKey, PrimaryKeyConstraint
 from werkzeug.datastructures import Authorization
@@ -152,6 +152,13 @@ class Categories(db.Model):
     category = db.Column(db.String(255))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
 
+class Reports(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user = db.Column(db.String(255))
+    post = db.Column(db.String(255))
+    reason = db.Column(db.Text)
+
+
 class MyModelView(ModelView):
     def is_accessible(self):
         if current_user.is_admin():
@@ -251,15 +258,31 @@ def unfollow(posting_user):
 def permanent(ID):
     deleting_user=Users.query.get(ID)
     all_users_post=Posts.query.filter_by(posting_user=deleting_user.username).all()
+    postID = [posts.id for posts in all_users_post]
     all_users_comments = Comments.query.filter_by(posting_user = deleting_user.username).all()
-    for posts in all_users_post:
-        print(posts.genres)
-        #db.session.delete(posts)
-    #db.session.commit()
-    '''for comments in all_users_comments:
-        db.session.delete(comments)
-    db.session.commit()'''
-    return None
+    print(deleting_user)
+    if postID is not None:
+        for ids in postID:
+            category=Categories.query.filter_by(post_id = int(ids)).first() 
+            db.session.delete(category)
+            print(category)
+        db.session.commit()
+    if all_users_comments is not None:
+        for comments in all_users_comments:
+            db.session.delete(comments)
+        db.session.commit()
+    if all_users_post is not None:
+        for posts in all_users_post:
+            old_image = posts.image # removes old photo from folder 
+            path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
+            os.remove(path)
+            for remaining_comments in posts.comments:
+                db.session.delete(remaining_comments)
+            db.session.delete(posts)
+        db.session.delete(deleting_user)
+        db.session.commit()
+    flash('You have successfully deleted your account permanently.','logout')
+    return redirect(url_for('login'))
 
 
 def checkemail(): # checks email during sgnup
@@ -362,18 +385,19 @@ def index():
     return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, random_users_list = random_users_list, current_user = current_user, anonymous_check = current_user.is_anonymous, Reportform = Reportform())
 
 @app.route('/report', methods = ['POST'])
+@login_required
 def report():
-    print(Reportform.reason.data)
-    print(Reportform.Poster_username.data)
-    return "success"
+    report = request.get_json(force=True)
+    print(report)
+    print(report['user'], report['posts'], report['reason'])
+    return 'success'
 
 @app.route ('/user/<username>')
 def all_post(username):
-    
     hottest_post=db.session.query(func.max(Posts.article_views)).scalar()
     hottest_post_id=Posts.query.filter_by(article_views = hottest_post).first()
     page = request.args.get('page', 1, type = int)
-    user = Users.query.filter_by(username = username).first_or_404()
+    user = Users.query.filter_by(username = username).first()
     posts = Posts.query.filter_by(posting_user=user.username).order_by(Posts.id.desc()).paginate(page = page, per_page = 3)
     newest_user = Users.query.order_by(Users.id.desc()).all()
     newest_posts = Posts.query.order_by(Posts.id.desc()).first()
@@ -633,9 +657,8 @@ def post():
             current_user.total_post += 1
             db.session.add(posting)
             db.session.commit()
-            postid = Posts.query.filter_by(title = form.title.data, posting_user = current_user.username).first()
+            postid = Posts.query.filter_by(content = form.content.data, posting_user = current_user.username).first()
             category= Categories(category = request.form['genre'], post_id = postid.id)
-            print(category)
             db.session.add(category)
             db.session.commit()
             #new_post_id = Posts.query.filter_by(image = hexed_name, posting_user = current_user.username).first()
@@ -652,7 +675,7 @@ def post():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template("Dashboard.html", name = current_user.name, last_logged = current_user.last_login, profimage = current_user.profimage, description = current_user.description, views = current_user.profile_views, total_post = current_user.total_post, username = current_user.username, current_user = current_user, follower_count = len(current_user.followers))
+    return render_template("Dashboard.html", last_logged = current_user.last_login, current_user = current_user, follower_count = len(current_user.followers))
 
 #public profiles for each poster
 @app.route('/public_dashboard/<poster>')
