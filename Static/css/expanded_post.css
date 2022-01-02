@@ -95,12 +95,39 @@ body{
     font-weight: bolder;
 }
 .fa-thumbs-up{
-    margin: 15px 0px 15px 0px !important;
+    margin: 15px 3px 15px 0px !important;
     cursor: pointer;
 }
 .fa-thumbs-up:hover{
-    font-size:3rem;
+    animation: myAnim 1s linear 0s 1 normal none;
 }
+@keyframes myAnim {
+    0%,
+    100% {
+      transform: translateX(0%);
+      transform-origin: 50% 50%;
+    }
+  
+    15% {
+      transform:rotate(-20deg);
+    }
+  
+    30% {
+      transform:rotate(40deg);
+    }
+  
+    45% {
+      transform:rotate(-20deg);
+    }
+  
+    60% {
+      transform:rotate(40deg);
+    }
+  
+    75% {
+      transform:rotate(0deg);
+    }
+  }
 /* .fa-thumbs-down{
     margin: 0px 0px 0px 15px !important;
     cursor: pointer;

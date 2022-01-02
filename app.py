@@ -154,9 +154,11 @@ class Categories(db.Model):
 
 class Reports(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user = db.Column(db.String(255))
-    post = db.Column(db.String(255))
+    post_id = db.Column(db.Integer)
+    reporting_user = db.Column(db.String(255))
+    title = db.Column(db.String(255))
     reason = db.Column(db.Text)
+    date_reported = db.Column(db.String(255))
 
 
 class MyModelView(ModelView):
@@ -210,7 +212,7 @@ admin.add_view(MyModelView(Comments, db.session))
 path = op.join(op.dirname(__file__), 'static/images')
 admin.add_view(Files(path, name='Uploaded Images'))
 
-#routes for backend, does not return templates
+#routes for backend, does not return templates. Routes are for JavaScript
 @app.route('/likes/<post_id>', methods = ["GET", "POST"]) 
 @login_required
 def likes(post_id):
@@ -232,7 +234,7 @@ def dislikes(post_id):
         print('successfully removed')
         return "success"
 
-@app.route('/follow/<posting_user>', methods = ["GET","POST"])
+@app.route('/follow/<posting_user>', methods = ["GET","POST"])  #handles the following button with a js fetch request, this is where its routed to
 @login_required
 def followers(posting_user):
     if request.method == "POST":
@@ -243,7 +245,7 @@ def followers(posting_user):
         print('following')
     return "success"
 
-@app.route('/unfollow/<posting_user>', methods = ["GET","POST"])
+@app.route('/unfollow/<posting_user>', methods = ["GET","POST"]) # reverse of the following button
 @login_required
 def unfollow(posting_user):
     if request.method == "POST":
@@ -252,22 +254,48 @@ def unfollow(posting_user):
         db.session.commit()
         print('unfollow')
     return "success"
+
+@app.route('/comment_delete/<commentID>', methods = ["POST"]) # fetch route for deleting the comment
+def delete_comment(commentID):
+    if request.method == "POST":
+        user_comment=Comments.query.get(commentID)
+        db.session.delete(user_comment)
+        db.session.commit()
+    return "success"
+
+@app.route('/edit_comment/<commentID>', methods = ['POST']) #fetch route for editing comment
+def edit_comment(commentID):
+    user_comment = Comments.query.get(commentID)
+    new_comment = request.get_json(force = True)
+    if request.method == "POST":
+        user_comment.comment = new_comment
+        db.session.add(user_comment)
+        db.session.commit()
+        return jsonify(user_comment.comment)
+    return "success"
+
+@app.route('/get_comment/<commentID>', methods = ["POST"]) #gets information for js to append into editing carrot in comment option
+def getComment(commentID):
+    comment = Comments.query.get(commentID)
+    return jsonify(comment.comment)
 #end non-template routes
 
-@app.route('/perm/<ID>', methods = ["GET", "POST"]) #j6*HOTk96RuvGq%mwlPUd^ViNa4jh3
+#used my random generator to put in a hard guessable token to protect the url, also has login protection.
+@app.route('/perm/j6*HOTk96RuvGq%mwlPUd^ViNa4jh3/<ID>', methods = ["GET", "POST"])
+@login_required
 def permanent(ID):
     deleting_user=Users.query.get(ID)
     all_users_post=Posts.query.filter_by(posting_user=deleting_user.username).all()
-    postID = [posts.id for posts in all_users_post]
+    postID = [posts.id for posts in all_users_post]  # list comprehension in order to get all ids in a list
     all_users_comments = Comments.query.filter_by(posting_user = deleting_user.username).all()
     print(deleting_user)
-    if postID is not None:
-        for ids in postID:
+    if postID is not None:  
+        for ids in postID:   # This loop begins to delete categories because its used as reference in a one to many for post
             category=Categories.query.filter_by(post_id = int(ids)).first() 
             db.session.delete(category)
             print(category)
         db.session.commit()
-    if all_users_comments is not None:
+    if all_users_comments is not None:  # gets rid of all users comments on every post
         for comments in all_users_comments:
             db.session.delete(comments)
         db.session.commit()
@@ -276,16 +304,16 @@ def permanent(ID):
             old_image = posts.image # removes old photo from folder 
             path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
             os.remove(path)
-            for remaining_comments in posts.comments:
+            for remaining_comments in posts.comments:    # removes any remaining comments on the deleted posts
                 db.session.delete(remaining_comments)
             db.session.delete(posts)
-        db.session.delete(deleting_user)
+        db.session.delete(deleting_user)   # deletes user after all table references and relationships are cleared.
         db.session.commit()
     flash('You have successfully deleted your account permanently.','logout')
     return redirect(url_for('login'))
 
 
-def checkemail(): # checks email during sgnup
+def checkemail(): # checks email during signup
     user = Users.query.filter_by(email=request.form.get('email')).first()
     if user == None:
         return False
@@ -299,11 +327,11 @@ def checkusername(): #checks if username isn't appropriate during signup
     else:
         return True
 
-def allowed_file(filename):
+def allowed_file(filename):  #splits file extension and checks if its allowed
     return '.' in filename and \
         filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def hex(file):
+def hex(file):  #returns hex name
     random_hex = secrets.token_hex(10)
     split=os.path.splitext(file)
     return random_hex + split[1]
@@ -328,7 +356,7 @@ def verify_token(token):
         return None
     return Users.query.get(user_id)
 
-def send_mail(user):
+def send_mail(user):  #sends mail for password resets
     token = get_reset_token(user)
     print(token)
     message = Message('Password Reset Request', recipients = [user.email], sender='noreply@gmail.com')
@@ -357,15 +385,10 @@ def listen():
         time.sleep(1)
   return Response(respond_to_client(), mimetype='text/event-stream')'''
 
-@app.route("/testing")
-def testing():
-    return render_template('test.html')
   
 #homepage
 @app.route ('/')
 def index():
-    test=Posts.query.first()
-    #print(test.json.dumps())
     hottest_post=db.session.query(func.max(Posts.article_views)).scalar()
     hottest_post_id=Posts.query.filter_by(article_views = hottest_post).first()
     page = request.args.get('page', 1, type = int)
@@ -382,31 +405,35 @@ def index():
                 random_users_list.append(top_post_id)
         else:
             break
-    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, random_users_list = random_users_list, current_user = current_user, anonymous_check = current_user.is_anonymous, Reportform = Reportform())
+    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, random_users_list = random_users_list, current_user = current_user, anonymous_check = current_user.is_anonymous)
 
-@app.route('/report', methods = ['POST'])
+@app.route('/report', methods = ['POST'])  #handles the report from posts.
 @login_required
 def report():
-    report = request.get_json(force=True)
-    print(report)
-    print(report['user'], report['posts'], report['reason'])
-    return 'success'
+    report = request.get_json(force=True) # gets json dictionary 
+    #print(report['reportingUser'], report['title'], report['reason'], report['postID'])  #checks data if needed
+    completed_report = Reports(post_id = report['postID'], reporting_user = report['reportingUser'], title = report['title'], reason = report['reason'], date_reported = datetime.datetime.now().date())  # appends key values into reports table
+    db.session.add(completed_report)
+    db.session.commit()
+    return "success"
 
+# individual user pagination
 @app.route ('/user/<username>')
-def all_post(username):
+def all_post(username):  
     hottest_post=db.session.query(func.max(Posts.article_views)).scalar()
     hottest_post_id=Posts.query.filter_by(article_views = hottest_post).first()
     page = request.args.get('page', 1, type = int)
     user = Users.query.filter_by(username = username).first()
     posts = Posts.query.filter_by(posting_user=user.username).order_by(Posts.id.desc()).paginate(page = page, per_page = 3)
     newest_user = Users.query.order_by(Users.id.desc()).all()
-    newest_posts = Posts.query.order_by(Posts.id.desc()).first()
+    newest_posts = Posts.query.order_by(Posts.id.desc()).first()   #all this is to get information about posts and page setup
     print(posts.items)
     if posts.items == []:
         flash('You do not have any current post to show!', 'no_post')
         return redirect(url_for('dashboard'))
     return render_template("total_users_post.html", posts = posts, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, user = user, loggedin = current_user.is_active, newest_posts = newest_posts)
 
+#category tags
 @app.route ('/tag/<category>')
 def categories(category):
     hottest_post=db.session.query(func.max(Posts.article_views)).scalar()
@@ -491,7 +518,7 @@ def upload_profile():
                 db.session.commit()
                 flash('You have sucessfully uploaded your profile picture.','prof_photo')
                 return redirect(url_for('dashboard', name=filename))
-            else:
+            else: # handles the removal of an already existing profile.
                 old_image = current_user.profimage # removes old photo from folder before updating current photo
                 path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
                 os.remove(path)
@@ -537,13 +564,12 @@ def edit(postID):
 @app.route('/delete/<postID>')
 def delete(postID):
     poster = Posts.query.get(postID)
-    if current_user.username != poster.posting_user:
+    if current_user.username != poster.posting_user: #route protection if user is not original poster
         flash('You can only delete your own post.', 'false_user')
         return redirect(url_for('index'))
     try:
         delete_id = Posts.query.get(postID)
         category_id = Categories.query.filter_by(post_id = delete_id.id).first()
-        #category_id = Categories.filter_by()
         current_user.total_post -= 1
         for comments in delete_id.comments:
             db.session.delete(comments)
@@ -586,49 +612,6 @@ def expanded_post(postID):
         return redirect(url_for('expanded_post', postID = postID))
         #poster_image = current_user.profimage
     return render_template('expanded_post.html', expanded_post = expanded_post, form = form, show_comments = show_comments, loggedin = current_user.is_active, current_user_check = current_user.is_anonymous, current_user = current_user, likes = len(number_of_likes), liked = number_of_likes, user = current_user, json_postid = json_postid) # current_user doesn't work if changed to check if user is active. So i passed two variables instead to check for if the user exist and then the method to call image
-
-@app.route('/comment_delete/<commentID>', methods = ["POST"])
-def delete_comment(commentID):
-    if request.method == "POST":
-        user_comment=Comments.query.get(commentID)
-        db.session.delete(user_comment)
-        db.session.commit()
-    return "success"
-
-@app.route('/random', methods = ["GET", "POST"])
-def randoming():
-    if request.method == "GET":
-        word = [{
-            'id':1,
-            'comment':'first'
-        },
-        {
-            'id':2,
-            'comment':'second'
-        }
-        ]
-        return jsonify(word)
-    return '<h1>hello</h1>'
-
-@app.route('/info')
-def experiment():
-    return render_template('testing.html')
-
-@app.route('/edit_comment/<commentID>', methods = ['POST'])
-def edit_comment(commentID):
-    user_comment = Comments.query.get(commentID)
-    new_comment = request.get_json(force = True)
-    if request.method == "POST":
-        user_comment.comment = new_comment
-        db.session.add(user_comment)
-        db.session.commit()
-        return jsonify(user_comment.comment)
-    return "success"
-
-@app.route('/get_comment/<commentID>', methods = ["POST"])
-def getComment(commentID):
-    comment = Comments.query.get(commentID)
-    return jsonify(comment.comment)
 
 #posting for blog articles/status
 @app.route('/post', methods = ["POST", "GET"])

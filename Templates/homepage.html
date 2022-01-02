@@ -42,7 +42,7 @@
       {% if post.poster.profimage == None %}
       <div class = "d-flex justify-content-between">
           <div class = "prof_header">
-          <a href="{{url_for('public_user_dashboard', poster = post.poster.username )}}" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}"  alt="">
+          <a href="{{url_for('public_user_dashboard', poster = post.poster.username )}}" class= "prof_link"><img class = "prof_thumbnail" src="{{url_for('static', filename='/images/default.jpg') }}"  alt="">
             -{{post.posting_user}}
           </a>
           <span>
@@ -55,12 +55,12 @@
             {% endif %}
           </span>
           </div>
-          <i class = "fas fa-exclamation" data-bs-toggle="modal" data-bs-target="#exampleModal" title = "Report this post"></i>
+          <i class = "fas fa-exclamation" data-bs-toggle="modal" data-bs-target="#exampleModal" title = "Report this post" data-id= "1" onclick="getCurrentPost('{{post.id}}')"></i>
       </div>
       {% else %}
     <div class = "d-flex justify-content-between">
     <div class = "prof_header">
-      <a href="{{url_for('public_user_dashboard', poster = post.poster.username )}}" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/' + post.poster.profimage) }}" alt="">
+      <a href="{{url_for('public_user_dashboard', poster = post.poster.username )}}" class= "prof_link"><img class = "prof_thumbnail" src="{{url_for('static', filename='/images/' + post.poster.profimage) }}" alt="">
         -{{post.posting_user}}
       </a>
         {% if post.poster.username != current_user.username%}
@@ -80,7 +80,7 @@
           {% endif %}
         {% endif %}
       {% endif %}
-      <i class = "fas fa-exclamation" data-bs-toggle="modal" data-bs-target="#exampleModal" title = "report this post"></i>
+      <i class = "fas fa-exclamation" data-bs-toggle="modal" data-bs-target="#exampleModal" title = "report this post" data-id= "1" onclick="getCurrentPost('{{post.id}}')"></i>
     </div>
       {% endif %}
       {%if post.image != None or '' or [] %}
@@ -89,28 +89,30 @@
     <div class = "title">{{ post.title }} </div>
     <div class = "bar"></div>
     <div class = "content">{{ post.content| truncate(500) }}</div>
+            <!-- id tracker -->
+    <div class = "invisible" id='id-tracker'></div>
             <!-- modal -->
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+            <h5 class="modal-title" id="exampleModalLabel">Post Report</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <form action="{{url_for('report')}}" method="POST" enctype="multipart/form-data" id = "report">
+            <form action="" method="POST" enctype="multipart/form-data" id = "report">
               <div class="form-group">
-                <label for="recipient-name" class="col-form-label">Post title</label>
+                <label for="recipient-name" class="col-form-label">Title of report:</label>
                 <input type="text" class="form-control" id="recipient-name" name = "post">
               </div>
               <div class="form-group">
-                <label for="message-text" class="col-form-label">Message:{{post.id}}</label>
+                <label for="message-text" class="col-form-label">Reason:</label>
                 <textarea class="form-control" id="message-text" name ="reason"></textarea>
               </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id = "reportSubmit" onclick="getReport()" data-bs-target="#myModal">Save changes</button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id = "reportSubmit" data-bs-target="#myModal">Submit</button>
           </div>
         </form>
         </div>
@@ -213,7 +215,7 @@
                 {% if highlight.poster.profimage == None or '' or [] %}
                 <div>
                   <a href="{{url_for('public_user_dashboard', poster = highlight.poster.username )}}" class= "recommend_links">
-                    <img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}" alt="">
+                    <img class = "prof_thumbnail" src="{{url_for('static', filename='/images/default.jpg') }}" alt="">
                   </a>
                 </div>
                 <div>
@@ -224,7 +226,7 @@
               {% else %}
               <div>
                 <a href="{{url_for('public_user_dashboard', poster = highlight.poster.username )}}" class= "recommend_links">
-                  <img class = "tree" src="{{url_for('static', filename='/images/' + highlight.poster.profimage) }}" alt="">
+                  <img class = "prof_thumbnail" src="{{url_for('static', filename='/images/' + highlight.poster.profimage) }}" alt="">
                 </a>
               </div>
                 <div>
@@ -297,34 +299,47 @@ function follow(ID) {  //sends to python route for dislikes without updating
 let reportingUser = JSON.stringify('{{current_user.username}}')
 var post = document.getElementById('message-text')
 var reason = document.getElementById('recipient-name')
-var myModal = new bootstrap.Modal(document.getElementById('myModal'), options)
 
-function getReport(postid){
-//var reportSubmit = document.getElementById('reportSubmit')
-//reportSubmit.addEventListener('click', () => {
+const getReport = (postid) => {
   console.log(postid)
+  console.log(reportingUser)
   var entry = {
-            postID: postid,
-            user: reportingUser,
-            posts:post.value,
-            reason:reason.value
-            };
+    postID: postid,
+    reportingUser: reportingUser,
+    title:post.value,
+    reason:reason.value
+  };
+  console.log(entry)
   report(entry)
-  post.value=''
-  reason.value=''
 }
 
-function report(entry) {  //sends to python route for dislikes without updating
+const generateGetReport = (event) => {
+  const e = document.getElementById('id-tracker');
+  const id = e.innerHTML;
+  getReport(id);
+}
+
+function getCurrentPost(id){
+  var reportSubmit = document.getElementById('reportSubmit');
+  const e = document.getElementById('id-tracker');
+  e.innerHTML = `${id}`;
+  reportSubmit.removeEventListener('click', generateGetReport); 
+  reportSubmit.addEventListener('click', generateGetReport);
+}
+
+function report(entry) {  //send reports without leaving current page
     const url = `/report`;
   fetch(url, {
     method: 'POST',
     body: JSON.stringify(entry),
     contentType: "application/json"
   }).then((response) => {
-    myModal.dispose()
+    post.value=''
+    reason.value=''
+    alert('Thank you. Your report has been submitted.')
     return response.text();
   }).then(function(entry){
-    console.log(text);
+    //console.log(text);
   });
 }
 
