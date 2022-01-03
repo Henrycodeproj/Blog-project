@@ -44,12 +44,15 @@ import time
 import os.path as op
 
 app = Flask(__name__)
+ip_ban = IpBan(ban_seconds=200)
+ip_ban.init_app(app)
 
-'''limiter = Limiter( #limiter if I ever need it
+#route limiter if there someone decides to spam
+limiter = Limiter(
     app,
     key_func=get_remote_address,
-    default_limits=["10 per day", "50 per hour"]
-)'''
+    #default_limits=["10000 per day", "100 per hour"]
+)
 
 ip_ban = IpBan(app)
 Bootstrap(app)
@@ -108,7 +111,7 @@ class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
     last_login = db.Column(db.String(50))
     profile_views = db.Column(db.Integer)
     total_post = db.Column(db.Integer)
-    posts = db.relationship('Posts', backref='poster', lazy = True)
+    posts = db.relationship('Posts', backref='poster', lazy = True) 
     comments = db.relationship('Comments', backref='commentor', lazy = True)
     likes = db.relationship('Posts', secondary=likes, lazy='subquery',
         backref=db.backref('liking', lazy=True))
@@ -121,7 +124,7 @@ class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
                              )
 
     def is_admin(self):
-        admins = ['henry','test']
+        admins = ['henry']
         if self.username in admins:
             return True
 
@@ -154,14 +157,18 @@ class Categories(db.Model):
 
 class Reports(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    post_id = db.Column(db.Integer)
+    post_content = db.Column(db.Text)
     reporting_user = db.Column(db.String(255))
     title = db.Column(db.String(255))
     reason = db.Column(db.Text)
     date_reported = db.Column(db.String(255))
 
+class Announcements(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    message = db.Column(db.Text)
 
-class MyModelView(ModelView):
+
+class MyModelView(ModelView): # modelview for admin
     def is_accessible(self):
         if current_user.is_admin():
             return True
@@ -172,7 +179,7 @@ class MyModelView(ModelView):
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for('login'))
 
-    def delete_model(self, model):
+    def delete_model(self, model): # overrided original delete method, now deletes previous comments and removes old lying image from static folder
         if hasattr(model,'image'):
             previous_category = model.genres[0]
             previous_comments = model.comments
@@ -190,10 +197,9 @@ class MyModelView(ModelView):
             self.session.commit()
         return flash('Succesfully deleted post.', 'success')
 
-class Files(FileAdmin):
+class Files(FileAdmin): 
     def is_visible(self):
         if current_user.is_admin():
-            print(current_user)
             return True
         return False
 
@@ -209,30 +215,33 @@ admin = Admin(app, index_view=allowedAdminView())
 admin.add_view(MyModelView(Users, db.session))
 admin.add_view(MyModelView(Posts, db.session))
 admin.add_view(MyModelView(Comments, db.session))
+admin.add_view(MyModelView(Reports, db.session))
+admin.add_view(MyModelView(Announcements, db.session))
 path = op.join(op.dirname(__file__), 'static/images')
 admin.add_view(Files(path, name='Uploaded Images'))
 
 #routes for backend, does not return templates. Routes are for JavaScript
-@app.route('/likes/<post_id>', methods = ["GET", "POST"]) 
+@app.route('/likes/<post_id>', methods = ["GET", "POST"])
+@limiter.limit("10/minute") 
 @login_required
 def likes(post_id):
     if request.method == "POST":
         current_posting =Posts.query.filter_by(id=post_id).first()
         current_posting.liking.append(current_user)
         db.session.commit()
-        print('success')
-        return "success"
-        #return redirect(url_for('expanded_post', postID = post_id))
+        print('liked')
+        return "Success"
 
 @app.route('/dislikes/<post_id>', methods = ["GET", "POST"])
+@limiter.limit("10/minute")
 @login_required
 def dislikes(post_id):
     if request.method == "POST":
         current_posting =Posts.query.filter_by(id=post_id).first()
         current_posting.liking.remove(current_user)
         db.session.commit()
-        print('successfully removed')
-        return "success"
+        print("unliked")
+        return "Success"
 
 @app.route('/follow/<posting_user>', methods = ["GET","POST"])  #handles the following button with a js fetch request, this is where its routed to
 @login_required
@@ -288,12 +297,10 @@ def permanent(ID):
     all_users_post=Posts.query.filter_by(posting_user=deleting_user.username).all()
     postID = [posts.id for posts in all_users_post]  # list comprehension in order to get all ids in a list
     all_users_comments = Comments.query.filter_by(posting_user = deleting_user.username).all()
-    print(deleting_user)
     if postID is not None:  
         for ids in postID:   # This loop begins to delete categories because its used as reference in a one to many for post
             category=Categories.query.filter_by(post_id = int(ids)).first() 
             db.session.delete(category)
-            print(category)
         db.session.commit()
     if all_users_comments is not None:  # gets rid of all users comments on every post
         for comments in all_users_comments:
@@ -304,10 +311,10 @@ def permanent(ID):
             old_image = posts.image # removes old photo from folder 
             path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
             os.remove(path)
-            for remaining_comments in posts.comments:    # removes any remaining comments on the deleted posts
+            for remaining_comments in posts.comments: # removes any remaining comments on the deleted posts
                 db.session.delete(remaining_comments)
             db.session.delete(posts)
-        db.session.delete(deleting_user)   # deletes user after all table references and relationships are cleared.
+        db.session.delete(deleting_user) # deletes user after all table references and relationships are cleared.
         db.session.commit()
     flash('You have successfully deleted your account permanently.','logout')
     return redirect(url_for('login'))
@@ -389,6 +396,7 @@ def listen():
 #homepage
 @app.route ('/')
 def index():
+    newest_announcement=Announcements.query.order_by(Announcements.id.desc()).first()
     hottest_post=db.session.query(func.max(Posts.article_views)).scalar()
     hottest_post_id=Posts.query.filter_by(article_views = hottest_post).first()
     page = request.args.get('page', 1, type = int)
@@ -405,21 +413,23 @@ def index():
                 random_users_list.append(top_post_id)
         else:
             break
-    return render_template("homepage.html", posts = posts, loggedin = current_user.is_active, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, random_users_list = random_users_list, current_user = current_user, anonymous_check = current_user.is_anonymous)
+    return render_template("homepage.html", posts = posts, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, random_users_list = random_users_list, current_user = current_user, anonymous_check = current_user.is_anonymous, newest_announcement = newest_announcement)
 
 @app.route('/report', methods = ['POST'])  #handles the report from posts.
 @login_required
 def report():
     report = request.get_json(force=True) # gets json dictionary 
-    #print(report['reportingUser'], report['title'], report['reason'], report['postID'])  #checks data if needed
-    completed_report = Reports(post_id = report['postID'], reporting_user = report['reportingUser'], title = report['title'], reason = report['reason'], date_reported = datetime.datetime.now().date())  # appends key values into reports table
+    #print(report['reportingUser'], report['title'], report['reason'], report['postID'])  #checks json data if needed
+    content = Posts.query.filter_by(id = report['postID']).first()
+    completed_report = Reports(post_content = content.content, reporting_user = report['reportingUser'], title = report['title'], reason = report['reason'], date_reported = datetime.datetime.now().date())  # appends json key values into reports table
     db.session.add(completed_report)
     db.session.commit()
     return "success"
 
 # individual user pagination
 @app.route ('/user/<username>')
-def all_post(username):  
+def all_post(username):
+    newest_announcement=Announcements.query.order_by(Announcements.id.desc()).first()  
     hottest_post=db.session.query(func.max(Posts.article_views)).scalar()
     hottest_post_id=Posts.query.filter_by(article_views = hottest_post).first()
     page = request.args.get('page', 1, type = int)
@@ -427,25 +437,25 @@ def all_post(username):
     posts = Posts.query.filter_by(posting_user=user.username).order_by(Posts.id.desc()).paginate(page = page, per_page = 3)
     newest_user = Users.query.order_by(Users.id.desc()).all()
     newest_posts = Posts.query.order_by(Posts.id.desc()).first()   #all this is to get information about posts and page setup
-    print(posts.items)
     if posts.items == []:
         flash('You do not have any current post to show!', 'no_post')
         return redirect(url_for('dashboard'))
-    return render_template("total_users_post.html", posts = posts, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, user = user, loggedin = current_user.is_active, newest_posts = newest_posts)
+    return render_template("total_users_post.html", posts = posts, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, user = user, loggedin = current_user.is_active, newest_posts = newest_posts, newest_announcement = newest_announcement)
 
-#category tags
-@app.route ('/tag/<category>')
+#category tags taken from homepage
+@app.route ('/tag/<category>') 
 def categories(category):
+    newest_announcement=Announcements.query.order_by(Announcements.id.desc()).first()
     hottest_post=db.session.query(func.max(Posts.article_views)).scalar()
     hottest_post_id=Posts.query.filter_by(article_views = hottest_post).first()
     page = request.args.get('page', 1, type = int)
     posts = Categories.query.filter_by(category = category).order_by(Categories.id.desc()).paginate(page = page, per_page = 3)
     newest_user = Users.query.order_by(Users.id.desc()).all()
     newest_posts = Posts.query.order_by(Posts.id.desc()).first()
-    if posts.items == []:
+    if posts.items == []:  #if there are no items in that category, return alert
         flash('There are currently no post in that category.', 'no_post')
         return redirect(url_for('index'))
-    return render_template("category_tag.html", posts = posts, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, loggedin = current_user.is_active, newest_posts = newest_posts, category = category)
+    return render_template("category_tag.html", posts = posts, current_date = datetime.datetime.now().date(), newest_user = newest_user, hottest_post_id = hottest_post_id, loggedin = current_user.is_active, newest_posts = newest_posts, category = category, newest_announcement = newest_announcement)
 
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required
@@ -467,8 +477,6 @@ def upload_profile():
                 user.profimage = hexed_name
                 user.description = profile.description.data
                 user.hobbies = profile.hobbies.data
-                print(profile.description.data)
-                print(profile.hobbies.data)
                 db.session.add(user)
                 db.session.commit()
                 flash('You have sucessfully changed your profile picture, hobbies and profile description.','prof_photo')
@@ -512,8 +520,6 @@ def upload_profile():
                 picture.thumbnail(output_size, Image.ANTIALIAS)
                 picture.save(os.path.join(app.config['UPLOAD_FOLDER'], hexed_name), quality = 100)
                 user.profimage = hexed_name
-                print(profile.description.data)
-                print(profile.hobbies.data)
                 db.session.add(user)
                 db.session.commit()
                 flash('You have sucessfully uploaded your profile picture.','prof_photo')
@@ -588,7 +594,6 @@ def delete(postID):
 @app.route('/view/<postID>', methods = ["POST", "GET"])
 def expanded_post(postID):
     show_comments = Comments.query.filter_by(post_id = postID).all() #gets all post that equals the to current post
-    print(show_comments)
     original_poster = Posts.query.get(postID)
     expanded_post=Posts.query.get(postID)
     number_of_likes = expanded_post.liking
@@ -598,11 +603,10 @@ def expanded_post(postID):
     if current_user.get_id() == None:
         pass
     elif current_user.username != original_poster.posting_user:
-        # print(view_count.get(current_user.id))
-        # if postID not in view_count.get(current_user.id):
-        #     expanded_post.article_views += 1
-        #     view_count[current_user.id].append(postID)
-         db.session.commit()
+        if postID not in view_count.get(str(current_user.email)):      
+            expanded_post.article_views += 1
+            view_count[str(current_user.email)].append(postID)
+            db.session.commit()
     if request.method == "POST":
         date = datetime.datetime.now(tz=pytz.utc)
         date = date.astimezone(timezone('US/Pacific'))
@@ -621,7 +625,7 @@ def post():
     if request.method == "POST":
         #check if the post request has the file
         if 'file' not in request.files:
-            print('No file part')
+            flash('No file part', 'posted')
             return redirect(url_for('post'))
         file = request.files['file']
         # If the user does not select a file, the browser submits an
@@ -632,7 +636,7 @@ def post():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             hexed_name = hex(filename) # passes original name of file into hex function and returns hexed name, prevents long names, overloads, injections
-            output_size = (550,550)
+            output_size = (500,500)
             picture = Image.open(file)   # converts uploaded images into smaller thumbnails or any pixel related size
             picture.thumbnail(output_size, Image.ANTIALIAS)
             picture.save(os.path.join(app.config['UPLOAD_FOLDER'], hexed_name), quality = 100)
@@ -674,13 +678,13 @@ def public_user_dashboard(poster):
     if current_user.is_active:
         if user.username == current_user.username:
             return redirect(url_for('dashboard'))
-        elif current_user != user.username:
-            #if poster not in view_count.get(current_user.id):
-            #    user.profile_views += 1
-            #    view_count[current_user.id].append(user.username)
-            #    print(view_count)
+        elif current_user != user:
+            print(view_count)
+            print(poster)
+            if poster not in view_count.get(str(current_user.email)):
+                user.profile_views += 1
+                view_count[str(current_user.email)].append(user.username)
             db.session.commit()
-    print(current_user)
     return render_template('public_profile.html', user = user, user_followers = len(user.followers), current_user = current_user, top_article = top_article)
 
 #login method/handler
@@ -695,8 +699,7 @@ def login():
             if check_password_hash(user.password, form.password.data) == True:
                 login_user(user, remember = form.remember_me.data)
                 flash('You have been successfully logged in!', 'success')
-                view_count[current_user.id] = []
-                print(view_count)
+                view_count[str(current_user.email)] = []
                 return redirect(url_for('dashboard'))
         flash('Incorrect username or password', 'login_error')  
         return redirect(url_for('login'))
@@ -769,8 +772,8 @@ def signup():
 def logout():
     current_user.last_login = datetime.datetime.now().date()
     db.session.commit()
-    print(view_count)
-    #view_count.pop(current_user.id) # takes user out of viewcount dict
+    if str(current_user.email) in view_count:
+        view_count.pop(str(current_user.email)) # takes user out of viewcount dict
     logout_user()
     flash('You have been successfully logged out', 'logout')
     return redirect(url_for("login"))
@@ -778,7 +781,5 @@ def logout():
 if __name__ == '__main__':
     db.create_all()
     app.run(debug=True)
-    ip_ban = IpBan(ban_seconds=200)
-    ip_ban.init_app(app)
     #http_server = WSGIServer(("localhost", 5000), app)
     #http_server.serve_forever()

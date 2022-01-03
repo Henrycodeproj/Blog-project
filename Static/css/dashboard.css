@@ -152,12 +152,17 @@ img {
     display:flex;
     justify-content: center;
 }
+.dashboard_image{
+    justify-content: center;
+    width:300px;
+    height:300px;
+}
 .thumbnail {
     position: relative;
     width: 300px;
     height: 300px;
     overflow: hidden;
-  }
+}
   .thumbnail img {
     position: absolute;
     left: 50%;
@@ -176,5 +181,10 @@ img {
     img{
         max-width: 100%;
     }
-    
+}
+@media (max-width:321px){
+    .dashboard_image{
+        width: 200px;
+        height:200px;
+    }
 }

@@ -81,12 +81,12 @@
 
 <div class = "container welcome-intro">
   {% if current_user.profimage == None or '' %}
-  <div class="container thumbnail">
-    <img src="{{url_for ('static', filename ='/images/default.jpg') }}" alt="Image" />
+  <div class="container-fluid d-flex dashboard_image">
+    <img class = "img-fluid" src="{{url_for ('static', filename ='/images/default.jpg') }}" />
   </div>
   {% else %}
-  <div class="container thumbnail">
-    <img src="{{url_for ('static', filename ='/images/' + profimage) }}" alt="Image" />
+  <div class="container-fluid d-flex dashboard_image">
+    <img class = "img-fluid" src="{{url_for ('static', filename ='/images/' + current_user.profimage) }}"/>
   </div>
   {% endif %}
     <h1 class = "welcome_text">Hello {{ current_user.name }},</h1>

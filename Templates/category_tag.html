@@ -30,13 +30,13 @@
         <div class = "post_container posting">
           {% if post.genre.poster.profimage == None %}
           <div class = "">
-            <a href="{{url_for('public_user_dashboard', poster = post.genre.poster.username )}}" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/default.jpg') }}" alt="">
+            <a href="{{url_for('public_user_dashboard', poster = post.genre.poster.username )}}" class= "prof_link"><img class = "prof_thumbnail" src="{{url_for('static', filename='/images/default.jpg') }}" alt="">
               -{{post.genre.posting_user}}
             </a>
           </div>
           {% else %}
         <div class = "">
-          <a href="{{url_for('public_user_dashboard', poster = post.genre.poster.username )}}" class= "prof_link"><img class = "tree" src="{{url_for('static', filename='/images/' + post.genre.poster.profimage) }}" alt="">
+          <a href="{{url_for('public_user_dashboard', poster = post.genre.poster.username )}}" class= "prof_link"><img class = "prof_thumbnail" src="{{url_for('static', filename='/images/' + post.genre.poster.profimage) }}" alt="">
             -{{post.genre.posting_user}}
           </a>
         </div>
@@ -90,11 +90,14 @@
     <div class = "lok">
       <div class="sidesection">
         <div class="content-section ">
-        <h3 class = "sidebar_text">Sidebar</h3>
         <p class='text-muted'>
           <ul class="list-group">
             <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Today's Date:</span> {{ current_date }}</li>
-            <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Announcements:</span> This site is still a work in progress and will always continue updating to be better </li>
+            <li class="list-group-item list-group-item-light"><span class = "sidebar_header">Announcements:</span>
+            {% if newest_announcement != None %}
+              {{newest_announcement.message}}
+            {% endif %}
+            </li>
 
             {% if posts == [] %}
             <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span></li>
@@ -131,6 +134,7 @@
               <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Horror' )}}">Horror</a></li>
               <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Fighting' )}}">Fighting</a></li>
               <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Other' )}}">Other</a></li>
+              <li class = "breadcrumb-item category"><a class = "category_links" href="{{url_for('categories', category = 'Other' )}}" id = "off_topic">Off-topic</a></li>
             </ol>
           </div>
       </div>

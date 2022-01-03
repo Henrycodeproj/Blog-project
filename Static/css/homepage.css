@@ -103,7 +103,7 @@ body{
     margin-left: 10px;
     font-weight: 400;
 }
-.lok{
+.sidebar_container{
     display:flex;
     justify-content: space-between;
     width: 40%;
@@ -237,7 +237,7 @@ body{
     display:flex;
     flex-direction: row;
 }
-#anything{
+#off_topic{
     font-weight: bolder;
 }
 .invisible{
@@ -247,6 +247,7 @@ body{
     cursor: pointer;
     padding-top:6px;
     color:red;
+    padding-right: 20px;
 }
 .prof_header{
     margin-bottom: 5px;
@@ -282,8 +283,14 @@ body{
     .flex{
         flex-wrap: wrap;
     }
-    .lok{
+    .sidebar_container{
         width:100%;
+    }
+    .category_container{
+        margin:0;
+    }
+    .recommendations{
+        margin-top:15px;
     }
     .content-section{
         margin:0px;
