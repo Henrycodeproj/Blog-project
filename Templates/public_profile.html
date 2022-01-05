@@ -278,6 +278,7 @@ function followUnfollow(ID){
     button.innerText = "Following"
     button.appendChild(check)
     check.classList.add('fas','fa-check-circle')
+    check.style.marginLeft = "5px"
     follow(ID)
    }
   else if(button.classList.contains('following')){

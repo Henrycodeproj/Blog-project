@@ -89,6 +89,7 @@
     <div class = "title">{{ post.title }} </div>
     <div class = "bar"></div>
     <div class = "content">{{ post.content| truncate(500) }}</div>
+    <div class = "category_test"><a href="{{url_for('categories', category = post.genres.category )}}" class = "assd">{{post.genres.category}}</a></div>
             <!-- id tracker -->
     <div class = "invisible" id='id-tracker'></div>
             <!-- modal -->

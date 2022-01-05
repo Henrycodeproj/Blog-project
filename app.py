@@ -1,26 +1,26 @@
 from datetime import datetime
-from enum import unique
-from flask_admin.actions import action
+#from enum import unique
+#from flask_admin.actions import action
 from flask_admin.base import AdminIndexView
-import flask_login
-from flask_login.mixins import AnonymousUserMixin
+#import flask_login
+#from flask_login.mixins import AnonymousUserMixin
 from flask import Flask, json, render_template, request, url_for, redirect, flash, jsonify, stream_with_context, Response, abort, make_response
 from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_login.utils import login_required, login_user, logout_user
-from flask.sessions import NullSession
+#from flask.sessions import NullSession
 from flask_bootstrap import Bootstrap
-from flask_sqlalchemy import Pagination, SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 from flask_login import current_user, UserMixin, LoginManager
-from flask_sqlalchemy.model import Model
+#from flask_sqlalchemy.model import Model
 from itsdangerous.serializer import Serializer
-from sqlalchemy.orm import dynamic_loader, relation, relationship, session
-from sqlalchemy.sql.functions import ReturnTypeFromArgs, user
-from sqlalchemy.sql.schema import ForeignKey, PrimaryKeyConstraint
-from werkzeug.datastructures import Authorization
-from wtforms.fields.core import BooleanField
-from wtforms.fields.simple import SubmitField
-from wtforms.validators import ValidationError
+#from sqlalchemy.orm import dynamic_loader, relation, relationship, session
+#from sqlalchemy.sql.functions import ReturnTypeFromArgs, user
+#from sqlalchemy.sql.schema import ForeignKey, PrimaryKeyConstraint
+#from werkzeug.datastructures import Authorization
+#from wtforms.fields.core import BooleanField
+#from wtforms.fields.simple import SubmitField
+#from wtforms.validators import ValidationError
 from models import Addprofile, LoginForm, Register, Postform, Addprofile, Passwordrequest, Passwordsuccess, Commentsform, Reportform
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -28,7 +28,7 @@ from PIL import Image
 from flask_mail import Mail, Message
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from pytz import timezone
-from sqlalchemy.sql.expression import column, func, intersect_all
+from sqlalchemy.sql.expression import func
 from flask_admin.contrib.fileadmin import FileAdmin
 from flask_ipban import IpBan
 from flask_limiter import Limiter
@@ -40,7 +40,7 @@ import random
 import datetime
 import os 
 import secrets
-import time
+#import time
 import os.path as op
 
 app = Flask(__name__)
@@ -603,6 +603,8 @@ def expanded_post(postID):
     if current_user.get_id() == None:
         pass
     elif current_user.username != original_poster.posting_user:
+        if current_user.email not in view_count:
+            view_count[str(current_user.email)] = []
         if postID not in view_count.get(str(current_user.email)):      
             expanded_post.article_views += 1
             view_count[str(current_user.email)].append(postID)
@@ -671,16 +673,18 @@ def public_user_dashboard(poster):
     if user == None:
         flash('There is no user with that username.','no_post')
         return redirect(url_for('index'))
-    top_post=db.session.query(func.max(Posts.article_views)).scalar()
-    top_article=Posts.query.filter_by(posting_user = user.username, article_views = top_post).first()
+    #top_post=db.session.query(func.max(Posts.article_views)).all()
+    top_post=db.session.query(func.max(Posts.article_views)).filter_by(posting_user=user.username).scalar()
+    top_article = Posts.query.filter_by(posting_user = user.username, article_views = top_post).first()
+    #print(top_article)
     if user.is_anonymous == True:
         return render_template('public_profile.html', user = user)
     if current_user.is_active:
         if user.username == current_user.username:
             return redirect(url_for('dashboard'))
-        elif current_user != user:
-            print(view_count)
-            print(poster)
+        if current_user != user:
+            if current_user.email not in view_count:
+                view_count[str(current_user.email)] = []
             if poster not in view_count.get(str(current_user.email)):
                 user.profile_views += 1
                 view_count[str(current_user.email)].append(user.username)

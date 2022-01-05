@@ -145,6 +145,7 @@ body{
     font-weight: 700;
     display:flex;
     align-items: center;
+    margin-top: 10px;
 }
 .recommend_links{
     color:rgb(160, 159, 159);
@@ -252,7 +253,26 @@ body{
 .prof_header{
     margin-bottom: 5px;
 }
+.category_test{
+    margin-top:20px;
+    display: inline;
+    border-style: solid;
+    border-radius: 5px;
+    background-color: rgb(132, 164, 223);
+    font-weight: 600;
+    padding:1px;
+}
+.category_test a{
+    text-transform: none;
+    color:black;
+    margin-top: 40px;
+    text-decoration: none;
+}
 .fa-check-circle{
+    color:rgb(0, 110, 74);
+    margin-left: 5px;
+}
+.fa-check-circle::before{
     color:rgb(0, 110, 74);
     margin-left: 5px;
 }
