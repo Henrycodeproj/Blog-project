@@ -297,6 +297,8 @@ def permanent(ID):
     all_users_post=Posts.query.filter_by(posting_user=deleting_user.username).all()
     postID = [posts.id for posts in all_users_post]  # list comprehension in order to get all ids in a list
     all_users_comments = Comments.query.filter_by(posting_user = deleting_user.username).all()
+    if current_user.username is not deleting_user.username:
+        return redirect(url_for('index'))
     if postID is not None:  
         for ids in postID:   # This loop begins to delete categories because its used as reference in a one to many for post
             category=Categories.query.filter_by(post_id = int(ids)).first() 
