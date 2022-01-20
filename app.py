@@ -124,7 +124,7 @@ class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
                              )
 
     def is_admin(self):
-        admins = ['henry']
+        admins = []
         if self.username in admins:
             return True
 
