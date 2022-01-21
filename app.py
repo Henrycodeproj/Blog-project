@@ -1,26 +1,13 @@
 from datetime import datetime
-#from enum import unique
-#from flask_admin.actions import action
 from flask_admin.base import AdminIndexView
-#import flask_login
-#from flask_login.mixins import AnonymousUserMixin
 from flask import Flask, json, render_template, request, url_for, redirect, flash, jsonify, stream_with_context, Response, abort, make_response
 from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_login.utils import login_required, login_user, logout_user
-#from flask.sessions import NullSession
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import current_user, UserMixin, LoginManager
-#from flask_sqlalchemy.model import Model
 from itsdangerous.serializer import Serializer
-#from sqlalchemy.orm import dynamic_loader, relation, relationship, session
-#from sqlalchemy.sql.functions import ReturnTypeFromArgs, user
-#from sqlalchemy.sql.schema import ForeignKey, PrimaryKeyConstraint
-#from werkzeug.datastructures import Authorization
-#from wtforms.fields.core import BooleanField
-#from wtforms.fields.simple import SubmitField
-#from wtforms.validators import ValidationError
 from models import Addprofile, LoginForm, Register, Postform, Addprofile, Passwordrequest, Passwordsuccess, Commentsform, Reportform
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -33,14 +20,11 @@ from flask_admin.contrib.fileadmin import FileAdmin
 from flask_ipban import IpBan
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-#from gevent import monkey; monkey.patch_all()
-#from gevent.pywsgi import WSGIServer
 import pytz
 import random
 import datetime
 import os 
 import secrets
-#import time
 import os.path as op
 
 app = Flask(__name__)
