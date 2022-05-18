@@ -1,13 +1,12 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField,PasswordField,BooleanField,validators
-from wtforms import widgets
 from wtforms.fields.simple import FileField
 from wtforms.validators import InputRequired, Email, Length
 from wtforms.widgets import TextArea
 from wtforms.widgets.core import Input 
 
-
+#All forum skeletons 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[InputRequired(), Length(min = 3, max = 30)])
     password = PasswordField('Password', validators=[InputRequired(), Length(min = 6, max = 80)])
