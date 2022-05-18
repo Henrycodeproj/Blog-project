@@ -1,4 +1,5 @@
 from datetime import datetime
+from flask import Flask, render_template, request, url_for, redirect, flash, jsonify
 from flask_admin.base import AdminIndexView
 from flask import Flask, json, render_template, request, url_for, redirect, flash, jsonify, stream_with_context, Response, abort, make_response
 from flask_admin import Admin, AdminIndexView
@@ -16,10 +17,10 @@ from flask_mail import Mail, Message
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from pytz import timezone
 from sqlalchemy.sql.expression import func
+from flask_admin.base import AdminIndexView
+from flask_admin import Admin, AdminIndexView
+from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.fileadmin import FileAdmin
-from flask_ipban import IpBan
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 import pytz
 import random
 import datetime
@@ -28,17 +29,7 @@ import secrets
 import os.path as op
 
 app = Flask(__name__)
-ip_ban = IpBan(ban_seconds=200)
-ip_ban.init_app(app)
 
-#route limiter if there someone decides to spam
-limiter = Limiter(
-    app,
-    key_func=get_remote_address,
-    #default_limits=["10000 per day", "100 per hour"]
-)
-
-ip_ban = IpBan(app)
 Bootstrap(app)
 
 UPLOAD_FOLDER = 'static/images'
@@ -151,7 +142,6 @@ class Announcements(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     message = db.Column(db.Text)
 
-
 class MyModelView(ModelView): # modelview for admin
     def is_accessible(self):
         if current_user.is_admin():
@@ -165,7 +155,8 @@ class MyModelView(ModelView): # modelview for admin
 
     def delete_model(self, model): # overrided original delete method, now deletes previous comments and removes old lying image from static folder
         if hasattr(model,'image'):
-            previous_category = model.genres[0]
+            print(self)
+            previous_category = model.genres
             previous_comments = model.comments
             old_image = model.image # removes old photo from folder before updating
             for comments in previous_comments:
@@ -194,7 +185,6 @@ class allowedAdminView(AdminIndexView):
         return current_user.is_admin()
 
 
-
 admin = Admin(app, index_view=allowedAdminView())
 admin.add_view(MyModelView(Users, db.session))
 admin.add_view(MyModelView(Posts, db.session))
@@ -206,7 +196,6 @@ admin.add_view(Files(path, name='Uploaded Images'))
 
 #routes for backend, does not return templates. Routes are for JavaScript
 @app.route('/likes/<post_id>', methods = ["GET", "POST"])
-@limiter.limit("10/minute") 
 @login_required
 def likes(post_id):
     if request.method == "POST":
@@ -217,7 +206,6 @@ def likes(post_id):
         return "Success"
 
 @app.route('/dislikes/<post_id>', methods = ["GET", "POST"])
-@limiter.limit("10/minute")
 @login_required
 def dislikes(post_id):
     if request.method == "POST":
@@ -360,25 +348,6 @@ If you did not send this email, please ignore this message.
 '''
     mail.send(message)
 
-'''@app.route("/sse")
-def sse():
-    return render_template('ses.html')
-    
-@app.route("/listen")   #SSE(server sent events) setup if ever needed
-def listen():
-
-  def respond_to_client():
-    while True:
-        comment = Comments.query.all()
-        if len(Comments.query.all()) != 1:
-            for id in comment:
-                print(id.id)
-                _data = json.dumps=({'comment':str(id.id), "color":'red'})
-                yield f"id: 1\ndata: {_data}\nevent: online\n\n"
-        time.sleep(1)
-  return Response(respond_to_client(), mimetype='text/event-stream')'''
-
-  
 #homepage
 @app.route ('/')
 def index():
@@ -771,5 +740,4 @@ def logout():
 if __name__ == '__main__':
     db.create_all()
     app.run(debug=True)
-    #http_server = WSGIServer(("localhost", 5000), app)
-    #http_server.serve_forever()
+
