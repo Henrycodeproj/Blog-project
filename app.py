@@ -1,5 +1,9 @@
 from datetime import datetime
 from flask import Flask, render_template, request, url_for, redirect, flash, jsonify
+from flask_admin.base import AdminIndexView
+from flask import Flask, json, render_template, request, url_for, redirect, flash, jsonify, stream_with_context, Response, abort, make_response
+from flask_admin import Admin, AdminIndexView
+from flask_admin.contrib.sqla import ModelView
 from flask_login.utils import login_required, login_user, logout_user
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
@@ -10,7 +14,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from PIL import Image
 from flask_mail import Mail, Message
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from itsdangerous import TimedSerializer as serializer
 from pytz import timezone
 from sqlalchemy.sql.expression import func
 from flask_admin.base import AdminIndexView
@@ -95,7 +99,7 @@ class Users(UserMixin, db.Model): #user skeleton and columns for mysql database
                              )
 
     def is_admin(self):
-        admins = ['test']
+        admins = []
         if self.username in admins:
             return True
 
@@ -736,3 +740,4 @@ def logout():
 if __name__ == '__main__':
     db.create_all()
     app.run(debug=True)
+
