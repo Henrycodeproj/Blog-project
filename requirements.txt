@@ -34,7 +34,7 @@ mysql==0.0.3
 mysql-connector==2.2.9
 mysql-connector-python==8.0.27
 mysqlclient==2.0.3
-Pillow==8.4.0
+Pillow==9.0.1
 platformdirs==2.2.0
 protobuf==3.18.1
 pycparser==2.21
