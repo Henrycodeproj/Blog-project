@@ -11,10 +11,10 @@ This is my localhost files and will need to be adjusted as so.
 It was hosted on pythonanywhere at https://boredblogs.pythonanywhere.com/ but will need adjustments since I have downgraded to a free tier.
 
 **Libraries**:
--Passport js (local-strategy)
--Node Js
--React
--Material UI
--MongoDB
+-Passport js (local-strategy)\
+-Node Js\
+-React\
+-Material UI\
+-MongoDB\
 -Mongoose
 
