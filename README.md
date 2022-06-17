@@ -1,6 +1,6 @@
 # Blog-project
 
-The code is curently poorly organized and I will work on modularizing and cleaning up this code base.\
+The code is curently poorly organized and I will work on modularizing and cleaning up this code base.
 
 **Goal**: I wanted to create my own full stack project where people can make accounts and have a platform to discuss about board games.
 
