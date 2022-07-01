@@ -14,7 +14,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from PIL import Image
 from flask_mail import Mail, Message
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from itsdangerous import TimedSerializer as Serializer
 from pytz import timezone
 from sqlalchemy.sql.expression import func
 from flask_admin.base import AdminIndexView
