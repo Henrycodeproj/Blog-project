@@ -176,13 +176,22 @@
             {% if posts.items == [] %}
             <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span></li>
             {% else %}
-            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span><a class = "random_boardgame_title" href="{{url_for('expanded_post', postID = posts.items[0].id)}}"> {{ posts.items[0].title}}</a></li>
+            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Latest Post:</span>
+              <a class = "random_boardgame_title" href="{{url_for('expanded_post', postID = posts.items[0].id)}}">
+                {{ posts.items[0].title }}
+            </a></li>
             {% endif %}
 
-            {% if newest_user == [] %}
+            {% if not newest_user %}
             <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Newest Users:</span></li> 
             {% else %}
-            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Newest Users:</span> <a href="{{url_for('public_user_dashboard', poster = newest_user[0].username)}}">{{newest_user[0].username}}</a></li>
+            <li class="list-group-item list-group-item-light right-bar"><span class = "sidebar_header">Newest Users:</span> 
+              
+              {% for i in range(newest_user|length) %}
+              <a class = "newest_text" href="{{url_for('public_user_dashboard', poster = newest_user[i].username)}}">
+                {{newest_user[i].username if i <= 3 }},
+              {% endfor%}
+            </a></li>
             {% endif %}
 
             <li class="list-group-item list-group-item-light right-bar">

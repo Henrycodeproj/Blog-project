@@ -201,6 +201,12 @@ body{
     color:rgba(207, 207, 207, 0.911);
     margin-top:10px;
 }
+.newest_text{
+    text-transform: capitalize;
+    text-decoration: none;
+    color:rgb(57, 56, 56);
+    font-weight: 600;
+}
 .posting{
     margin:10px;
     box-shadow: 2px 1px 10px 2px rgb(48, 47, 47);
